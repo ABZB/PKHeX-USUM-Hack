@@ -65,13 +65,14 @@ public static class FormConverter
             Slowbro when generation >= 8 => GetFormsGalarSlowbro(types, forms),
             Weezing or Ponyta or Rapidash or MrMime or Articuno or Zapdos or Moltres when generation >= 7 => GetFormsGalar(types, forms),
             Slowpoke or Farfetchd when generation >= 8 => GetFormsGalar(types, forms),
-            Growlithe or Arcanine or Voltorb or Electrode or Scyther when generation >= 7 => GetFormsHisui(species, generation, types, forms),
+            Growlithe or Arcanine or Voltorb or Electrode when generation >= 7 => GetFormsHisui(species, generation, types, forms),
             Tauros when generation >= 9 => GetFormsPaldea(species, types, forms),
             Diglett or Dugtrio or Tentacool or Tentacruel when generation >= 7 => GetFormsConvergent(types, forms),
 
             Dragonair or Dragonite when generation >= 7 => GetFormsJudea(types, forms),
             Onix when generation >= 7 => GetFormsCrystal(types, forms),
             Wigglytuff when generation >= 7 => GetFormsParadox(species, types, forms),
+            Feraligatr or Scyther when generation >= 7 => GetFormsOrre(types, forms),
 
 
             _ => GetFormsAlolan(context, types, forms, species),
