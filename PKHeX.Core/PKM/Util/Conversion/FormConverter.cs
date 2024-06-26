@@ -94,6 +94,13 @@ public static class FormConverter
             Unown => GetFormsUnown(generation),
             Donphan or Raikou or Entei or Suicune when generation >= 7 => GetFormsParadox(species, types, forms),
             Crobat when generation >= 7 => GetFormsDeltaHolon(types, forms),
+
+            Scizor when generation == 7 => [
+                types[1146], // Johtonian
+                forms[1137], // Orrean
+                forms[1094], // Hisuian (Kleavor)
+                forms[1067], // Ultra
+            ],
             _ => EMPTY,
         };
     }
@@ -776,7 +783,7 @@ public static class FormConverter
 
     private static bool IsFormListSingleMega(ushort species) => species is
         // XY
-        003 or 009 or 065 or 094 or 115 or 127 or 130 or 142 or 181 or 212 or
+        003 or 009 or 065 or 094 or 115 or 127 or 130 or 142 or 181 or
         214 or 229 or 248 or 257 or 282 or 303 or 306 or 308 or 310 or 354 or
         359 or 380 or 381 or 445 or 448 or 460 or
 
@@ -1017,6 +1024,8 @@ public static class FormConverter
     private const int ParadoxAncient = 1142;
     private const int ParadoxFuture = 1143;
     private const int DeltaHolon = 1144;
+    private const int DeltaHolon1 = 1145;
+    private const int Johto = 1146;
 
     public static string GetGigantamaxName(IReadOnlyList<string> forms) => forms[Gigantamax];
 
