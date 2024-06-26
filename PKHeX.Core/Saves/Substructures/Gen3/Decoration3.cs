@@ -1,6 +1,4 @@
-using System;
-
-namespace PKHeX.Core;
+﻿namespace PKHeX.Core;
 
 public enum Decoration3 : byte
 {
@@ -125,33 +123,4 @@ public enum Decoration3 : byte
     REGIROCK_DOLL,
     REGICE_DOLL,
     REGISTEEL_DOLL,
-}
-
-public enum DecorationCategory3 : byte
-{
-    Desk,
-    Chair,
-    Plant,
-    Ornament,
-    Mat,
-    Poster,
-    Doll,
-    Cushion,
-}
-
-public static class DecorationInfo
-{
-    public static DecorationCategory3 GetCategory(this Decoration3 deco) => deco switch
-    {
-        <= Decoration3.HARD_DESK      => DecorationCategory3.Desk,
-        <= Decoration3.HARD_CHAIR     => DecorationCategory3.Chair,
-        <= Decoration3.GORGEOUS_PLANT => DecorationCategory3.Plant,
-        <= Decoration3.CUTE_TV        => DecorationCategory3.Ornament,
-        <= Decoration3.SPIKES_MAT     => DecorationCategory3.Mat,
-        <= Decoration3.KISS_POSTER    => DecorationCategory3.Poster,
-        <= Decoration3.SEEDOT_DOLL    => DecorationCategory3.Doll,
-        <= Decoration3.WATER_CUSHION  => DecorationCategory3.Cushion,
-        <= Decoration3.REGISTEEL_DOLL => DecorationCategory3.Doll,
-        _ => throw new ArgumentOutOfRangeException(nameof(deco)),
-    };
 }

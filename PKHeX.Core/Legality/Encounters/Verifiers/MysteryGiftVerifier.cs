@@ -12,14 +12,14 @@ public static class MysteryGiftVerifier
     private static Dictionary<int, MysteryGiftRestriction>?[] Get()
     {
         var s = new Dictionary<int, MysteryGiftRestriction>?[PKX.Generation + 1];
-        for (byte i = 3; i < s.Length; i++)
+        for (int i = 3; i < s.Length; i++)
             s[i] = GetRestriction(i);
         return s;
     }
 
-    private static string RestrictionSetName(byte generation) => $"mgrestrict{generation}.pkl";
+    private static string RestrictionSetName(int generation) => $"mgrestrict{generation}.pkl";
 
-    private static Dictionary<int, MysteryGiftRestriction> GetRestriction(byte generation)
+    private static Dictionary<int, MysteryGiftRestriction> GetRestriction(int generation)
     {
         var resource = RestrictionSetName(generation);
         var data = Util.GetBinaryResource(resource).AsSpan();
@@ -40,8 +40,8 @@ public static class MysteryGiftVerifier
         if (!restricted)
             return new CheckResult(CheckIdentifier.GameOrigin);
 
-        var version = (int)value >> 16;
-        if (version != 0 && !CanVersionReceiveGift(g.Generation, version, pk.Version))
+        var ver = (int)value >> 16;
+        if (ver != 0 && !CanVersionReceiveGift(g.Generation, ver, pk.Version))
             return new CheckResult(Severity.Invalid, CheckIdentifier.GameOrigin, LEncGiftVersionNotDistributed);
 
         var lang = value & MysteryGiftRestriction.LangRestrict;
@@ -74,15 +74,10 @@ public static class MysteryGiftVerifier
             return false; // no data
         if (!val.HasFlag(MysteryGiftRestriction.OTReplacedOnTrade))
             return false;
-
-        Span<char> trainer = stackalloc char[pk.TrashCharCountTrainer];
-        int len = pk.LoadString(pk.OriginalTrainerTrash, trainer);
-        trainer = trainer[..len];
-
-        return CurrentOTMatchesReplaced(g.Generation, trainer);
+        return CurrentOTMatchesReplaced(g.Generation, pk.OT_Name);
     }
 
-    private static bool CanVersionReceiveGift(byte generation, int version4bit, GameVersion version)
+    private static bool CanVersionReceiveGift(int generation, int version4bit, int version)
     {
         return generation switch
         {
@@ -90,7 +85,7 @@ public static class MysteryGiftVerifier
         };
     }
 
-    private static bool CurrentOTMatchesReplaced(byte format, ReadOnlySpan<char> pkOtName)
+    private static bool CurrentOTMatchesReplaced(int format, ReadOnlySpan<char> pkOtName)
     {
         if (format <= 4 && IsMatchName(pkOtName, 4))
             return true;
@@ -103,7 +98,7 @@ public static class MysteryGiftVerifier
         return false;
     }
 
-    private static bool IsMatchName(ReadOnlySpan<char> ot, byte generation)
+    private static bool IsMatchName(ReadOnlySpan<char> pkOtName, int generation)
     {
         return generation switch
         {

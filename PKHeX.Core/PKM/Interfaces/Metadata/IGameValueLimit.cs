@@ -33,12 +33,12 @@ public interface IGameValueLimit
     /// <summary>
     /// Maximum Version ID value that can exist.
     /// </summary>
-    GameVersion MaxGameID { get; }
+    int MaxGameID { get; }
 
     /// <summary>
     /// Minimum Version ID value that can exist.
     /// </summary>
-    GameVersion MinGameID { get; }
+    int MinGameID { get; }
 
     /// <summary>
     /// Maximum IV value that is possible.
@@ -53,7 +53,7 @@ public interface IGameValueLimit
     /// <summary>
     /// Maximum length of a string field for a Trainer Name.
     /// </summary>
-    int MaxStringLengthTrainer { get; }
+    int MaxStringLengthOT { get; }
 
     /// <summary>
     /// Maximum length of a string field for a Pokémon Nickname.

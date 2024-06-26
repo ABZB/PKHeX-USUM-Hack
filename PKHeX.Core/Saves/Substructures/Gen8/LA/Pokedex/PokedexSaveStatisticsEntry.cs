@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
@@ -6,11 +6,13 @@ namespace PKHeX.Core;
 /// <summary>
 /// Per-species/form research logs used for <see cref="GameVersion.PLA"/> Pokédex entries.
 /// </summary>
-public sealed class PokedexSaveStatisticsEntry(Memory<byte> raw)
+public sealed class PokedexSaveStatisticsEntry
 {
-    private Span<byte> Data => raw.Span;
+    private readonly byte[] _data;
+    private readonly int Offset;
 
-    public const int SIZE = 0x18;
+    public PokedexSaveStatisticsEntry(byte[] data, int offset) => (_data, Offset) = (data, offset);
+    private Span<byte> Data => _data.AsSpan(Offset);
 
     public uint Flags { get => ReadUInt32LittleEndian(Data); set => WriteUInt32LittleEndian(Data, value); }
     public bool HasMaximumStatistics { get => (Flags & (1u << 0)) != 0; set => Flags = (Flags & ~(1u << 0)) | ((value ? 1u : 0u) << 0); }

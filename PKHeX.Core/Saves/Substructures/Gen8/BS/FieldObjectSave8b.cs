@@ -10,9 +10,11 @@ namespace PKHeX.Core;
 /// </summary>
 /// <remarks>size: 0x109A0 (1000 * 4*17)</remarks>
 [TypeConverter(typeof(ExpandableObjectConverter))]
-public sealed class FieldObjectSave8b(SAV8BS sav, Memory<byte> raw) : SaveBlock<SAV8BS>(sav, raw)
+public sealed class FieldObjectSave8b : SaveBlock<SAV8BS>
 {
     private const int COUNT_OBJECTS = 1_000;
+
+    public FieldObjectSave8b(SAV8BS sav, int offset) : base(sav) => Offset = offset;
 
     public FieldObject8b[] AllObjects
     {
@@ -24,7 +26,7 @@ public sealed class FieldObjectSave8b(SAV8BS sav, Memory<byte> raw) : SaveBlock<
     {
         var result = new FieldObject8b[COUNT_OBJECTS];
         for (int i = 0; i < result.Length; i++)
-            result[i] = new FieldObject8b(Data.Slice((i * FieldObject8b.SIZE), FieldObject8b.SIZE));
+            result[i] = new FieldObject8b(Data, Offset + (i * FieldObject8b.SIZE));
         return result;
     }
 
@@ -44,7 +46,10 @@ public sealed class FieldObject8b
 
     public override string ToString() => $"{NameHash:X8} @ ({GridX:000},{GridY:000}) - {(Active ? "✓" : "✕")}";
 
-    public FieldObject8b(ReadOnlySpan<byte> data) => data[..SIZE].CopyTo(Data);
+    public FieldObject8b(byte[] data, int offset)
+    {
+        data.AsSpan(offset, SIZE).CopyTo(Data);
+    }
 
     public byte Count // cnt
     {

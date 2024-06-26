@@ -111,8 +111,8 @@ public static class EntitySorting
     public static IEnumerable<PKM> OrderByOwnership(this IEnumerable<PKM> list, ITrainerInfo trainer)
     {
         return list.InitialSortBy()
-            .ThenByDescending(p => trainer.IsOriginalHandler(p, trainer.Version.IsValidSavedVersion())) // true first
-            .ThenByDescending(p => string.Equals(p.OriginalTrainerName, trainer.OT, StringComparison.OrdinalIgnoreCase))
+            .ThenByDescending(p => trainer.IsOriginalHandler(p, ((GameVersion)trainer.Game).IsValidSavedVersion())) // true first
+            .ThenByDescending(p => string.Equals(p.OT_Name, trainer.OT, StringComparison.OrdinalIgnoreCase))
             .OrderByTrainer()
             .ThenBy(p => p.Species)
             .FinalSortBy();
@@ -215,8 +215,8 @@ public static class EntitySorting
     /// <param name="list">Output list of <see cref="PKM"/> data.</param>
     private static IOrderedEnumerable<PKM> OrderByTrainer(this IOrderedEnumerable<PKM> list)
     {
-        return list.ThenBy(p => p.OriginalTrainerName)
-            .ThenBy(p => p.OriginalTrainerGender)
+        return list.ThenBy(p => p.OT_Name)
+            .ThenBy(p => p.OT_Gender)
             .ThenBy(p => p.TID16)
             .ThenBy(p => p.SID16);
     }
@@ -224,26 +224,21 @@ public static class EntitySorting
     /// <summary>
     /// Gets if the current handler is the original trainer.
     /// </summary>
-    /// <param name="tr">The <see cref="ITrainerInfo"/> requesting the check.</param>
+    /// <param name="trainer">The <see cref="ITrainerInfo"/> requesting the check.</param>
     /// <param name="pk">Pokémon data</param>
     /// <param name="checkGame">Toggle to check the game's version or not</param>
     /// <returns>True if OT, false if not OT.</returns>
-    public static bool IsOriginalHandler(this ITrainerInfo tr, PKM pk, bool checkGame)
+    public static bool IsOriginalHandler(this ITrainerInfo trainer, PKM pk, bool checkGame)
     {
         if (pk.Format >= 6)
             return pk.CurrentHandler != 1;
-        if (checkGame && tr.Version != pk.Version)
+        if (checkGame && trainer.Game != pk.Version)
             return false;
-        if (tr.TID16 != pk.TID16 || tr.SID16 != pk.SID16)
+        if (trainer.TID16 != pk.TID16 || trainer.SID16 != pk.SID16)
             return false;
-        if (tr.Gender != pk.OriginalTrainerGender)
+        if (trainer.Gender != pk.OT_Gender)
             return false;
-
-        Span<char> trainer = stackalloc char[pk.TrashCharCountTrainer];
-        int len = pk.LoadString(pk.OriginalTrainerTrash, trainer);
-        trainer = trainer[..len];
-
-        return trainer.SequenceEqual(tr.OT);
+        return trainer.OT == pk.OT_Name;
     }
 
     /// <summary>
@@ -256,16 +251,7 @@ public static class EntitySorting
         var currentFriendship = pk.CurrentFriendship;
         if (currentFriendship == 255)
             return 255;
-
-        var baseFriendship = GetInitialFriendship(pk);
+        var baseFriendship = pk.PersonalInfo.BaseFriendship;
         return currentFriendship - baseFriendship;
-    }
-
-    private static byte GetInitialFriendship(PKM pk)
-    {
-        // Don't get too intricate with this, we generally want to know if it's been raised.
-        if (pk.WasEgg)
-            return EggStateLegality.EggHatchFriendshipGeneral;
-        return pk.PersonalInfo.BaseFriendship;
     }
 }

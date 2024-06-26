@@ -217,7 +217,8 @@ namespace PKHeX.WinForms.Controls
             // 
             // PokePreview
             // 
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(148, 180);
             Controls.Add(PAN_All);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;

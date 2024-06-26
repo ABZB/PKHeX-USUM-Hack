@@ -2,16 +2,18 @@ using System;
 
 namespace PKHeX.Core;
 
-public sealed class Fashion7b(SAV7b sav, Memory<byte> raw) : SaveBlock<SAV7b>(sav, raw)
+public sealed class Fashion7b : SaveBlock<SAV7b>
 {
+    public Fashion7b(SAV7b sav, int offset) : base(sav) => Offset = offset;
+
     public void UnlockAllAccessoriesPlayer()
     {
-        SAV.SetData(Data, AllAccessoriesPlayer);
+        SAV.SetData(AllAccessoriesPlayer, Offset);
     }
 
     public void UnlockAllAccessoriesStarter()
     {
-        SAV.SetData(Data, AllAccessoriesStarter);
+        SAV.SetData(AllAccessoriesStarter, Offset);
     }
 
     private static ReadOnlySpan<byte> AllAccessoriesPlayer =>

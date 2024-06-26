@@ -136,7 +136,7 @@ public sealed class SCBlock
             bw.Write((byte)((byte)SubType ^ xk.Next()));
         }
 
-        foreach (var b in Data)
+        foreach (ref var b in Data.AsSpan())
             bw.Write((byte)(b ^ xk.Next()));
     }
 

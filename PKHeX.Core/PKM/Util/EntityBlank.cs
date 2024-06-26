@@ -44,12 +44,12 @@ public static class EntityBlank
         return x;
     }
 
-    public static PKM GetBlank(byte gen, GameVersion version) => gen switch
+    public static PKM GetBlank(int gen, GameVersion ver) => gen switch
     {
-        1 when version == GameVersion.BU => new PK1(true),
-        7 when GameVersion.Gen7b.Contains(version) => new PB7(),
-        8 when GameVersion.BDSP.Contains(version) => new PB8(),
-        8 when GameVersion.PLA == version => new PA8(),
+        1 when ver == GameVersion.BU => new PK1(true),
+        7 when GameVersion.Gen7b.Contains(ver) => new PB7(),
+        8 when GameVersion.BDSP.Contains(ver) => new PB8(),
+        8 when GameVersion.PLA == ver => new PA8(),
         _ => GetBlank(gen),
     };
 
@@ -60,11 +60,14 @@ public static class EntityBlank
     {
         if (tr is SaveFile s)
             return s.BlankPKM;
-        return GetBlank(tr.Generation, tr.Version);
+        return GetBlank(tr.Generation, tr.Game);
     }
 
     /// <inheritdoc cref="GetBlank(ITrainerInfo)"/>
-    public static PKM GetBlank(byte gen)
+    public static PKM GetBlank(int gen, int ver) => GetBlank(gen, (GameVersion)ver);
+
+    /// <inheritdoc cref="GetBlank(ITrainerInfo)"/>
+    public static PKM GetBlank(int gen)
     {
         var type = Type.GetType($"PKHeX.Core.PK{gen}");
         ArgumentNullException.ThrowIfNull(type);

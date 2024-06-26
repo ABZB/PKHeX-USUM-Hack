@@ -6,8 +6,11 @@ namespace PKHeX.Core;
 /// <summary>
 /// Pokédex structure used by <see cref="SAV4"/> games.
 /// </summary>
-public sealed class Zukan4(SAV4 sav, Memory<byte> raw) : ZukanBase<SAV4>(sav, raw)
+public sealed class Zukan4(SAV4 sav, int offset) : ZukanBase<SAV4>(sav, offset)
 {
+    private readonly Memory<byte> Buffer = sav.GeneralBuffer[offset..];
+    private Span<byte> Data => Buffer.Span;
+
     // General structure: u32 magic, 4*bitflags, u32 spinda, form flags, language flags, more form flags, upgrade flags
 
     /* 4 BitRegions with 0x40*8 bits
@@ -286,7 +289,7 @@ public sealed class Zukan4(SAV4 sav, Memory<byte> raw) : ZukanBase<SAV4>(sav, ra
         SetDex(species, gender, form, language);
     }
 
-    private void SetDex(ushort species, byte gender, byte form, int language)
+    private void SetDex(ushort species, int gender, byte form, int language)
     {
         SetCaught(species);
         SetSeenGender(species, gender);
@@ -295,7 +298,7 @@ public sealed class Zukan4(SAV4 sav, Memory<byte> raw) : ZukanBase<SAV4>(sav, ra
         SetLanguage(species, language);
     }
 
-    public void SetSeenGender(ushort species, byte gender)
+    public void SetSeenGender(ushort species, int gender)
     {
         if (!GetSeen(species))
             SetSeenGenderNewFlag(species, gender);
@@ -303,7 +306,7 @@ public sealed class Zukan4(SAV4 sav, Memory<byte> raw) : ZukanBase<SAV4>(sav, ra
             SetSeenGenderSecond(species, gender);
     }
 
-    public void SetSeenGenderNewFlag(ushort species, byte gender)
+    public void SetSeenGenderNewFlag(ushort species, int gender)
     {
         SetSeenGenderFirst(species, gender);
         SetSeenGenderSecond(species, gender);
@@ -315,7 +318,7 @@ public sealed class Zukan4(SAV4 sav, Memory<byte> raw) : ZukanBase<SAV4>(sav, ra
         SetSeenGenderSecond(species, 0);
     }
 
-    private void SetForms(ushort species, byte form, byte gender)
+    private void SetForms(ushort species, byte form, int gender)
     {
         if (species == (int)Species.Unown) // Unown
         {
@@ -329,7 +332,7 @@ public sealed class Zukan4(SAV4 sav, Memory<byte> raw) : ZukanBase<SAV4>(sav, ra
 
         if (species == (int)Species.Pichu && HGSS) // Pichu (HGSS Only)
         {
-            var formID = form == 1 ? (byte)2 : gender;
+            var formID = form == 1 ? (byte)2 : (byte)gender;
             if (TryInsertForm(forms, formID))
                 SetForms(species, forms);
         }
@@ -468,7 +471,7 @@ public sealed class Zukan4(SAV4 sav, Memory<byte> raw) : ZukanBase<SAV4>(sav, ra
         }
         else
         {
-            SetSeenGenderNewFlag(species, (byte)(pi.FixedGender() & 1));
+            SetSeenGenderNewFlag(species, pi.FixedGender() & 1);
         }
     }
 

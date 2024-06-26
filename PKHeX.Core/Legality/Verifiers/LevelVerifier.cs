@@ -29,21 +29,22 @@ public sealed class LevelVerifier : Verifier
 
         if (pk.IsEgg)
         {
-            if (pk.CurrentLevel != enc.LevelMin)
+            int elvl = enc.LevelMin;
+            if (elvl != pk.CurrentLevel)
             {
-                data.AddLine(GetInvalid(string.Format(LEggFMetLevel_0, enc.LevelMin)));
+                data.AddLine(GetInvalid(string.Format(LEggFMetLevel_0, elvl)));
                 return;
             }
 
             var reqEXP = enc is EncounterStatic2 { DizzyPunchEgg: true }
                 ? 125 // Gen2 Dizzy Punch gifts always have 125 EXP, even if it's more than the Lv5 exp required.
-                : Experience.GetEXP(enc.LevelMin, pk.PersonalInfo.EXPGrowth);
+                : Experience.GetEXP(elvl, pk.PersonalInfo.EXPGrowth);
             if (reqEXP != pk.EXP)
                 data.AddLine(GetInvalid(LEggEXP));
             return;
         }
 
-        var lvl = pk.CurrentLevel;
+        int lvl = pk.CurrentLevel;
         if (lvl >= 100)
         {
             var expect = Experience.GetEXP(100, pk.PersonalInfo.EXPGrowth);
@@ -51,7 +52,7 @@ public sealed class LevelVerifier : Verifier
                 data.AddLine(GetInvalid(LLevelEXPTooHigh));
         }
 
-        if (lvl < pk.MetLevel)
+        if (lvl < pk.Met_Level)
             data.AddLine(GetInvalid(LLevelMetBelow));
         else if (!enc.IsWithinEncounterRange(pk) && lvl != 100 && pk.EXP == Experience.GetEXP(lvl, pk.PersonalInfo.EXPGrowth))
             data.AddLine(Get(LLevelEXPThreshold, Severity.Fishy));
@@ -61,16 +62,16 @@ public sealed class LevelVerifier : Verifier
 
     private static bool IsMetLevelMatchEncounter(MysteryGift gift, PKM pk)
     {
-        if (gift.Level == pk.MetLevel)
+        if (gift.Level == pk.Met_Level)
             return true;
         if (!pk.HasOriginalMetLocation)
             return true;
 
         return gift switch
         {
-            WC3 wc3 when wc3.MetLevel == pk.MetLevel || wc3.IsEgg => true,
-            WC7 wc7 when wc7.MetLevel == pk.MetLevel => true,
-            PGT { IsManaphyEgg: true } when pk.MetLevel == 0 => true,
+            WC3 wc3 when wc3.Met_Level == pk.Met_Level || wc3.IsEgg => true,
+            WC7 wc7 when wc7.MetLevel == pk.Met_Level => true,
+            PGT { IsManaphyEgg: true } when pk.Met_Level == 0 => true,
             _ => false,
         };
     }
@@ -86,10 +87,10 @@ public sealed class LevelVerifier : Verifier
                 data.AddLine(GetInvalid(string.Format(LEggFMetLevel_0, elvl)));
             return;
         }
-        if (pk.MetLocation != 0) // crystal
+        if (pk.Met_Location != 0) // crystal
         {
             int lvl = pk.CurrentLevel;
-            if (lvl < pk.MetLevel)
+            if (lvl < pk.Met_Level)
                 data.AddLine(GetInvalid(LLevelMetBelow));
         }
 
@@ -123,7 +124,7 @@ public sealed class LevelVerifier : Verifier
         // Context check is only applicable to Gen1/2; transferring to Gen2 is a trade.
         // Stadium 2 can transfer across game/generation boundaries without initiating a trade.
         // Ignore this check if the environment's loaded trainer is not from Gen1/2 or is from GB Era.
-        if (ParseSettings.AllowGBStadium2 || ParseSettings.ActiveTrainer is { Generation: not (1 or 2) })
+        if (ParseSettings.ActiveTrainer.Generation >= 3 || ParseSettings.AllowGBStadium2)
             return false;
 
         var moves = data.Info.Moves;
@@ -135,9 +136,6 @@ public sealed class LevelVerifier : Verifier
             return true; // traded to Gen2 for special moves
         if (pk.Format != 1)
             return true; // traded to Gen2 (current state)
-
-        if (ParseSettings.ActiveTrainer is { } tr)
-            return !tr.IsFromTrainer(pk); // not with OT
-        return false;
+        return !ParseSettings.IsFromActiveTrainer(pk); // not with OT
     }
 }

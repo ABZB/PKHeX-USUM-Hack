@@ -16,15 +16,23 @@ public sealed class TrainerDatabase
     /// <param name="version">Version the trainer should originate from</param>
     /// <param name="language">Language to request for</param>
     /// <returns>Null if no trainer found for this version.</returns>
-    public ITrainerInfo? GetTrainer(GameVersion version, LanguageID? language = null)
+    public ITrainerInfo? GetTrainer(int version, LanguageID? language = null) => GetTrainer((GameVersion)version, language);
+
+    /// <summary>
+    /// Fetches an appropriate trainer based on the requested <see cref="ver"/>.
+    /// </summary>
+    /// <param name="ver">Version the trainer should originate from</param>
+    /// <param name="language">Language to request for</param>
+    /// <returns>Null if no trainer found for this version.</returns>
+    public ITrainerInfo? GetTrainer(GameVersion ver, LanguageID? language = null)
     {
-        if (version <= 0)
+        if (ver <= 0)
             return null;
 
-        if (!version.IsValidSavedVersion())
-            return GetTrainerFromGroup(version, language);
+        if (!ver.IsValidSavedVersion())
+            return GetTrainerFromGroup(ver, language);
 
-        if (Database.TryGetValue(version, out var list))
+        if (Database.TryGetValue(ver, out var list))
             return GetRandomChoice(list);
 
         return null;
@@ -38,14 +46,14 @@ public sealed class TrainerDatabase
     }
 
     /// <summary>
-    /// Fetches an appropriate trainer based on the requested <see cref="version"/> group.
+    /// Fetches an appropriate trainer based on the requested <see cref="ver"/> group.
     /// </summary>
-    /// <param name="version">Version the trainer should originate from</param>
+    /// <param name="ver">Version the trainer should originate from</param>
     /// <param name="lang">Language to request for</param>
     /// <returns>Null if no trainer found for this version.</returns>
-    private ITrainerInfo? GetTrainerFromGroup(GameVersion version, LanguageID? lang = null)
+    private ITrainerInfo? GetTrainerFromGroup(GameVersion ver, LanguageID? lang = null)
     {
-        var possible = Database.Where(z => version.Contains(z.Key)).ToList();
+        var possible = Database.Where(z => ver.Contains(z.Key)).ToList();
         if (lang != null)
         {
             possible = possible.Select(z =>
@@ -63,7 +71,7 @@ public sealed class TrainerDatabase
     /// <param name="generation">Generation the trainer should inhabit</param>
     /// <param name="lang">Language to request for</param>
     /// <returns>Null if no trainer found for this version.</returns>
-    public ITrainerInfo? GetTrainerFromGen(byte generation, LanguageID? lang = null)
+    public ITrainerInfo? GetTrainerFromGen(int generation, LanguageID? lang = null)
     {
         var possible = Database.Where(z => z.Key.GetGeneration() == generation).ToList();
         if (lang != null)
@@ -91,10 +99,12 @@ public sealed class TrainerDatabase
     /// <param name="trainer">Trainer details to add.</param>
     public void Register(ITrainerInfo trainer)
     {
-        var version = trainer.Version;
-        if (!Database.TryGetValue(version, out var list))
+        var ver = (GameVersion)trainer.Game;
+        if (ver <= 0 && trainer is SaveFile s)
+            ver = s.Version;
+        if (!Database.TryGetValue(ver, out var list))
         {
-            Database.Add(version, [trainer]);
+            Database.Add(ver, [trainer]);
             return;
         }
 
@@ -119,9 +129,9 @@ public sealed class TrainerDatabase
 
     private static SimpleTrainerInfo GetTrainerReference(PKM pk)
     {
-        var result = new SimpleTrainerInfo(pk.Version)
+        var result = new SimpleTrainerInfo((GameVersion)pk.Version)
         {
-            TID16 = pk.TID16, SID16 = pk.SID16, OT = pk.OriginalTrainerName, Gender = pk.OriginalTrainerGender,
+            TID16 = pk.TID16, SID16 = pk.SID16, OT = pk.OT_Name, Gender = pk.OT_Gender,
             Language = pk.Language,
             Generation = pk.Generation,
         };

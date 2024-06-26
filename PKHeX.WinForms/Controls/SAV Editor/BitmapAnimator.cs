@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 using System.Drawing;
 using System.Timers;
 using System.Windows.Forms;
@@ -99,15 +98,10 @@ public sealed class BitmapAnimator : IDisposable
         var frameColor = GetFrameColor(elapsedFraction);
 
         ArgumentNullException.ThrowIfNull(GlowData);
+        var frameData = (byte[])GlowData.Clone();
+        ImageUtil.ChangeAllColorTo(frameData, frameColor);
 
-        var frameData = ArrayPool<byte>.Shared.Rent(GlowData.Length);
-        var frameSpan = frameData.AsSpan(0, GlowData.Length);
-        GlowData.AsSpan().CopyTo(frameSpan);
-        ImageUtil.ChangeAllColorTo(frameSpan, frameColor);
-        frame = ImageUtil.GetBitmap(frameData, imgWidth, imgHeight, GlowData.Length);
-        frameSpan.Clear();
-        ArrayPool<byte>.Shared.Return(frameData);
-
+        frame = ImageUtil.GetBitmap(frameData, imgWidth, imgHeight);
         if (ExtraLayer != null)
             frame = ImageUtil.LayerImage(frame, ExtraLayer, 0, 0);
         if (OriginalBackground != null)

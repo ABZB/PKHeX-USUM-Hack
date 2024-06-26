@@ -24,9 +24,6 @@ public partial class SAV_Encounters : Form
     private readonly CancellationTokenSource TokenSource = new();
     private readonly EntityInstructionBuilder UC_Builder;
 
-    private const int GridWidth = 6;
-    private const int GridHeight = 11;
-
     public SAV_Encounters(PKMEditor f1, TrainerDatabase db)
     {
         InitializeComponent();
@@ -47,7 +44,7 @@ public partial class SAV_Encounters : Form
         var grid = EncounterPokeGrid;
         var smallWidth = grid.Width;
         var smallHeight = grid.Height;
-        grid.InitializeGrid(GridWidth, GridHeight, SpriteUtil.Spriter);
+        grid.InitializeGrid(6, 11, SpriteUtil.Spriter);
         grid.SetBackground(Resources.box_wp_clean);
         var newWidth = grid.Width;
         var newHeight = grid.Height;
@@ -64,14 +61,18 @@ public partial class SAV_Encounters : Form
         foreach (var slot in PKXBOXES)
         {
             // Enable Click
-            slot.MouseClick += (_, e) =>
+            slot.MouseClick += (sender, e) =>
             {
+                if (sender == null)
+                    return;
                 if (ModifierKeys == Keys.Control)
-                    ClickView(slot, e);
+                    ClickView(sender, e);
             };
-            slot.Enter += (_, _) =>
+            slot.Enter += (sender, e) =>
             {
-                var index = Array.IndexOf(PKXBOXES, slot);
+                if (sender is not PictureBox pb)
+                    return;
+                var index = Array.IndexOf(PKXBOXES, sender);
                 if (index < 0)
                     return;
                 index += (SCR_Box.Value * RES_MIN);
@@ -79,16 +80,16 @@ public partial class SAV_Encounters : Form
                     return;
 
                 var enc = Results[index];
-                slot.AccessibleDescription = string.Join(Environment.NewLine, enc.GetTextLines());
+                pb.AccessibleDescription = string.Join(Environment.NewLine, enc.GetTextLines());
             };
             slot.ContextMenuStrip = mnu;
             if (Main.Settings.Hover.HoverSlotShowText)
-                slot.MouseEnter += (_, _) => ShowHoverTextForSlot(slot);
+                slot.MouseEnter += (o, args) => ShowHoverTextForSlot(slot, args);
         }
 
         Counter = L_Count.Text;
-        L_Viewed.Text = string.Empty; // invisible for now
-        L_Viewed.MouseEnter += (_, _) => hover.SetToolTip(L_Viewed, L_Viewed.Text);
+        L_Viewed.Text = string.Empty; // invis for now
+        L_Viewed.MouseEnter += (sender, e) => hover.SetToolTip(L_Viewed, L_Viewed.Text);
         PopulateComboBoxes();
 
         WinFormsUtil.TranslateInterface(this, Main.CurrentLanguage);
@@ -102,7 +103,7 @@ public partial class SAV_Encounters : Form
 
     private void GetTypeFilters()
     {
-        var types = Enum.GetValues<EncounterTypeGroup>();
+        var types = (EncounterTypeGroup[])Enum.GetValues(typeof(EncounterTypeGroup));
         var checks = types.Select(z => new CheckBox
         {
             Name = z.ToString(),
@@ -129,8 +130,8 @@ public partial class SAV_Encounters : Form
     private List<IEncounterInfo> Results = [];
     private int slotSelected = -1; // = null;
     private Image? slotColor;
-    private const int RES_MIN = GridWidth * 1;
-    private const int RES_MAX = GridWidth * GridHeight;
+    private const int RES_MAX = 66;
+    private const int RES_MIN = 6;
     private readonly string Counter;
 
     private bool GetShiftedIndex(ref int index)
@@ -187,7 +188,7 @@ public partial class SAV_Encounters : Form
         var set = new ShowdownSet(editor);
         var criteria = EncounterCriteria.GetCriteria(set, editor.PersonalInfo);
         if (!isInChain)
-            criteria = criteria with { Gender = default }; // Genderless tabs and a gendered enc -> let's play safe.
+            criteria = criteria with { Gender = FixedGenderUtil.GenderRandom }; // Genderless tabs and a gendered enc -> let's play safe.
         return criteria;
     }
 
@@ -252,7 +253,7 @@ public partial class SAV_Encounters : Form
         var species = settings.Species == 0 ? GetFullRange(SAV.MaxSpeciesID) : [settings.Species];
         var results = GetAllSpeciesFormEncounters(species, SAV.Personal, versions, moves, pk, token);
         if (settings.SearchEgg != null)
-            results = results.Where(z => z.IsEgg == settings.SearchEgg);
+            results = results.Where(z => z.EggEncounter == settings.SearchEgg);
         if (settings.SearchShiny != null)
             results = results.Where(z => z.IsShiny == settings.SearchShiny);
 
@@ -282,7 +283,7 @@ public partial class SAV_Encounters : Form
             return results;
 
         ReadOnlySpan<char> batchText = RTB_Instructions.Text;
-        if (batchText.Length != 0 && !StringInstructionSet.HasEmptyLine(batchText))
+        if (batchText.Length > 0 && !StringInstructionSet.HasEmptyLine(batchText))
         {
             var filters = StringInstruction.GetFilters(batchText);
             BatchEditing.ScreenStrings(filters);
@@ -357,7 +358,7 @@ public partial class SAV_Encounters : Form
             Species = GetU16(CB_Species),
 
             BatchInstructions = RTB_Instructions.Text,
-            Version = (GameVersion)WinFormsUtil.GetIndex(CB_GameOrigin),
+            Version = WinFormsUtil.GetIndex(CB_GameOrigin),
         };
 
         static ushort GetU16(ListControl cb)
@@ -481,8 +482,9 @@ public partial class SAV_Encounters : Form
             FillPKXBoxes(SCR_Box.Value = newval);
     }
 
-    private void ShowHoverTextForSlot(PictureBox pb)
+    private void ShowHoverTextForSlot(object sender, EventArgs e)
     {
+        var pb = (PictureBox)sender;
         int index = Array.IndexOf(PKXBOXES, pb);
         if (!GetShiftedIndex(ref index))
             return;
@@ -501,8 +503,8 @@ public partial class SAV_Encounters : Form
         // If we already have text, add a new line (except if the last line is blank).
         var tb = RTB_Instructions;
         var batchText = tb.Text;
-        if (batchText.Length != 0 && !batchText.EndsWith('\n'))
+        if (batchText.Length > 0 && !batchText.EndsWith('\n'))
             tb.AppendText(Environment.NewLine);
-        tb.AppendText(s);
+        RTB_Instructions.AppendText(s);
     }
 }

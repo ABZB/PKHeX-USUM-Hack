@@ -38,7 +38,7 @@ public partial class SAV_EventReset1 : Form
                 Text = pkmname, Enabled = pair.IsHidden,
                 Size = new Size((Width / 2) - 25, 22),
             };
-            b.Click += (_, _) =>
+            b.Click += (s, e) =>
             {
                 pair.Reset();
                 b.Enabled = false;

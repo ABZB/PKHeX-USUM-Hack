@@ -161,9 +161,9 @@ public static class StringConverter12Transporter
     /// </summary>
     /// <param name="language">Language to localize with</param>
     /// <param name="version">Version transferred from to Bank</param>
-    public static string GetFilteredOT(int language, GameVersion version) => version switch
+    public static string GetFilteredOT(int language, int version) => version switch
     {
-        GameVersion.RD => language switch
+        (int)GameVersion.RD => language switch
         {
             1 => "レッド．",
             2 => "Red*",
@@ -173,7 +173,7 @@ public static class StringConverter12Transporter
             7 => "Rojo*",
             _ => string.Empty,
         },
-        GameVersion.GN => language switch
+        (int)GameVersion.GN => language switch
         {
             1 => "グリーン．",
             2 => "Blue*",
@@ -183,12 +183,12 @@ public static class StringConverter12Transporter
             7 => "Azul*",
             _ => string.Empty,
         },
-        GameVersion.BU => language switch
+        (int)GameVersion.BU => language switch
         {
             1 => "ブルー．",
             _ => string.Empty,
         },
-        GameVersion.YW => language switch
+        (int)GameVersion.YW => language switch
         {
             1 => "イエロー．",
             2 => "Yellow*",
@@ -198,7 +198,7 @@ public static class StringConverter12Transporter
             7 => "Amarillo*",
             _ => string.Empty,
         },
-        GameVersion.GD => language switch
+        (int)GameVersion.GD => language switch
         {
             1 => "ゴールド．",
             2 => "Gold*",
@@ -209,7 +209,7 @@ public static class StringConverter12Transporter
             8 => "금.",
             _ => string.Empty,
         },
-        GameVersion.SI => language switch
+        (int)GameVersion.SI => language switch
         {
             1 => "シルバー．",
             2 => "Silver*",
@@ -220,7 +220,7 @@ public static class StringConverter12Transporter
             8 => "은.",
             _ => string.Empty,
         },
-        GameVersion.C => language switch
+        (int)GameVersion.C => language switch
         {
             1 => "クリスタル．",
             2 => "Crystal*",

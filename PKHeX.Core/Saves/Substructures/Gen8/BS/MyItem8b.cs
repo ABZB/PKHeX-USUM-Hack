@@ -7,23 +7,24 @@ namespace PKHeX.Core;
 /// Player item pouches storage
 /// </summary>
 /// <remarks>size=0xBB80 (<see cref="ItemSaveSize"/> items)</remarks>
-public sealed class MyItem8b(SAV8BS sav, Memory<byte> raw) : MyItem(sav, raw)
+public sealed class MyItem8b : MyItem
 {
     public const int ItemSaveSize = 3000;
-    public const int SIZE = ItemSaveSize * InventoryItem8b.SIZE;
+
+    public MyItem8b(SAV8BS sav, int offset) : base(sav) => Offset = offset;
 
     public int GetItemQuantity(ushort itemIndex)
     {
-        var ofs = InventoryPouch8b.GetItemOffset(itemIndex);
-        var span = Data.Slice(ofs, InventoryItem8b.SIZE);
+        var ofs = InventoryPouch8b.GetItemOffset(itemIndex, Offset);
+        var span = Data.AsSpan(ofs, InventoryItem8b.SIZE);
         var item = InventoryItem8b.Read(itemIndex, span);
         return item.Count;
     }
 
     public void SetItemQuantity(ushort itemIndex, int quantity)
     {
-        var ofs = InventoryPouch8b.GetItemOffset(itemIndex);
-        var span = Data.Slice(ofs, InventoryItem8b.SIZE);
+        var ofs = InventoryPouch8b.GetItemOffset(itemIndex, Offset);
+        var span = Data.AsSpan(ofs, InventoryItem8b.SIZE);
         var item = InventoryItem8b.Read(itemIndex, span);
         item.Count = quantity;
         if (!item.IsValidSaveSortNumberCount) // not yet obtained
@@ -42,8 +43,8 @@ public sealed class MyItem8b(SAV8BS sav, Memory<byte> raw) : MyItem(sav, raw)
         ushort max = 0;
         foreach (var itemID in legal)
         {
-            var ofs = InventoryPouch8b.GetItemOffset(itemID);
-            var span = Data.Slice(ofs, InventoryItem8b.SIZE);
+            var ofs = InventoryPouch8b.GetItemOffset(itemID, Offset);
+            var span = Data.AsSpan(ofs, InventoryItem8b.SIZE);
             var item = InventoryItem8b.Read(itemID, span);
             if (item.SortOrder > max)
                 max = item.SortOrder;
@@ -89,14 +90,14 @@ public sealed class MyItem8b(SAV8BS sav, Memory<byte> raw) : MyItem(sav, raw)
         for (ushort i = 0; i < (ushort)SAV.MaxItemID; i++) // even though there are 3000, just overwrite the ones that people will mess up.
         {
             if (!hashSet.Contains(i))
-                InventoryItem8b.Clear(Data, InventoryPouch8b.GetItemOffset(i));
+                InventoryItem8b.Clear(Data, InventoryPouch8b.GetItemOffset(i, Offset));
         }
     }
 
-    private static InventoryPouch8b MakePouch(InventoryType type)
+    private InventoryPouch8b MakePouch(InventoryType type)
     {
         var info = ItemStorage8BDSP.Instance;
         var max = info.GetMax(type);
-        return new InventoryPouch8b(type, info, max);
+        return new InventoryPouch8b(type, info, max, Offset);
     }
 }

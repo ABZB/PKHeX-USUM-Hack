@@ -10,15 +10,15 @@ namespace PKHeX.Core;
 public sealed record EncounterSlot8GO(int StartDate, int EndDate, ushort Species, byte Form, byte LevelMin, byte LevelMax, Shiny Shiny, Gender Gender, PogoType Type, PogoImportFormat OriginFormat)
     : IEncounterable, IEncounterMatch, IEncounterConvertible<PKM>, IPogoSlot, IFixedOTFriendship, IEncounterServerDate
 {
-    public byte Generation => 8;
+    public int Generation => 8;
     public bool IsDateRestricted => true;
     public bool IsShiny => Shiny.IsShiny();
     public Ball FixedBall => Type.GetValidBall();
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public AbilityPermission Ability => AbilityPermission.Any12;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
     public GameVersion Version => GameVersion.GO;
-    public ushort Location => Locations.GO8;
+    public int Location => Locations.GO8;
 
     public string Name => $"Wild Encounter ({Version})";
     public string LongName
@@ -114,38 +114,37 @@ public sealed record EncounterSlot8GO(int StartDate, int EndDate, ushort Species
     {
         var pk = GetBlank();
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language);
-        var rnd = Util.Rand;
         {
             pk.Language = lang;
-            pk.PID = rnd.Rand32();
-            pk.EncryptionConstant = rnd.Rand32();
+            pk.PID = Util.Rand32();
+            pk.EncryptionConstant = Util.Rand32();
             pk.Species = Species;
             pk.Form = Form;
             pk.CurrentLevel = LevelMin;
-            pk.OriginalTrainerFriendship = OriginalTrainerFriendship;
-            pk.MetLocation = Location;
-            pk.MetLevel = LevelMin;
-            pk.Version = GameVersion.GO;
+            pk.OT_Friendship = OT_Friendship;
+            pk.Met_Location = Location;
+            pk.Met_Level = LevelMin;
+            pk.Version = (byte)GameVersion.GO;
             pk.Ball = (byte)GetRequiredBall(Ball.Poke);
             pk.MetDate = this.GetRandomValidDate();
 
-            pk.OriginalTrainerName = tr.OT;
+            pk.OT_Name = tr.OT;
             pk.ID32 = tr.ID32;
-            pk.OriginalTrainerGender = tr.Gender;
-            pk.HandlingTrainerName = "PKHeX";
+            pk.OT_Gender = tr.Gender;
+            pk.HT_Name = "PKHeX";
             pk.CurrentHandler = 1;
             if (pk is IHandlerLanguage l)
-                l.HandlingTrainerLanguage = 2;
+                l.HT_Language = 2;
         }
         SetPINGA(pk, criteria);
         EncounterUtil.SetEncounterMoves(pk, Version, LevelMin);
-        pk.Nickname = SpeciesName.GetSpeciesNameImportHOME(Species, lang, Generation);
+        pk.Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation);
         SetEncounterMoves(pk, LevelMin);
 
         if (pk is IScaledSize s2)
         {
-            s2.HeightScalar = PokeSizeUtil.GetRandomScalar(rnd);
-            s2.WeightScalar = PokeSizeUtil.GetRandomScalar(rnd);
+            s2.HeightScalar = PokeSizeUtil.GetRandomScalar();
+            s2.WeightScalar = PokeSizeUtil.GetRandomScalar();
             if (pk is IScaledSize3 s3)
                 s3.Scale = s2.HeightScalar;
         }
@@ -158,7 +157,7 @@ public sealed record EncounterSlot8GO(int StartDate, int EndDate, ushort Species
         {
             var pi = pk9.PersonalInfo;
             pk9.TeraTypeOriginal = pk9.TeraTypeOverride = TeraTypeUtil.GetTeraTypeImport(pi.Type1, pi.Type2);
-            pk9.ObedienceLevel = pk9.MetLevel;
+            pk9.Obedience_Level = (byte)pk9.Met_Level;
         }
         pk.ResetPartyStats();
         return pk;
@@ -169,8 +168,9 @@ public sealed record EncounterSlot8GO(int StartDate, int EndDate, ushort Species
         var pi = GetPersonal();
         if (OriginFormat is PogoImportFormat.PK7)
             pk.EXP = Experience.GetEXP(LevelMin, pi.EXPGrowth);
-        var gender = criteria.GetGender(Gender, pi);
-        var nature = criteria.GetNature();
+        var g = Gender == Gender.Random ? -1 : (int)Gender;
+        int gender = criteria.GetGender(g, pi);
+        int nature = (int)criteria.GetNature();
         var ability = criteria.GetAbilityFromNumber(Ability);
 
         pk.Nature = pk.StatNature = nature;
@@ -214,7 +214,7 @@ public sealed record EncounterSlot8GO(int StartDate, int EndDate, ushort Species
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (!this.IsLevelWithinRange(pk.MetLevel))
+        if (!this.IsLevelWithinRange(pk.Met_Level))
             return false;
         if (!IsBallValid((Ball)pk.Ball, pk.Species, pk))
             return false;
@@ -234,7 +234,7 @@ public sealed record EncounterSlot8GO(int StartDate, int EndDate, ushort Species
         return EncounterMatchRating.Match;
     }
 
-    public byte OriginalTrainerFriendship => Species switch
+    public byte OT_Friendship => Species switch
     {
         (int)Timburr  when Form == 0 => 70,
         (int)Stunfisk when Form == 0 => 70,
@@ -244,7 +244,7 @@ public sealed record EncounterSlot8GO(int StartDate, int EndDate, ushort Species
 
     private byte GetHOMEFriendship()
     {
-        var fs = GetPersonal().BaseFriendship;
+        var fs = (byte)GetPersonal().BaseFriendship;
         if (fs == 70)
             return 50;
         return fs;
@@ -258,7 +258,7 @@ public sealed record EncounterSlot8GO(int StartDate, int EndDate, ushort Species
             return true;
 
         // Eevee & Glaceon have different base friendships. Make sure if it is invalid that we yield the other encounter before.
-        if (pk.OriginalTrainerFriendship != OriginalTrainerFriendship)
+        if (pk.OT_Friendship != OT_Friendship)
             return true;
 
         return IsFormArgIncorrect(pk);
@@ -266,7 +266,7 @@ public sealed record EncounterSlot8GO(int StartDate, int EndDate, ushort Species
 
     public bool IsWithinDistributionWindow(PKM pk)
     {
-        var date = new DateOnly(pk.MetYear + 2000, pk.MetMonth, pk.MetDay);
+        var date = new DateOnly(pk.Met_Year + 2000, pk.Met_Month, pk.Met_Day);
         return IsWithinDistributionWindow(date);
     }
 

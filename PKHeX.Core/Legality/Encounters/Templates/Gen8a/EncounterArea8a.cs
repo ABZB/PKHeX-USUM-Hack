@@ -3,15 +3,6 @@ using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
 
-public enum SlotType8a : byte
-{
-    Standard = 0,
-    Distortion = 1,
-    Landmark = 2,
-    MassOutbreakRegular = 3,
-    MassOutbreakMassive = 4,
-}
-
 /// <summary>
 /// <see cref="GameVersion.PLA"/> encounter area
 /// </summary>
@@ -21,11 +12,14 @@ public sealed record EncounterArea8a : IEncounterArea<EncounterSlot8a>, IAreaLoc
     public GameVersion Version => GameVersion.PLA;
 
     private readonly byte[] Locations;
-    public readonly SlotType8a Type;
+    public readonly SlotType Type;
 
-    public ushort Location => Locations[0];
+    public int Location => Locations[0];
 
-    public bool IsMatchLocation(ushort location) => Locations.AsSpan().Contains((byte)location);
+    public bool IsMatchLocation(int location)
+    {
+        return Array.IndexOf(Locations, (byte)location) != -1;
+    }
 
     public static EncounterArea8a[] GetAreas(BinLinkerAccessor input)
     {
@@ -38,13 +32,14 @@ public sealed record EncounterArea8a : IEncounterArea<EncounterSlot8a>, IAreaLoc
     private EncounterArea8a(ReadOnlySpan<byte> areaData)
     {
         // Area Metadata
-        var locationCount = areaData[0];
+        int locationCount = areaData[0];
         Locations = areaData.Slice(1, locationCount).ToArray();
 
-        var align = (locationCount + 1);
-        align += align & 1; // ensure alignment is even
+        int align = (locationCount + 1);
+        if ((align & 1) == 1)
+            align++;
         areaData = areaData[align..];
-        Type = (SlotType8a)areaData[0];
+        Type = areaData[0] + SlotType.Overworld;
         var count = areaData[1];
 
         var slots = areaData[2..];

@@ -9,16 +9,16 @@ namespace PKHeX.Core;
 public sealed record EncounterSlot7GO(int StartDate, int EndDate, ushort Species, byte Form, byte LevelMin, byte LevelMax, Shiny Shiny, Gender Gender, PogoType Type)
     : IEncounterable, IEncounterMatch, IPogoSlot, IEncounterConvertible<PB7>
 {
-    public byte Generation => 7;
+    public int Generation => 7;
     public EntityContext Context => EntityContext.Gen7b;
     public Ball FixedBall => Ball.None; // GO Park can override the ball; obey capture rules for LGP/E
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public AbilityPermission Ability => AbilityPermission.Any12;
     public bool IsShiny => Shiny.IsShiny();
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
 
     public GameVersion Version => GameVersion.GO;
-    public ushort Location => Locations.GO7;
+    public int Location => Locations.GO7;
     public string Name => $"Wild Encounter ({Version})";
     public string LongName
     {
@@ -41,24 +41,23 @@ public sealed record EncounterSlot7GO(int StartDate, int EndDate, ushort Species
     public PB7 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language);
-        var rnd = Util.Rand;
         var pk = new PB7
         {
-            PID = rnd.Rand32(),
-            EncryptionConstant = rnd.Rand32(),
+            PID = Util.Rand32(),
+            EncryptionConstant = Util.Rand32(),
             Species = Species,
             Form = Form,
             CurrentLevel = LevelMin,
-            OriginalTrainerFriendship = PersonalTable.GG[Species].BaseFriendship,
-            MetLocation = Location,
-            MetLevel = LevelMin,
-            Version = Version,
+            OT_Friendship = PersonalTable.GG[Species].BaseFriendship,
+            Met_Location = Location,
+            Met_Level = LevelMin,
+            Version = (byte)Version,
             Ball = (byte)Ball.Poke,
             MetDate = this.GetRandomValidDate(),
 
             Language = lang,
-            OriginalTrainerName = tr.OT,
-            OriginalTrainerGender = tr.Gender,
+            OT_Name = tr.OT,
+            OT_Gender = tr.Gender,
             ID32 = tr.ID32,
         };
         SetPINGA(pk, criteria);
@@ -66,8 +65,8 @@ public sealed record EncounterSlot7GO(int StartDate, int EndDate, ushort Species
         pk.Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation);
         SetEncounterMoves(pk, LevelMin);
         pk.AwakeningSetAllTo(2);
-        pk.HeightScalar = PokeSizeUtil.GetRandomScalar(rnd);
-        pk.WeightScalar = PokeSizeUtil.GetRandomScalar(rnd);
+        pk.HeightScalar = PokeSizeUtil.GetRandomScalar();
+        pk.WeightScalar = PokeSizeUtil.GetRandomScalar();
         pk.ResetHeight();
         pk.ResetWeight();
         pk.ResetCP();
@@ -77,9 +76,9 @@ public sealed record EncounterSlot7GO(int StartDate, int EndDate, ushort Species
 
     private void SetPINGA(PB7 pk, EncounterCriteria criteria)
     {
-        var pi = PersonalTable.GG[Species];
-        var gender = criteria.GetGender(Gender, pi);
-        var nature = criteria.GetNature();
+        var g = Gender == Gender.Random ? -1 : (int)Gender;
+        int gender = criteria.GetGender(g, PersonalTable.GG[Species]);
+        int nature = (int)criteria.GetNature();
         var ability = criteria.GetAbilityFromNumber(Ability);
 
         criteria.SetRandomIVsGO(pk, Type.GetMinIV());
@@ -119,7 +118,7 @@ public sealed record EncounterSlot7GO(int StartDate, int EndDate, ushort Species
         // Since it is possible to evolve before transferring, we only need the highest evolution species possible.
         // PoGoEncTool has already extrapolated the evolutions to separate encounters!
 
-        if (!this.IsLevelWithinRange(pk.MetLevel))
+        if (!this.IsLevelWithinRange(pk.Met_Level))
             return false;
         //if (!slot.IsBallValid(ball)) -- can have any of the in-game balls due to re-capture
         //    continue;
@@ -133,7 +132,7 @@ public sealed record EncounterSlot7GO(int StartDate, int EndDate, ushort Species
 
     public EncounterMatchRating GetMatchRating(PKM pk)
     {
-        var stamp = PogoDateRangeExtensions.GetTimeStamp(pk.MetYear + 2000, pk.MetMonth, pk.MetDay);
+        var stamp = PogoDateRangeExtensions.GetTimeStamp(pk.Met_Year + 2000, pk.Met_Month, pk.Met_Day);
         if (!this.IsWithinStartEnd(stamp))
             return EncounterMatchRating.DeferredErrors;
         if (!this.GetIVsValid(pk))

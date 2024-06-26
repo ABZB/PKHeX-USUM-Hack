@@ -84,7 +84,7 @@ public static class LearnVerifierRelearn
 
     internal static void VerifyEggMoveset(EncounterEgg e, Span<MoveResult> result, ReadOnlySpan<ushort> moves)
     {
-        var gen = e.Generation;
+        int gen = e.Generation;
         Span<byte> origins = stackalloc byte[moves.Length];
         var valid = MoveBreed.Validate(gen, e.Species, e.Form, e.Version, moves, origins);
         if (valid)
@@ -94,7 +94,7 @@ public static class LearnVerifierRelearn
                 if (moves[i] == 0)
                     result[i] = MoveResult.Empty;
                 else
-                    result[i] = new(EggSourceUtil.GetSource(origins[i], gen), GameData.GetLearnSource(e.Version).Environment);
+                    result[i] = new(EggSourceUtil.GetSource(origins[i], gen));
             }
         }
         else
@@ -111,7 +111,7 @@ public static class LearnVerifierRelearn
                 else if (current == 0)
                     result[i] = MoveResult.Empty;
                 else
-                    result[i] = new(EggSourceUtil.GetSource(origins[i], gen), GameData.GetLearnSource(e.Version).Environment);
+                    result[i] = new(EggSourceUtil.GetSource(origins[i], gen));
             }
         }
 

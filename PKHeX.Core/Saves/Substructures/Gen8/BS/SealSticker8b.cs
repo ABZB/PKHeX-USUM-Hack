@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
@@ -13,29 +13,29 @@ public sealed class SealSticker8b
     public int Count { get; set; }
     public int TotalCount { get; set; }
 
-    public SealSticker8b(Span<byte> raw, int index)
+    public SealSticker8b(byte[] data, int baseOffset, int index)
     {
         Index = index;
-        var offset = (SIZE * index);
-        var span = raw.Slice(offset, SIZE);
-        ReadAbsolute(span);
+        var offset = baseOffset + (SIZE * index);
+        var span = data.AsSpan(offset, SIZE);
+        Read(span);
     }
 
-    private void ReadAbsolute(ReadOnlySpan<byte> span)
+    private void Read(ReadOnlySpan<byte> span)
     {
         IsGet = ReadUInt32LittleEndian(span) == 1;
         Count = ReadInt32LittleEndian(span[4..]);
         TotalCount = ReadInt32LittleEndian(span[8..]);
     }
 
-    public void Write(Span<byte> data)
+    public void Write(byte[] data, int baseOffset)
     {
-        var offset = (SIZE * Index);
-        var span = data.Slice(offset, SIZE);
-        WriteAbsolute(span);
+        var offset = baseOffset + (SIZE * Index);
+        var span = data.AsSpan(offset, SIZE);
+        Write(span);
     }
 
-    private void WriteAbsolute(Span<byte> span)
+    private void Write(Span<byte> span)
     {
         WriteUInt32LittleEndian(span, IsGet ? 1u : 0u);
         WriteInt32LittleEndian(span[4..], Count);

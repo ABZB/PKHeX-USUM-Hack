@@ -161,24 +161,24 @@ public static class Overworld8aRNG
 
         pk.RefreshAbility((int)rand.NextInt(2));
 
-        byte gender = para.GenderRatio switch
+        int gender = para.GenderRatio switch
         {
             PersonalInfo.RatioMagicGenderless => 2,
             PersonalInfo.RatioMagicFemale => 1,
             PersonalInfo.RatioMagicMale => 0,
-            _ => rand.NextInt(252) + 1 < para.GenderRatio ? (byte)1 : (byte)0,
+            _ => (int)rand.NextInt(252) + 1 < para.GenderRatio ? 1 : 0,
         };
-        if (!criteria.IsGenderSatisfied(gender))
+        if (gender != criteria.Gender && criteria.Gender != FixedGenderUtil.GenderRandom)
             return false;
         pk.Gender = gender;
 
-        var nature = (Nature)rand.NextInt(25);
+        int nature = (int)rand.NextInt(25);
         pk.Nature = pk.StatNature = nature;
 
         var (height, weight) = para.IsAlpha
             ? (byte.MaxValue, byte.MaxValue)
-            : ((byte)(rand.NextInt(0x81) + rand.NextInt(0x80)),
-               (byte)(rand.NextInt(0x81) + rand.NextInt(0x80)));
+            : ((byte)((int)rand.NextInt(0x81) + (int)rand.NextInt(0x80)),
+               (byte)((int)rand.NextInt(0x81) + (int)rand.NextInt(0x80)));
 
         if (pk is IScaledSize s)
         {
@@ -201,8 +201,7 @@ public static class Overworld8aRNG
         _ => Shiny.Never,
     };
 
-    public static bool Verify(PKM pk, ulong seed, in OverworldParam8a para,
-        bool isFixedH = false, bool isFixedW = false)
+    public static bool Verify(PKM pk, ulong seed, in OverworldParam8a para)
     {
         var rand = new Xoroshiro128Plus(seed);
         var ec = (uint)rand.NextInt();
@@ -262,51 +261,51 @@ public static class Overworld8aRNG
         if (pk.IV_SPE != ivs[5])
             return false;
 
-        int ability = (int)rand.NextInt(2);
-        ability <<= 1; // 1/2/4
+        int abil = (int)rand.NextInt(2);
+        abil <<= 1; // 1/2/4
 
         var current = pk.AbilityNumber;
-        if (ability == 4 && current != 4)
+        if (abil == 4 && current != 4)
             return false;
         // else, for things that were made Hidden Ability, defer to Ability Checks (Ability Patch)
 
-        byte gender = para.GenderRatio switch
+        int gender = para.GenderRatio switch
         {
             PersonalInfo.RatioMagicGenderless => 2,
             PersonalInfo.RatioMagicFemale => 1,
             PersonalInfo.RatioMagicMale => 0,
-            _ => rand.NextInt(252) + 1 < para.GenderRatio ? (byte)1 : (byte)0,
+            _ => (int)rand.NextInt(252) + 1 < para.GenderRatio ? 1 : 0,
         };
         if (pk.Gender != gender)
             return false;
 
-        var nature = (Nature)rand.NextInt(25);
+        var nature = (int)rand.NextInt(25);
         if (pk.Nature != nature)
             return false;
 
         var (height, weight) = para.IsAlpha
             ? (byte.MaxValue, byte.MaxValue)
-            : ((byte)(rand.NextInt(0x81) + rand.NextInt(0x80)),
-               (byte)(rand.NextInt(0x81) + rand.NextInt(0x80)));
+            : ((byte)((int)rand.NextInt(0x81) + (int)rand.NextInt(0x80)),
+               (byte)((int)rand.NextInt(0x81) + (int)rand.NextInt(0x80)));
 
         if (pk is IScaledSize s)
         {
-            if (!isFixedH && s.HeightScalar != height)
+            if (s.HeightScalar != height)
                 return false;
-            if (!isFixedW && s.WeightScalar != weight)
+            if (s.WeightScalar != weight)
                 return false;
         }
 
         return true;
     }
 
-    public static byte GetRandomLevel(ulong slotSeed, byte min, byte max)
+    public static int GetRandomLevel(ulong slotSeed, byte LevelMin, byte LevelMax)
     {
-        var delta = 1ul + max - min;
-        var rnd = new Xoroshiro128Plus(slotSeed);
-        rnd.Next();
-        rnd.Next(); // slot, entitySeed
-        var amp = (byte)rnd.NextInt(delta);
-        return (byte)(min + amp);
+        var delta = LevelMax - LevelMin;
+        var xoro = new Xoroshiro128Plus(slotSeed);
+        xoro.Next();
+        xoro.Next(); // slot, entitySeed
+        var amp = (int)xoro.NextInt((ulong)delta + 1);
+        return LevelMin + amp;
     }
 }

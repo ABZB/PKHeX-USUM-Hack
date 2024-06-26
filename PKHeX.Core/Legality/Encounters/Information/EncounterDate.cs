@@ -10,14 +10,9 @@ public static class EncounterDate
     /// <summary>
     /// Time provider to use for date fetching.
     /// </summary>
-    public static TimeProvider TimeProvider { get; set; } = TimeProvider.System;
+    public static ITimeProvider TimeProvider { get; set; } = DefaultTimeProvider.Instance;
 
-    private static DateTime Now => TimeProvider.GetLocalNow().DateTime;
-
-    /// <summary>
-    /// Fetches a valid date for the Nintendo GameCube.
-    /// </summary>
-    public static DateTime GetDateTimeGC() => Now;
+    private static DateTime Now => TimeProvider.Now;
 
     /// <summary>
     /// Fetches a valid date for the Nintendo DS.
@@ -70,8 +65,33 @@ public static class EncounterDate
     /// </summary>
     public static bool IsValidDateSwitch(DateOnly date)
     {
-        if (date.Year is < 2000 or > 2060)
+        if (date.Year is < 2000 or > 2050)
             return false;
         return true;
     }
+}
+
+/// <summary>
+/// Default time provider that uses <see cref="DateTime.Now"/>.
+/// </summary>
+public sealed class DefaultTimeProvider : ITimeProvider
+{
+    /// <summary>
+    /// Singleton instance of the default time provider.
+    /// </summary>
+    public static readonly DefaultTimeProvider Instance = new();
+
+    /// <inheritdoc cref="DateTime.Now"/>
+    public DateTime Now => DateTime.Now;
+}
+
+/// <summary>
+/// Interface for fetching the current time.
+/// </summary>
+public interface ITimeProvider
+{
+    /// <summary>
+    /// Fetches the current time.
+    /// </summary>
+    DateTime Now { get; }
 }

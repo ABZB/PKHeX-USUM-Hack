@@ -15,7 +15,7 @@ public sealed class BulkAnalysis
     public readonly Dictionary<ulong, SlotCache> Trackers = [];
     public readonly bool Valid;
 
-    public readonly BulkAnalysisSettings Settings;
+    public readonly IBulkAnalysisSettings Settings;
     private readonly bool[] CloneFlags;
 
     /// <summary>
@@ -28,7 +28,7 @@ public sealed class BulkAnalysis
     /// </summary>
     public bool SetIsClone(int entryIndex, bool value = true) => CloneFlags[entryIndex] = value;
 
-    public BulkAnalysis(SaveFile sav, BulkAnalysisSettings settings)
+    public BulkAnalysis(SaveFile sav, IBulkAnalysisSettings settings)
     {
         Trainer = sav;
         Settings = settings;
@@ -103,5 +103,5 @@ public sealed class BulkAnalysis
         return results;
     }
 
-    private static LegalityAnalysis Get(SlotCache cache) => new(cache.Entity, cache.SAV.Personal, cache.Source.Type);
+    private static LegalityAnalysis Get(SlotCache cache) => new(cache.Entity, cache.SAV.Personal, cache.Source.Origin);
 }

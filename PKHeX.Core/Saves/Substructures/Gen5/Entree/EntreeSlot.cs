@@ -29,9 +29,9 @@ public sealed class EntreeSlot(Memory<byte> Data) : ISpeciesForm
     /// <summary>
     /// <see cref="PKM.Gender"/> index
     /// </summary>
-    public byte Gender // bits 21-22
+    public int Gender // bits 21-22
     {
-        get => (byte)((RawValue & 0x0060_0000) >> 21);
+        get => (int)(RawValue & 0x0060_0000) >> 21;
         set => RawValue = (RawValue & 0xFF9F_FFFF) | ((uint)(value & 0x3) << 21);
     }
 

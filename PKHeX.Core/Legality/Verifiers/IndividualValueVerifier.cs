@@ -28,16 +28,15 @@ public sealed class IndividualValueVerifier : Verifier
                 break;
         }
         var pk = data.Entity;
-        var hp = pk.IV_HP;
-        if (hp < 30 && AllIVsEqual(pk, hp))
-            data.AddLine(Get(string.Format(LIVAllEqual_0, hp), Severity.Fishy));
+        var hpiv = pk.IV_HP;
+        if (hpiv < 30 && AllIVsEqual(pk, hpiv))
+            data.AddLine(Get(string.Format(LIVAllEqual_0, hpiv), Severity.Fishy));
     }
 
-    private static bool AllIVsEqual(PKM pk, int hp) => pk.IV_ATK == hp
-                                                    && pk.IV_DEF == hp
-                                                    && pk.IV_SPA == hp
-                                                    && pk.IV_SPD == hp
-                                                    && pk.IV_SPE == hp;
+    private static bool AllIVsEqual(PKM pk, int hpiv)
+    {
+        return (pk.IV_ATK == hpiv) && (pk.IV_DEF == hpiv) && (pk.IV_SPA == hpiv) && (pk.IV_SPD == hpiv) && (pk.IV_SPE == hpiv);
+    }
 
     private void VerifyIVsMystery(LegalityAnalysis data, MysteryGift g)
     {
@@ -46,8 +45,8 @@ public sealed class IndividualValueVerifier : Verifier
 
         Span<int> IVs = stackalloc int[6];
         g.GetIVs(IVs);
-        var ivflag = IVs.IndexOfAny(0xFC, 0xFD, 0xFE);
-        if (ivflag == -1) // Random IVs
+        var ivflag = IVs.Find(static iv => (byte)(iv - 0xFC) < 3);
+        if (ivflag == default) // Random IVs
         {
             bool valid = Legal.GetIsFixedIVSequenceValidSkipRand(IVs, data.Entity);
             if (!valid)
@@ -55,7 +54,7 @@ public sealed class IndividualValueVerifier : Verifier
         }
         else
         {
-            int IVCount = IVs[ivflag] - 0xFB;  // IV2/IV3
+            int IVCount = ivflag - 0xFB;  // IV2/IV3
             VerifyIVsFlawless(data, IVCount);
         }
     }

@@ -261,6 +261,8 @@ public record struct EncounterPossible3(EvoCriteria[] Chain, EncounterTypeGroup 
             {
                 if (evo.Species != enc.Species)
                     continue;
+                if (enc.NotDistributed)
+                    break;
                 return SetCurrent(enc);
             }
         }

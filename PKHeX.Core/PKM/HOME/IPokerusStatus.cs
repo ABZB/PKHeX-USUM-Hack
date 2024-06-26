@@ -8,5 +8,5 @@ public interface IPokerusStatus
     /// <summary>
     /// Pokerus Strain and Duration
     /// </summary>
-    byte PokerusState { get; set; }
+    byte PKRS { get; set; }
 }

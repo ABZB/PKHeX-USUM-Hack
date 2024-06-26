@@ -3,8 +3,10 @@ using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
 
-public sealed class FestaBlock5(SAV5B2W2 SAV, Memory<byte> raw) : SaveBlock<SAV5B2W2>(SAV, raw)
+public sealed class FestaBlock5 : SaveBlock<SAV5B2W2>
 {
+    public FestaBlock5(SAV5B2W2 SAV, int offset) : base(SAV) => Offset = offset;
+
     public const ushort MaxScore = 9999;
     public const int FunfestFlag = 2438;
 
@@ -12,44 +14,44 @@ public sealed class FestaBlock5(SAV5B2W2 SAV, Memory<byte> raw) : SaveBlock<SAV5
 
     public ushort Hosted
     {
-        get => ReadUInt16LittleEndian(Data[0xF0..]);
-        set => WriteUInt16LittleEndian(Data[0xF0..], Math.Min(MaxScore, value));
+        get => ReadUInt16LittleEndian(Data.AsSpan(Offset + 0xF0));
+        set => WriteUInt16LittleEndian(Data.AsSpan(Offset + 0xF0), Math.Min(MaxScore, value));
     }
 
     public ushort Participated
     {
-        get => ReadUInt16LittleEndian(Data[0xF2..]);
-        set => WriteUInt16LittleEndian(Data[0xF2..], Math.Min(MaxScore, value));
+        get => ReadUInt16LittleEndian(Data.AsSpan(Offset + 0xF2));
+        set => WriteUInt16LittleEndian(Data.AsSpan(Offset + 0xF2), Math.Min(MaxScore, value));
     }
 
     public ushort Completed
     {
-        get => ReadUInt16LittleEndian(Data[0xF4..]);
-        set => WriteUInt16LittleEndian(Data[0xF4..], Math.Min(MaxScore, value));
+        get => ReadUInt16LittleEndian(Data.AsSpan(Offset + 0xF4));
+        set => WriteUInt16LittleEndian(Data.AsSpan(Offset + 0xF4), Math.Min(MaxScore, value));
     }
 
     public ushort TopScores
     {
-        get => ReadUInt16LittleEndian(Data[0xF6..]);
-        set => WriteUInt16LittleEndian(Data[0xF6..], Math.Min(MaxScore, value));
+        get => ReadUInt16LittleEndian(Data.AsSpan(Offset + 0xF6));
+        set => WriteUInt16LittleEndian(Data.AsSpan(Offset + 0xF6), Math.Min(MaxScore, value));
     }
 
     public byte WhiteEXP
     {
-        get => Data[0xF8];
-        set => Data[0xF8] = value;
+        get => Data[Offset + 0xF8];
+        set => Data[Offset + 0xF8] = value;
     }
 
     public byte BlackEXP
     {
-        get => Data[0xF9];
-        set => Data[0xF9] = value;
+        get => Data[Offset + 0xF9];
+        set => Data[Offset + 0xF9] = value;
     }
 
     public byte Participants
     {
-        get => Data[0xFA];
-        set => Data[0xFA] = value;
+        get => Data[Offset + 0xFA];
+        set => Data[Offset + 0xFA] = value;
     }
 
     private static int GetMissionRecordOffset(int mission)
@@ -61,20 +63,20 @@ public sealed class FestaBlock5(SAV5B2W2 SAV, Memory<byte> raw) : SaveBlock<SAV5
 
     public Funfest5Score GetMissionRecord(int mission)
     {
-        var value = ReadUInt32LittleEndian(Data[GetMissionRecordOffset(mission)..]);
-        return new Funfest5Score(value);
+        var raw = ReadUInt32LittleEndian(Data.AsSpan(Offset + GetMissionRecordOffset(mission)));
+        return new Funfest5Score(raw);
     }
 
     public void SetMissionRecord(int mission, Funfest5Score score)
     {
         var value = score.RawValue;
-        WriteUInt32LittleEndian(Data[GetMissionRecordOffset(mission)..], value);
+        WriteUInt32LittleEndian(Data.AsSpan(Offset + GetMissionRecordOffset(mission)), value);
     }
 
     public bool IsFunfestMissionsUnlocked
     {
-        get => SAV.EventWork.GetEventFlag(FunfestFlag);
-        set => SAV.EventWork.SetEventFlag(FunfestFlag, value);
+        get => SAV.GetEventFlag(FunfestFlag);
+        set => SAV.SetEventFlag(FunfestFlag, value);
     }
 
     public bool IsFunfestMissionUnlocked(int mission)
@@ -88,7 +90,7 @@ public sealed class FestaBlock5(SAV5B2W2 SAV, Memory<byte> raw) : SaveBlock<SAV5
         var req = FunfestMissionUnlockFlagRequired[mission];
         foreach (var f in req)
         {
-            if (!SAV.EventWork.GetEventFlag(f))
+            if (!SAV.GetEventFlag(f))
                 return false;
         }
         return true;
@@ -102,7 +104,7 @@ public sealed class FestaBlock5(SAV5B2W2 SAV, Memory<byte> raw) : SaveBlock<SAV5
         IsFunfestMissionsUnlocked = true;
         var req = FunfestMissionUnlockFlagRequired[mission];
         foreach (var f in req)
-            SAV.EventWork.SetEventFlag(f, true);
+            SAV.SetEventFlag(f, true);
     }
 
     public void UnlockAllFunfestMissions()
@@ -178,16 +180,16 @@ public enum Funfest5Mission
     SearchFor3Pokemon = 6,
     TrainwithMartialArtists = 7,
     Sparringwith10Trainers = 8,
-    GetRichQuickB = 9,
-    TreasureHuntingW = 10,
-    ExcitingTradingB = 11,
-    ExhilaratingTradingW = 12,
+    B_GetRichQuick = 9,
+    W_TreasureHunting = 10,
+    B_ExcitingTrading = 11,
+    W_ExhilaratingTrading = 12,
     FindEmolga = 13,
     WingsFallingontheDrawbridge = 14,
     FindTreasures = 15,
     MushroomsHideAndSeek = 16,
-    FindMysteriousOresB = 17,
-    FindShiningOresW = 18,
+    B_FindMysteriousOres = 17,
+    W_FindShiningOres = 18,
     The2LostTreasures = 19,
     BigHarvestofBerries = 20,
     RingtheBell = 21,
@@ -198,15 +200,15 @@ public enum Funfest5Mission
     PushtheLimitofYourMemory = 26,
     FindRustlingGrass = 27,
     FindShards = 28,
-    ForgottenLostItemsB = 29,
-    NotFoundLostItemsW = 30,
-    WhatistheBestPriceB = 31,
-    WhatistheRealPriceW = 32,
+    B_ForgottenLostItems = 29,
+    W_NotFoundLostItems = 30,
+    B_WhatistheBestPrice = 31,
+    W_WhatistheRealPrice = 32,
     GivemetheItem = 33,
     DoaGreatTradeUp = 34,
-    SearchHiddenGrottoes = 35,
-    NoisyHiddenGrottoesB = 36,
-    QuietHiddenGrottoesW = 37,
+    SearchHiddenGrottes = 35,
+    B_NoisyHiddenGrottes = 36,
+    W_QuietHiddenGrottes = 37,
     FishingCompetition = 38,
     MulchCollector = 39,
     WhereareFlutteringHearts = 40,

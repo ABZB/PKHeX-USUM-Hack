@@ -8,16 +8,16 @@ namespace PKHeX.Core;
 public sealed record EncounterTrade9
     : IEncounterable, IEncounterMatch, IFixedTrainer, IFixedNickname, IEncounterConvertible<PK9>, IGemType, IFixedGender, IFixedNature, IRibbonPartner, IMoveset
 {
-    public byte Generation => 9;
+    public int Generation => 9;
     public EntityContext Context => EntityContext.Gen9;
-    public ushort Location => Locations.LinkTrade6NPC;
+    public int Location => Locations.LinkTrade6NPC;
     public Shiny Shiny { get; init; } = Shiny.Never;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public Ball FixedBall { get; init; }
     public bool IsShiny => false;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
     public bool IsFixedTrainer => true;
-    public bool IsFixedNickname => Nicknames.Length != 0;
+    public bool IsFixedNickname => Nicknames.Length > 0;
     public GameVersion Version { get; }
 
     private string[] TrainerNames { get; }
@@ -67,45 +67,44 @@ public sealed record EncounterTrade9
 
     public PK9 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language, version);
         var pi = PersonalTable.SV[Species, Form];
-        var rnd = Util.Rand;
-        var xoro = new Xoroshiro128Plus(rnd.Rand64());
+        var rnd = new Xoroshiro128Plus(Util.Rand.Rand64());
         var pk = new PK9
         {
             Species = Species,
             Form = Form,
             CurrentLevel = Level,
-            MetLocation = Location,
-            MetLevel = Level,
+            Met_Location = Location,
+            Met_Level = Level,
             MetDate = EncounterDate.GetDateSwitch(),
             Gender = Gender,
-            Nature = Nature,
-            StatNature = Nature,
+            Nature = (byte)Nature,
+            StatNature = (byte)Nature,
             Ball = (byte)FixedBall,
 
             ID32 = ID32,
-            Version = version,
+            Version = (byte)version,
             Language = lang,
-            OriginalTrainerGender = OTGender,
-            OriginalTrainerName = TrainerNames[lang],
+            OT_Gender = OTGender,
+            OT_Name = TrainerNames[lang],
 
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
 
             IsNicknamed = IsFixedNickname,
             Nickname = IsFixedNickname ? Nicknames[lang] : SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
 
-            HeightScalar = PokeSizeUtil.GetRandomScalar(rnd),
-            WeightScalar = Weight.GetSizeValue(Weight != SizeType9.RANDOM ? FixedValueScale : default, ref xoro),
-            Scale = Scale.GetSizeValue(Scale != SizeType9.RANDOM ? FixedValueScale : default, ref xoro),
+            HeightScalar = PokeSizeUtil.GetRandomScalar(),
+            WeightScalar = Weight.GetSizeValue(Weight != SizeType9.RANDOM ? FixedValueScale : default, ref rnd),
+            Scale = Scale.GetSizeValue(Scale != SizeType9.RANDOM ? FixedValueScale : default, ref rnd),
             TeraTypeOriginal = GetOriginalTeraType(),
 
-            HandlingTrainerName = tr.OT,
-            HandlingTrainerLanguage = (byte)tr.Language,
+            HT_Name = tr.OT,
+            HT_Language = (byte)tr.Language,
             CurrentHandler = 1,
-            HandlingTrainerFriendship = pi.BaseFriendship,
-            ObedienceLevel = Level,
+            HT_Friendship = pi.BaseFriendship,
+            Obedience_Level = Level,
         };
 
         EncounterUtil.SetEncounterMoves(pk, version, Level);
@@ -125,10 +124,9 @@ public sealed record EncounterTrade9
 
     private void SetPINGA(PK9 pk, EncounterCriteria criteria, PersonalInfo9SV pi)
     {
-        var rnd = Util.Rand;
-        pk.PID = rnd.Rand32();
-        pk.EncryptionConstant = rnd.Rand32();
-        pk.Nature = pk.StatNature = criteria.GetNature(Nature);
+        pk.PID = Util.Rand32();
+        pk.EncryptionConstant = Util.Rand32();
+        pk.Nature = pk.StatNature = (int)criteria.GetNature(Nature);
         pk.Gender = criteria.GetGender(Gender, pi);
         pk.RefreshAbility(criteria.GetAbilityFromNumber(Ability));
         criteria.SetRandomIVs(pk, IVs);
@@ -157,7 +155,7 @@ public sealed record EncounterTrade9
             return false;
         if (pk.Gender != Gender)
             return false;
-        if (pk.Nature != Nature)
+        if (pk.Nature != (int)Nature)
             return false;
         return true;
     }
@@ -168,7 +166,7 @@ public sealed record EncounterTrade9
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (pk.MetLevel != Level)
+        if (pk.Met_Level != Level)
             return false;
         if (TeraType != GemType.Random && pk is ITeraType t && !Tera9RNG.IsMatchTeraType(TeraType, Species, Form, (byte)t.TeraTypeOriginal))
             return false;
@@ -182,7 +180,7 @@ public sealed record EncounterTrade9
             return false;
         if (evo.Form != Form && !FormInfo.IsFormChangeable(Species, Form, pk.Form, Context, pk.Context))
             return false;
-        if (pk.OriginalTrainerGender != OTGender)
+        if (pk.OT_Gender != OTGender)
             return false;
         if (!IsMatchEggLocation(pk))
             return false;
@@ -216,8 +214,8 @@ public sealed record EncounterTrade9
         return IsMatchEggLocationExact(pk) || IsMatchEggLocationRemapped(pk);
     }
 
-    private static bool IsMatchEggLocationRemapped(PKM pk) => pk.EggLocation == 0;
-    private bool IsMatchEggLocationExact(PKM pk) => pk.EggLocation == EggLocation;
+    private static bool IsMatchEggLocationRemapped(PKM pk) => pk.Egg_Location == 0;
+    private bool IsMatchEggLocationExact(PKM pk) => pk.Egg_Location == EggLocation;
 
     private bool IsMatchLocation(PKM pk)
     {
@@ -229,14 +227,14 @@ public sealed record EncounterTrade9
         return IsMatchLocationExact(pk) || IsMatchLocationRemapped(pk);
     }
 
-    private bool IsMatchLocationExact(PKM pk) => pk.MetLocation == Location;
+    private bool IsMatchLocationExact(PKM pk) => pk.Met_Location == Location;
 
     private bool IsMatchLocationRemapped(PKM pk)
     {
-        var met = pk.MetLocation;
+        var met = (ushort)pk.Met_Location;
         var version = pk.Version;
         if (pk.Context == EntityContext.Gen8)
             return LocationsHOME.IsValidMetSV(met, version);
-        return LocationsHOME.GetMetSWSH(Location, version) == met;
+        return LocationsHOME.GetMetSWSH((ushort)Location, version) == met;
     }
 }

@@ -8,16 +8,17 @@ namespace PKHeX.Core;
 /// Generation 3 <see cref="SaveFile"/> object for <see cref="GameVersion.RS"/>.
 /// </summary>
 /// <inheritdoc cref="SAV3" />
-public sealed class SAV3RS : SAV3, IGen3Hoenn, IDaycareRandomState<ushort>
+public sealed class SAV3RS : SAV3, IGen3Hoenn
 {
     // Configuration
-    protected override SAV3RS CloneInternal() => new(Write()) { Language = Language };
-    public override GameVersion Version { get; set; } = GameVersion.RS; // allow mutation
+    protected override SAV3RS CloneInternal() => new(Write());
+    public override GameVersion Version { get => GameVersion.RS; protected set { } }
     public override PersonalTable3 Personal => PersonalTable.RS;
 
     public override int EventFlagCount => 8 * 288;
     public override int EventWorkCount => 0x100;
     protected override int DaycareSlotSize => SIZE_STORED;
+    public override int DaycareSeedSize => 4; // 16bit
     protected override int EggEventFlag => 0x86;
     protected override int BadgeFlagStart => 0x807;
 
@@ -27,11 +28,17 @@ public sealed class SAV3RS : SAV3, IGen3Hoenn, IDaycareRandomState<ushort>
     protected override int EventFlag => 0x1220;
     protected override int EventWork => 0x1340;
 
-    protected override int PokeDex => 0x18; // small
-    protected override int DaycareOffset => 0x2F9C; // large
+    private void Initialize()
+    {
+        // small
+        PokeDex = 0x18;
 
-    // storage
-    private void Initialize() => Box = 0;
+        // large
+        DaycareOffset = 0x2F9C;
+
+        // storage
+        Box = 0;
+    }
 
     #region Small
     public override bool NationalDex
@@ -99,12 +106,10 @@ public sealed class SAV3RS : SAV3, IGen3Hoenn, IDaycareRandomState<ushort>
         ];
     }
 
-    private Span<byte> PokeBlockData => Large.AsSpan(0x7F8, PokeBlock3Case.SIZE);
-
     public PokeBlock3Case PokeBlocks
     {
-        get => new(PokeBlockData);
-        set => value.Write(PokeBlockData);
+        get => new(Large, 0x7F8);
+        set => SetData(Large.AsSpan(0x7F8), value.Write());
     }
 
     protected override int SeenOffset2 => 0x938;
@@ -137,12 +142,9 @@ public sealed class SAV3RS : SAV3, IGen3Hoenn, IDaycareRandomState<ushort>
 
     protected override int MailOffset => 0x2B4C;
 
-    protected override int GetDaycareEXPOffset(int slot) => GetDaycareSlotOffset(2) + (2 * 0x38) + (4 * slot); // consecutive vals, after both consecutive slots & 2 mail
-    ushort IDaycareRandomState<ushort>.Seed
-    {
-        get => ReadUInt16LittleEndian(Large.AsSpan(GetDaycareEXPOffset(2)));
-        set => WriteUInt16LittleEndian(Large.AsSpan(GetDaycareEXPOffset(2)), value);
-    }
+    protected override int GetDaycareEXPOffset(int slot) => GetDaycareSlotOffset(0, 2) + (2 * 0x38) + (4 * slot); // consecutive vals, after both consecutive slots & 2 mail
+    public override string GetDaycareRNGSeed(int loc) => ReadUInt16LittleEndian(Large.AsSpan(GetDaycareEXPOffset(2))).ToString("X4");
+    public override void SetDaycareRNGSeed(int loc, string seed) => WriteUInt16LittleEndian(Large.AsSpan(GetDaycareEXPOffset(2)), (ushort)Util.GetHexValue(seed));
 
     protected override int ExternalEventData => 0x311B;
 

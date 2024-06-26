@@ -6,13 +6,13 @@ namespace PKHeX.Core;
 public sealed record EncounterStatic7(GameVersion Version)
     : IEncounterable, IEncounterMatch, IEncounterConvertible<PK7>, IRelearn, IEncounterFormRandom, IFlawlessIVCount, IFatefulEncounterReadOnly, IFixedGender, IFixedNature, IFixedIVSet
 {
-    public byte Generation => 7;
+    public int Generation => 7;
     public EntityContext Context => EntityContext.Gen7;
-    ushort ILocation.Location => Location;
-    ushort ILocation.EggLocation => EggLocation;
+    int ILocation.Location => Location;
+    int ILocation.EggLocation => EggLocation;
     public bool RibbonWishing => Species == (int)Core.Species.Magearna;
 
-    public bool IsEgg => EggLocation != 0;
+    public bool EggEncounter => EggLocation != 0;
     public bool IsShiny => false;
 
     public Moveset Relearn { get; init; }
@@ -53,27 +53,28 @@ public sealed record EncounterStatic7(GameVersion Version)
 
     public PK7 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language, version);
         var pi = PersonalTable.USUM[Species, Form];
         var pk = new PK7
         {
+            EncryptionConstant = Util.Rand32(),
             Species = Species,
             Form = GetWildForm(Form, tr),
             CurrentLevel = LevelMin,
-            MetLocation = Location,
-            MetLevel = LevelMin,
+            Met_Location = Location,
+            Met_Level = LevelMin,
             MetDate = EncounterDate.GetDate3DS(),
             Ball = (byte)(FixedBall is Ball.None ? Ball.Poke : FixedBall),
             FatefulEncounter = FatefulEncounter,
 
             ID32 = tr.ID32,
-            Version = version,
+            Version = (byte)version,
             Language = lang,
-            OriginalTrainerGender = tr.Gender,
-            OriginalTrainerName = tr.OT,
+            OT_Gender = tr.Gender,
+            OT_Name = tr.OT,
 
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
 
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
         };
@@ -85,12 +86,12 @@ public sealed record EncounterStatic7(GameVersion Version)
         else
             pk.SetDefaultRegionOrigins(lang);
 
-        if (IsEgg)
+        if (EggEncounter)
         {
             // Fake as hatched.
-            pk.MetLocation = Locations.HatchLocation7;
-            pk.MetLevel = EggStateLegality.EggMetLevel;
-            pk.EggLocation = EggLocation;
+            pk.Met_Location = Locations.HatchLocation7;
+            pk.Met_Level = EggStateLegality.EggMetLevel;
+            pk.Egg_Location = EggLocation;
             pk.EggMetDate = pk.MetDate;
         }
 
@@ -118,9 +119,7 @@ public sealed record EncounterStatic7(GameVersion Version)
 
     private void SetPINGA(PK7 pk, EncounterCriteria criteria, PersonalInfo7 pi)
     {
-        var rnd = Util.Rand;
-        pk.EncryptionConstant = rnd.Rand32();
-        pk.PID = rnd.Rand32();
+        pk.PID = Util.Rand32();
         if (pk.IsShiny)
         {
             if (Shiny == Shiny.Never || (Shiny != Shiny.Always && !criteria.Shiny.IsShiny()))
@@ -138,7 +137,7 @@ public sealed record EncounterStatic7(GameVersion Version)
             criteria.SetRandomIVs(pk, FlawlessIVCount);
 
         var ability = criteria.GetAbilityFromNumber(Ability);
-        pk.Nature = criteria.GetNature(Nature);
+        pk.Nature = (int)criteria.GetNature(Nature);
         pk.Gender = criteria.GetGender(Gender, pi);
         pk.AbilityNumber = 1 << ability;
         pk.Ability = pi.GetAbilityAtIndex(ability);
@@ -160,7 +159,7 @@ public sealed record EncounterStatic7(GameVersion Version)
             return false;
         if (!IsMatchLocation(pk))
             return false;
-        if (pk.MetLevel != Level)
+        if (pk.Met_Level != Level)
             return false;
         if (!IsMatchForm(pk, evo))
             return false;
@@ -168,7 +167,7 @@ public sealed record EncounterStatic7(GameVersion Version)
             return false;
         if (IVs.IsSpecified && !Legal.GetIsFixedIVSequenceValidSkipRand(IVs, pk))
             return false;
-        if (Nature != Nature.Random && pk.Nature != Nature)
+        if (Nature != Nature.Random && pk.Nature != (int)Nature)
             return false;
         if (FlawlessIVCount != 0 && pk.FlawlessIVCount < FlawlessIVCount)
             return false;
@@ -184,32 +183,32 @@ public sealed record EncounterStatic7(GameVersion Version)
 
     private bool IsMatchLocation(PKM pk)
     {
-        if (IsEgg)
+        if (EggEncounter)
             return true;
 
-        return pk.MetLocation == Location;
+        return pk.Met_Location == Location;
     }
 
     private bool IsMatchEggLocation(PKM pk)
     {
-        if (!IsEgg)
+        if (!EggEncounter)
         {
             var expect = pk is PB8 ? Locations.Default8bNone : EggLocation;
-            return pk.EggLocation == expect;
+            return pk.Egg_Location == expect;
         }
 
         // Gift Eevee edge case
         if (EggLocation == Locations.Daycare5 && !Relearn.HasMoves && pk.RelearnMove1 != 0)
             return false;
 
-        var eggLoc = pk.EggLocation;
+        var eggloc = pk.Egg_Location;
         if (!pk.IsEgg) // hatched
-            return eggLoc == EggLocation || eggLoc == Locations.LinkTrade6;
+            return eggloc == EggLocation || eggloc == Locations.LinkTrade6;
 
         // Unhatched:
-        if (eggLoc != EggLocation)
+        if (eggloc != EggLocation)
             return false;
-        if (pk.MetLocation is not (0 or Locations.LinkTrade6))
+        if (pk.Met_Location is not (0 or Locations.LinkTrade6))
             return false;
         return true;
     }

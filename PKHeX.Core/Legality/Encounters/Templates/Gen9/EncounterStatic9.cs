@@ -8,12 +8,12 @@ namespace PKHeX.Core;
 public sealed record EncounterStatic9(GameVersion Version)
     : IEncounterable, IEncounterMatch, IEncounterConvertible<PK9>, IMoveset, IFlawlessIVCount, IFixedIVSet, IGemType, IFatefulEncounterReadOnly, IFixedGender, IFixedNature, IEncounterMarkExtra
 {
-    public byte Generation => 9;
+    public int Generation => 9;
     public EntityContext Context => EntityContext.Gen9;
     public bool IsShiny => Shiny == Shiny.Always;
-    public bool IsEgg => EggLocation != 0;
-    ushort ILocation.Location => Location;
-    ushort ILocation.EggLocation => EggLocation;
+    public bool EggEncounter => EggLocation != 0;
+    int ILocation.Location => Location;
+    int ILocation.EggLocation => EggLocation;
 
     public Ball FixedBall { get; init; }
     public required ushort Location { get; init; }
@@ -60,8 +60,6 @@ public sealed record EncounterStatic9(GameVersion Version)
     public byte LevelMin => Level;
     public byte LevelMax => Level;
 
-    public const byte RideLegendFormArg = 1;
-
     #region Generating
     PKM IEncounterConvertible.ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria) => ConvertToPKM(tr, criteria);
     PKM IEncounterConvertible.ConvertToPKM(ITrainerInfo tr) => ConvertToPKM(tr);
@@ -69,7 +67,7 @@ public sealed record EncounterStatic9(GameVersion Version)
     public PK9 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language);
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         var pi = PersonalTable.SV[Species, Form];
         var pk = new PK9
         {
@@ -77,34 +75,34 @@ public sealed record EncounterStatic9(GameVersion Version)
             Species = Species,
             Form = Form,
             CurrentLevel = LevelMin,
-            OriginalTrainerFriendship = pi.BaseFriendship,
-            MetLocation = Location,
-            MetLevel = LevelMin,
+            OT_Friendship = pi.BaseFriendship,
+            Met_Location = Location,
+            Met_Level = LevelMin,
             MetDate = EncounterDate.GetDateSwitch(),
-            Version = version,
+            Version = (byte)version,
             Ball = (byte)Ball.Poke,
             FatefulEncounter = FatefulEncounter,
 
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
-            ObedienceLevel = LevelMin,
-            OriginalTrainerName = tr.OT,
-            OriginalTrainerGender = tr.Gender,
+            Obedience_Level = LevelMin,
+            OT_Name = tr.OT,
+            OT_Gender = tr.Gender,
             ID32 = tr.ID32,
         };
 
-        if (IsEgg)
+        if (EggEncounter)
         {
             // Fake as hatched.
-            pk.MetLocation = Locations.HatchLocation9;
-            pk.MetLevel = EggStateLegality.EggMetLevel;
-            pk.EggLocation = EggLocation;
+            pk.Met_Location = Locations.HatchLocation9;
+            pk.Met_Level = EggStateLegality.EggMetLevel;
+            pk.Egg_Location = EggLocation;
             pk.EggMetDate = pk.MetDate;
         }
 
-        if (GiftWithLanguage)
-            pk.HandlingTrainerLanguage = (byte)pk.Language;
+        if (Gift && !ScriptedYungoos)
+            pk.HT_Language = (byte)pk.Language;
         if (StarterBoxLegend)
-            pk.FormArgument = RideLegendFormArg; // Not Ride Form.
+            pk.FormArgument = 1; // Not Ride Form.
         if (IsTitan)
         {
             pk.RibbonMarkTitan = true;
@@ -162,14 +160,14 @@ public sealed record EncounterStatic9(GameVersion Version)
         if (Gender != FixedGenderUtil.GenderRandom)
             pk.Gender = Gender;
         if (Nature != Nature.Random)
-            pk.Nature = pk.StatNature = Nature;
+            pk.Nature = pk.StatNature = (int)Nature;
     }
     #endregion
 
     #region Matching
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (!this.IsLevelWithinRange(pk.MetLevel))
+        if (!this.IsLevelWithinRange(pk.Met_Level))
             return false;
         if (Gender != FixedGenderUtil.GenderRandom && pk.Gender != Gender)
             return false;
@@ -185,7 +183,7 @@ public sealed record EncounterStatic9(GameVersion Version)
             return false;
         if (TeraType != GemType.Random && pk is ITeraType t && !Tera9RNG.IsMatchTeraType(TeraType, Species, Form, (byte)t.TeraTypeOriginal))
             return false;
-        if (Nature != Nature.Random && pk.Nature != Nature)
+        if (Nature != Nature.Random && pk.Nature != (int)Nature)
             return false;
 
         return true;
@@ -193,20 +191,20 @@ public sealed record EncounterStatic9(GameVersion Version)
 
     private bool IsMatchEggLocation(PKM pk)
     {
-        var eggLoc = pk.EggLocation;
-        if (!IsEgg)
+        var eggloc = pk.Egg_Location;
+        if (!EggEncounter)
         {
             var expect = pk is PB8 ? Locations.Default8bNone : EggLocation;
-            return eggLoc == expect;
+            return eggloc == expect;
         }
 
         if (!pk.IsEgg) // hatched
-            return eggLoc == EggLocation || eggLoc == Locations.LinkTrade6;
+            return eggloc == EggLocation || eggloc == Locations.LinkTrade6;
 
         // Unhatched:
-        if (eggLoc != EggLocation)
+        if (eggloc != EggLocation)
             return false;
-        if (pk.MetLocation is not (0 or Locations.LinkTrade6))
+        if (pk.Met_Location is not (0 or Locations.LinkTrade6))
             return false;
         return true;
     }
@@ -230,14 +228,14 @@ public sealed record EncounterStatic9(GameVersion Version)
 
     private bool IsMatchLocationExact(PKM pk)
     {
-        if (IsEgg)
+        if (EggEncounter)
             return true;
-        return pk.MetLocation == Location;
+        return pk.Met_Location == Location;
     }
 
     private bool IsMatchLocationRemapped(PKM pk)
     {
-        var met = pk.MetLocation;
+        var met = (ushort)pk.Met_Location;
         var version = pk.Version;
         if (pk.Context == EntityContext.Gen8)
             return LocationsHOME.IsValidMetSV(met, version);
@@ -260,14 +258,7 @@ public sealed record EncounterStatic9(GameVersion Version)
             }
             else if (Ability.IsSingleValue(out int index) && 1 << index != num) // Fixed regular ability
             {
-                var a = Ability;
-                if (a is OnlyHidden)
-                {
-                    if (!AbilityVerifier.CanAbilityPatch(9, PersonalTable.SV.GetFormEntry(Species, Form), pk.Species))
-                        return EncounterMatchRating.DeferredErrors;
-                    a = num == 1 ? OnlyFirst : OnlySecond;
-                }
-                if (a is OnlyFirst or OnlySecond && !AbilityVerifier.CanAbilityCapsule(9, PersonalTable.SV.GetFormEntry(Species, Form)))
+                if (Ability is OnlyFirst or OnlySecond && !AbilityVerifier.CanAbilityCapsule(9, PersonalTable.SV.GetFormEntry(Species, Form)))
                     return EncounterMatchRating.DeferredErrors;
             }
         }

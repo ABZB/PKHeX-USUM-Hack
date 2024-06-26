@@ -169,16 +169,16 @@ public static class MemoryPermissions
         return result[0].Valid;
     }
 
-    public static bool GetCanBeCaptured(ushort species, EntityContext context, GameVersion version) => context switch
+    public static bool GetCanBeCaptured(ushort species, EntityContext gen, GameVersion version) => gen switch
     {
         EntityContext.Gen6 => MemoryContext6.GetCanBeCaptured(species, version),
         EntityContext.Gen8 => MemoryContext8.GetCanBeCaptured(species, version),
         _ => false,
     };
 
-    public static bool GetCanDynamaxTrainer(ushort species, byte generation, GameVersion version)
+    public static bool GetCanDynamaxTrainer(ushort species, int gen, GameVersion version)
     {
-        if (generation != 8)
+        if (gen != 8)
             return false;
 
         return version switch

@@ -25,7 +25,7 @@ public readonly record struct MoveLearnInfo(LearnMethod Method, LearnEnvironment
             sb.Append(Environment).Append('-');
         sb.Append(localizedMethod);
         if (Method is LevelUp)
-            sb.Append($" @ lv{Argument}");
+            sb.Append(" @ lv").Append(Argument);
     }
 
     private string GetLocalizedMethod() => Method switch
@@ -40,9 +40,7 @@ public readonly record struct MoveLearnInfo(LearnMethod Method, LearnEnvironment
         EggMove => LMoveRelearnEgg,
         InheritLevelUp => LMoveEggInherited,
 
-        HOME => LMoveSourceSpecial,
-        Evolution => LMoveSourceSpecial,
-        Encounter => LMoveSourceSpecial,
+        Special => LMoveSourceSpecial,
         SpecialEgg => LMoveSourceSpecial,
         ShedinjaEvo => LMoveSourceSpecial,
 

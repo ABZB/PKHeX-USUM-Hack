@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using PKHeX.Core;
 
@@ -9,22 +8,15 @@ namespace PKHeX.WinForms;
 
 public partial class TrashEditor : Form
 {
-    private readonly IStringConverter Converter;
-    private readonly ToolTip Tip = new() { InitialDelay = 200, IsBalloon = false, AutoPopDelay = 32_767 };
-    private readonly List<NumericUpDown> Bytes = [];
-    public string FinalString { get; private set; }
-    public byte[] FinalBytes { get; private set; }
+    private readonly SaveFile SAV;
 
-    private readonly byte[] Raw;
-    private bool editing;
+    public TrashEditor(TextBoxBase TB_NN, SaveFile sav) : this(TB_NN, [], sav) { }
 
-    public TrashEditor(TextBoxBase TB_NN, IStringConverter sav, byte generation) : this(TB_NN, [], sav, generation) { }
-
-    public TrashEditor(TextBoxBase TB_NN, Span<byte> raw, IStringConverter converter, byte generation)
+    public TrashEditor(TextBoxBase TB_NN, Span<byte> raw, SaveFile sav)
     {
         InitializeComponent();
         WinFormsUtil.TranslateInterface(this, Main.CurrentLanguage);
-        Converter = converter;
+        SAV = sav;
 
         FinalString = TB_NN.Text;
 
@@ -32,7 +24,7 @@ public partial class TrashEditor : Form
         if (raw.Length != 0)
         {
             Raw = FinalBytes = raw.ToArray();
-            AddTrashEditing(raw.Length, generation);
+            AddTrashEditing(raw.Length);
         }
         else
         {
@@ -40,7 +32,7 @@ public partial class TrashEditor : Form
         }
 
         var f = FontUtil.GetPKXFont();
-        AddCharEditing(f, generation);
+        AddCharEditing(f);
         TB_Text.MaxLength = TB_NN.MaxLength;
         TB_Text.Text = TB_NN.Text;
         TB_Text.Font = f;
@@ -58,15 +50,13 @@ public partial class TrashEditor : Form
 
         editing = false;
         CenterToParent();
-        B_ApplyTrash.MouseHover += (_, _) =>
-        {
-            var text = GetTrashString();
-            var data = SetString(text);
-            var display = $"{text} = {Environment.NewLine}{string.Join(' ', data.Select(z => $"{z:X2}"))}";
-            Tip.Show(display, B_ApplyTrash);
-        };
     }
 
+    private readonly List<NumericUpDown> Bytes = [];
+    public string FinalString;
+    public byte[] FinalBytes;
+    private readonly byte[] Raw;
+    private bool editing;
     private void B_Cancel_Click(object sender, EventArgs e) => Close();
 
     private void B_Save_Click(object sender, EventArgs e)
@@ -77,9 +67,9 @@ public partial class TrashEditor : Form
         Close();
     }
 
-    private void AddCharEditing(Font f, byte generation)
+    private void AddCharEditing(Font f)
     {
-        var chars = GetChars(generation);
+        var chars = GetChars(SAV.Generation);
         if (chars.Length == 0)
             return;
 
@@ -90,24 +80,22 @@ public partial class TrashEditor : Form
             l.Font = f;
             l.AutoSize = false;
             l.Size = new Size(20, 20);
-            l.Click += (_, _) => { if (TB_Text.Text.Length < TB_Text.MaxLength) TB_Text.AppendText(l.Text); };
+            l.Click += (s, e) => { if (TB_Text.Text.Length < TB_Text.MaxLength) TB_Text.AppendText(l.Text); };
             FLP_Characters.Controls.Add(l);
-            var tt = new ToolTip();
-            tt.SetToolTip(l, $"Insert {l.Text} (0x{c:X4})");
         }
     }
 
-    private void AddTrashEditing(int count, byte generation)
+    private void AddTrashEditing(int count)
     {
         FLP_Hex.Visible = true;
         GB_Trash.Visible = true;
-        NUD_Generation.Value = generation;
+        NUD_Generation.Value = SAV.Generation;
         for (int i = 0; i < count; i++)
         {
             var l = GetLabel($"${i:X2}");
             l.Font = NUD_Generation.Font;
             var n = GetNUD(min: 0, max: 255, hex: true);
-            n.Click += (_, _) =>
+            n.Click += (s, e) =>
             {
                 switch (ModifierKeys)
                 {
@@ -116,7 +104,7 @@ public partial class TrashEditor : Form
                 }
             };
             n.Value = Raw[i];
-            n.ValueChanged += (_, _) => UpdateNUD(n);
+            n.ValueChanged += (o, args) => UpdateNUD(n, args);
 
             FLP_Hex.Controls.Add(l);
             FLP_Hex.Controls.Add(n);
@@ -124,22 +112,23 @@ public partial class TrashEditor : Form
             if (i % 4 == 3)
                 FLP_Hex.SetFlowBreak(n, true);
         }
-        TB_Text.TextChanged += (_, _) => UpdateString(TB_Text);
+        TB_Text.TextChanged += (o, args) => UpdateString(TB_Text, args);
 
         CB_Species.InitializeBinding();
         CB_Species.DataSource = new BindingSource(GameInfo.SpeciesDataSource, null);
 
         CB_Language.InitializeBinding();
-        CB_Language.DataSource = GameInfo.LanguageDataSource(generation);
+        CB_Language.DataSource = GameInfo.LanguageDataSource(SAV.Generation);
     }
 
-    private void UpdateNUD(NumericUpDown nud)
+    private void UpdateNUD(object sender, EventArgs e)
     {
         if (editing)
             return;
-
-        // build bytes
         editing = true;
+        // build bytes
+        if (sender is not NumericUpDown nud)
+            throw new Exception();
         int index = Bytes.IndexOf(nud);
         Raw[index] = (byte)nud.Value;
 
@@ -147,16 +136,14 @@ public partial class TrashEditor : Form
         editing = false;
     }
 
-    private void UpdateString(TextBox tb)
+    private void UpdateString(object sender, EventArgs e)
     {
         if (editing)
             return;
         editing = true;
         // build bytes
-        ReadOnlySpan<byte> data = SetString(tb.Text);
-        if (data.Length > Raw.Length)
-            data = data[..Raw.Length];
-        data.CopyTo(Raw);
+        byte[] data = SetString(TB_Text.Text);
+        Array.Copy(data, Raw, Math.Min(data.Length, Raw.Length));
         for (int i = 0; i < Raw.Length; i++)
             Bytes[i].Value = Raw[i];
         editing = false;
@@ -164,9 +151,16 @@ public partial class TrashEditor : Form
 
     private void B_ApplyTrash_Click(object sender, EventArgs e)
     {
-        string text = GetTrashString();
-        ReadOnlySpan<byte> data = SetString(text);
-        ReadOnlySpan<byte> current = SetString(TB_Text.Text);
+        var species = (ushort)WinFormsUtil.GetIndex(CB_Species);
+        var language = WinFormsUtil.GetIndex(CB_Language);
+        var gen = (int)NUD_Generation.Value;
+        string speciesName = SpeciesName.GetSpeciesNameGeneration(species, language, gen);
+
+        if (string.IsNullOrEmpty(speciesName)) // no result
+            speciesName = CB_Species.Text;
+
+        byte[] current = SetString(TB_Text.Text);
+        byte[] data = SetString(speciesName);
         if (data.Length <= current.Length)
         {
             WinFormsUtil.Alert("Trash byte layer is hidden by current text.",
@@ -182,18 +176,6 @@ public partial class TrashEditor : Form
             Bytes[i].Value = data[i];
     }
 
-    private string GetTrashString()
-    {
-        var species = (ushort)WinFormsUtil.GetIndex(CB_Species);
-        var language = WinFormsUtil.GetIndex(CB_Language);
-        var gen = (byte)NUD_Generation.Value;
-        string text = SpeciesName.GetSpeciesNameGeneration(species, language, gen);
-
-        if (string.IsNullOrEmpty(text)) // no result
-            text = CB_Species.Text;
-        return text;
-    }
-
     private void B_ClearTrash_Click(object sender, EventArgs e)
     {
         byte[] current = SetString(TB_Text.Text);
@@ -204,11 +186,11 @@ public partial class TrashEditor : Form
     private byte[] SetString(ReadOnlySpan<char> text)
     {
         Span<byte> temp = stackalloc byte[Raw.Length];
-        var written = Converter.SetString(temp, text, text.Length, StringConverterOption.None);
+        var written = SAV.SetString(temp, text, text.Length, StringConverterOption.None);
         return temp[..written].ToArray();
     }
 
-    private string GetString() => Converter.GetString(Raw);
+    private string GetString() => SAV.GetString(Raw);
 
     // Helpers
     private static Label GetLabel(string str) => new() { Text = str, AutoSize = false, Size = new Size(40, 24), TextAlign = ContentAlignment.MiddleRight };
@@ -223,12 +205,11 @@ public partial class TrashEditor : Form
         Margin = new Padding(0),
     };
 
-    private static ReadOnlySpan<ushort> GetChars(byte generation) => generation switch
+    private static ReadOnlySpan<ushort> GetChars(int generation) => generation switch
     {
         5 => SpecialCharsGen5,
         6 => SpecialCharsGen67,
         7 => SpecialCharsGen67,
-        >= 8 => SpecialCharsGen8,
         _ => [], // Undocumented
     };
 
@@ -309,27 +290,5 @@ public partial class TrashEditor : Form
         0xE0A3, // Half Right-up arrow
         0xE0A4, // Half Right-down arrow 
         0xE0A5, // Half Zz
-    ];
-
-    private static ReadOnlySpan<ushort> SpecialCharsGen8 =>
-    [
-        '…', // '\uE08D' -> '\u2026'
-        '♂', // '\uE08E' -> '\u2642'
-        '♀', // '\uE08F' -> '\u2640'
-        '♠', // '\uE090' -> '\u2660'
-        '♣', // '\uE091' -> '\u2663'
-        '♥', // '\uE092' -> '\u2665'
-        '♦', // '\uE093' -> '\u2666'
-        '★', // '\uE094' -> '\u2605'
-        '◎', // '\uE095' -> '\u25CE'
-        '○', // '\uE096' -> '\u25CB'
-        '□', // '\uE097' -> '\u25A1'
-        '△', // '\uE098' -> '\u25B3'
-        '◇', // '\uE099' -> '\u25C7'
-        '♪', // '\uE09A' -> '\u266A'
-        '☀', // '\uE09B' -> '\u2600'
-        '☁', // '\uE09C' -> '\u2601'
-        '☂', // '\uE09D' -> '\u2602'
-        '☃', // '\uE09E' -> '\u2603'
     ];
 }

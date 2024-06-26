@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace PKHeX.Core;
@@ -6,14 +7,14 @@ namespace PKHeX.Core;
 /// Player item pouches storage
 /// </summary>
 /// <remarks>size=0xBB80 (<see cref="ItemSaveSize"/> items)</remarks>
-public sealed class MyItem9(SAV9SV sav, SCBlock block) : MyItem(sav, block.Data)
+public sealed class MyItem9(SaveFile SAV, SCBlock block) : MyItem(SAV, block.Data)
 {
     public const int ItemSaveSize = 3000;
 
     public int GetItemQuantity(ushort itemIndex)
     {
         var ofs = InventoryPouch9.GetItemOffset(itemIndex);
-        var span = Data.Slice(ofs, InventoryItem9.SIZE);
+        var span = Data.AsSpan(ofs, InventoryItem9.SIZE);
         var item = InventoryItem9.Read(itemIndex, span);
         return item.Count;
     }
@@ -21,7 +22,7 @@ public sealed class MyItem9(SAV9SV sav, SCBlock block) : MyItem(sav, block.Data)
     public void SetItemQuantity(ushort itemIndex, int quantity)
     {
         var ofs = InventoryPouch9.GetItemOffset(itemIndex);
-        var span = Data.Slice(ofs, InventoryItem9.SIZE);
+        var span = Data.AsSpan(ofs, InventoryItem9.SIZE);
         var item = InventoryItem9.Read(itemIndex, span);
         item.Count = quantity;
         item.Pouch = GetPouchIndex(GetType(itemIndex));

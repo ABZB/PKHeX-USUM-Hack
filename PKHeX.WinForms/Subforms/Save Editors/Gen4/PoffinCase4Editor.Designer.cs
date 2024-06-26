@@ -36,7 +36,6 @@
             // 
             // LB_Poffins
             // 
-            LB_Poffins.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             LB_Poffins.FormattingEnabled = true;
             LB_Poffins.ItemHeight = 15;
             LB_Poffins.Location = new System.Drawing.Point(0, 2);
@@ -48,7 +47,6 @@
             // 
             // B_PoffinDel
             // 
-            B_PoffinDel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             B_PoffinDel.Location = new System.Drawing.Point(246, 232);
             B_PoffinDel.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             B_PoffinDel.Name = "B_PoffinDel";
@@ -60,7 +58,6 @@
             // 
             // B_PoffinAll
             // 
-            B_PoffinAll.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             B_PoffinAll.Location = new System.Drawing.Point(147, 232);
             B_PoffinAll.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             B_PoffinAll.Name = "B_PoffinAll";

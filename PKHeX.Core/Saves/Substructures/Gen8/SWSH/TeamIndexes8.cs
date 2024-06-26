@@ -3,24 +3,11 @@ using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
 
-public sealed class TeamIndexes8 : ITeamIndexSet
+public sealed class TeamIndexes8(SAV8SWSH sav, SCBlock block) : SaveBlock<SAV8SWSH>(sav, block.Data), ITeamIndexSet
 {
     private const int TeamCount = 6;
     private const int NONE_SELECTED = -1;
-    private readonly SaveFile SAV;
-    private readonly SCBlock Indexes;
-    private readonly SCBlock Locks;
     public readonly int[] TeamSlots = new int[TeamCount * 6];
-
-    private TeamIndexes8(SaveFile sav, SCBlock indexes, SCBlock locks)
-    {
-        SAV = sav;
-        Indexes = indexes;
-        Locks = locks;
-    }
-
-    public TeamIndexes8(SAV8SWSH sav, SCBlock indexes, SCBlock locks) : this((SaveFile)sav, indexes, locks) { }
-    public TeamIndexes8(SAV9SV sav, SCBlock indexes, SCBlock locks) : this((SaveFile)sav, indexes, locks) { }
 
     public void LoadBattleTeams()
     {
@@ -32,7 +19,7 @@ public sealed class TeamIndexes8 : ITeamIndexSet
 
         for (int i = 0; i < TeamCount * 6; i++)
         {
-            short val = ReadInt16LittleEndian(Indexes.Data.AsSpan(i * 2));
+            short val = ReadInt16LittleEndian(Data.AsSpan(Offset + (i * 2)));
             if (val < 0)
             {
                 TeamSlots[i] = NONE_SELECTED;
@@ -60,7 +47,7 @@ public sealed class TeamIndexes8 : ITeamIndexSet
 
     public void SaveBattleTeams()
     {
-        var span = Indexes.Data.AsSpan();
+        var span = Data.AsSpan(Offset);
         for (int i = 0; i < TeamCount * 6; i++)
         {
             int index = TeamSlots[i];
@@ -76,6 +63,6 @@ public sealed class TeamIndexes8 : ITeamIndexSet
         }
     }
 
-    public bool GetIsTeamLocked(int team) => FlagUtil.GetFlag(Locks.Data, 0, team);
-    public void SetIsTeamLocked(int team, bool value) => FlagUtil.SetFlag(Locks.Data, 0, team, value);
+    public bool GetIsTeamLocked(int team) => true;
+    public void SetIsTeamLocked(int team, bool value) { }
 }

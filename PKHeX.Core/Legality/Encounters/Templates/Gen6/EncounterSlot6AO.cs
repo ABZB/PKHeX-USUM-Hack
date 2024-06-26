@@ -1,5 +1,4 @@
 using System;
-using static PKHeX.Core.SlotType6;
 
 namespace PKHeX.Core;
 
@@ -9,22 +8,22 @@ namespace PKHeX.Core;
 public sealed record EncounterSlot6AO(EncounterArea6AO Parent, ushort Species, byte Form, byte LevelMin, byte LevelMax)
     : IEncounterable, IEncounterMatch, IEncounterConvertible<PK6>, IEncounterFormRandom
 {
-    public byte Generation => 6;
+    public int Generation => 6;
     public EntityContext Context => EntityContext.Gen6;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public Ball FixedBall => Ball.None;
     public Shiny Shiny => Shiny.Random;
     public bool IsShiny => false;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
     public bool IsRandomUnspecificForm => Form >= EncounterUtil.FormDynamic;
 
     public string Name => $"Wild Encounter ({Version})";
     public string LongName => $"{Name} {Type.ToString().Replace('_', ' ')}";
     public GameVersion Version => Parent.Version;
-    public ushort Location => Parent.Location;
-    public SlotType6 Type => Parent.Type;
-    public bool CanDexNav => Type != Rock_Smash;
-    public bool IsHorde => Type == Horde;
+    public int Location => Parent.Location;
+    public SlotType Type => Parent.Type;
+    public bool CanDexNav => Type != SlotType.Rock_Smash;
+    public bool IsHorde => Type == SlotType.Horde;
 
     private HiddenAbilityPermission IsHiddenAbilitySlot() => CanDexNav || IsHorde ? HiddenAbilityPermission.Possible : HiddenAbilityPermission.Never;
 
@@ -64,16 +63,16 @@ public sealed record EncounterSlot6AO(EncounterArea6AO Parent, ushort Species, b
             Species = Species,
             Form = GetWildForm(Form),
             CurrentLevel = LevelMin,
-            OriginalTrainerFriendship = pi.BaseFriendship,
-            MetLocation = Location,
-            MetLevel = LevelMin,
-            Version = Version,
+            OT_Friendship = pi.BaseFriendship,
+            Met_Location = Location,
+            Met_Level = LevelMin,
+            Version = (byte)Version,
             Ball = (byte)Ball.Poke,
             MetDate = EncounterDate.GetDate3DS(),
 
             Language = lang,
-            OriginalTrainerName = tr.OT,
-            OriginalTrainerGender = tr.Gender,
+            OT_Name = tr.OT,
+            OT_Gender = tr.Gender,
             ID32 = tr.ID32,
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
         };
@@ -87,7 +86,7 @@ public sealed record EncounterSlot6AO(EncounterArea6AO Parent, ushort Species, b
         if (CanDexNav)
         {
             var eggMoves = GetDexNavMoves();
-            if (eggMoves.Length != 0)
+            if (eggMoves.Length > 0)
                 pk.RelearnMove1 = eggMoves[Util.Rand.Next(eggMoves.Length)];
         }
         pk.SetRandomMemory6();
@@ -105,10 +104,9 @@ public sealed record EncounterSlot6AO(EncounterArea6AO Parent, ushort Species, b
 
     private void SetPINGA(PK6 pk, EncounterCriteria criteria, PersonalInfo6AO pi)
     {
-        var rnd = Util.Rand;
-        pk.PID = rnd.Rand32();
-        pk.EncryptionConstant = rnd.Rand32();
-        pk.Nature = criteria.GetNature();
+        pk.PID = Util.Rand32();
+        pk.EncryptionConstant = Util.Rand32();
+        pk.Nature = (int)criteria.GetNature();
         pk.Gender = criteria.GetGender(pi);
         pk.RefreshAbility(criteria.GetAbilityFromNumber(Ability));
         criteria.SetRandomIVs(pk);
@@ -119,13 +117,13 @@ public sealed record EncounterSlot6AO(EncounterArea6AO Parent, ushort Species, b
 
     private const int FluteBoostMin = 4; // White Flute decreases levels.
     private const int FluteBoostMax = 4; // Black Flute increases levels.
-    private const int DexNavBoost = 29 + FluteBoostMax; // Maximum DexNav chain (95) and Flute.
+    private const int DexNavBoost = 30; // Maximum DexNav chain
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        var boostMax = Type != Rock_Smash ? DexNavBoost : FluteBoostMax;
+        var boostMax = Type != SlotType.Rock_Smash ? DexNavBoost : FluteBoostMax;
         const int boostMin = FluteBoostMin;
-        if (!this.IsLevelWithinRange(pk.MetLevel, boostMin, boostMax))
+        if (!this.IsLevelWithinRange(pk.Met_Level, boostMin, boostMax))
             return false;
 
         if (evo.Form != Form && !IsRandomUnspecificForm)

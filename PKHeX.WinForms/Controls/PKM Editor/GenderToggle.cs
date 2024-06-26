@@ -14,9 +14,9 @@ public partial class GenderToggle : UserControl, IGenderToggle
     private string? InitialAccessible;
     public static int FocusBorderDeflate { get; set; }
 
-    public byte Gender
+    public int Gender
     {
-        get => (byte)Value;
+        get => Value;
         set => Value = SetGender(value);
     }
 
@@ -118,7 +118,7 @@ public interface IGenderToggle
     /// <summary>
     /// Get or set the value the control displays.
     /// </summary>
-    byte Gender { get; set; }
+    int Gender { get; set; }
 
     /// <summary>
     /// Manually flips the gender state if possible.

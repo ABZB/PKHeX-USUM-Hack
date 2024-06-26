@@ -7,7 +7,7 @@ namespace PKHeX.Core;
 /// <summary>
 /// Generation 3 <see cref="SaveFile"/> object for Pokémon Ruby Sapphire Box saves.
 /// </summary>
-public sealed class SAV3RSBox : SaveFile, IGCSaveFile, IBoxDetailName, IBoxDetailWallpaper
+public sealed class SAV3RSBox : SaveFile, IGCSaveFile
 {
     protected internal override string ShortSummary => $"{Version} #{SaveCount:0000}";
     public override string Extension => this.GCExtension();
@@ -82,7 +82,7 @@ public sealed class SAV3RSBox : SaveFile, IGCSaveFile, IBoxDetailName, IBoxDetai
             return newFile;
 
         MemoryCard.WriteSaveGameData(newFile);
-        return MemoryCard.Data.ToArray();
+        return MemoryCard.Data;
     }
 
     private byte[] GetInnerData()
@@ -110,14 +110,16 @@ public sealed class SAV3RSBox : SaveFile, IGCSaveFile, IBoxDetailName, IBoxDetai
     public override int MaxAbilityID => Legal.MaxAbilityID_3;
     public override int MaxItemID => Legal.MaxItemID_3;
     public override int MaxBallID => Legal.MaxBallID_3;
-    public override GameVersion MaxGameID => Legal.MaxGameID_3;
+    public override int MaxGameID => Legal.MaxGameID_3;
 
     public override int MaxEV => EffortValues.Max255;
-    public override byte Generation => 3;
+    public override int Generation => 3;
     public override EntityContext Context => EntityContext.Gen3;
-    public override int MaxStringLengthTrainer => 7;
+    protected override int GiftCountMax => 1;
+    public override int MaxStringLengthOT => 7;
     public override int MaxStringLengthNickname => 10;
     public override int MaxMoney => 999999;
+    public override bool HasBoxWallpapers => false;
 
     public override int BoxCount => 50;
     public override bool HasParty => false;
@@ -129,7 +131,7 @@ public sealed class SAV3RSBox : SaveFile, IGCSaveFile, IBoxDetailName, IBoxDetai
     public override string ChecksumInfo => Blocks.GetChecksumInfo(Data);
 
     // Trainer Info
-    public override GameVersion Version { get => GameVersion.RSBOX; set { } }
+    public override GameVersion Version { get => GameVersion.RSBOX; protected set { } }
 
     // Storage
     public override int GetPartyOffset(int slot) => -1;
@@ -147,16 +149,13 @@ public sealed class SAV3RSBox : SaveFile, IGCSaveFile, IBoxDetailName, IBoxDetai
         return Data.AsSpan(offset, 9);
     }
 
-    private int GetBoxWallpaperOffset(int box)
+    protected override int GetBoxWallpaperOffset(int box)
     {
         // Box Wallpaper is directly after the Box Names
         return Box + 0x1ED19 + (box / 2);
     }
 
-    public int GetBoxWallpaper(int box) => Data[GetBoxWallpaperOffset(box)];
-    public void SetBoxWallpaper(int box, int value) => Data[GetBoxWallpaperOffset(box)] = (byte)value;
-
-    public string GetBoxName(int box)
+    public override string GetBoxName(int box)
     {
         // Tweaked for the 1-30/31-60 box showing
         int lo = (30 *(box%2)) + 1;
@@ -166,17 +165,17 @@ public sealed class SAV3RSBox : SaveFile, IGCSaveFile, IBoxDetailName, IBoxDetai
 
         var span = GetBoxNameSpan(box);
         if (span[0] is 0 or 0xFF)
-            boxName += BoxDetailNameExtensions.GetDefaultBoxNameCaps(box);
+            boxName += $"BOX {box + 1}";
         else
             boxName += GetString(span);
 
         return boxName;
     }
 
-    public void SetBoxName(int box, ReadOnlySpan<char> value)
+    public override void SetBoxName(int box, ReadOnlySpan<char> value)
     {
         var span = GetBoxNameSpan(box);
-        if (value == BoxDetailNameExtensions.GetDefaultBoxNameCaps(box))
+        if (value == $"BOX {box + 1}")
         {
             span.Clear();
             return;
@@ -207,10 +206,10 @@ public sealed class SAV3RSBox : SaveFile, IGCSaveFile, IBoxDetailName, IBoxDetai
         WriteUInt16LittleEndian(data[(PokeCrypto.SIZE_3STORED + 2)..], pk.SID16);
     }
 
-    public override string GetString(ReadOnlySpan<byte> data)
-        => StringConverter3.GetString(data, Japanese);
-    public override int LoadString(ReadOnlySpan<byte> data, Span<char> destBuffer)
-        => StringConverter3.LoadString(data, destBuffer, Japanese);
+    public override string GetString(ReadOnlySpan<byte> data) => StringConverter3.GetString(data, Japanese);
+
     public override int SetString(Span<byte> destBuffer, ReadOnlySpan<char> value, int maxLength, StringConverterOption option)
-        => StringConverter3.SetString(destBuffer, value, maxLength, Japanese, option);
+    {
+        return StringConverter3.SetString(destBuffer, value, maxLength, Japanese, option);
+    }
 }

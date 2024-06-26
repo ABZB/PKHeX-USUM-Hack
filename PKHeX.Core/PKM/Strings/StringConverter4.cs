@@ -28,27 +28,25 @@ public static class StringConverter4
     public static int LoadString(ReadOnlySpan<byte> data, Span<char> result)
     {
         int i = 0;
-        int ctr = 0;
         for (; i < data.Length; i += 2)
         {
             var value = ReadUInt16LittleEndian(data[i..]);
             if (value == Terminator)
                 break;
             char chr = (char)ConvertValue2CharG4(value);
-            chr = NormalizeGenderSymbol(chr);
-            result[ctr++] = chr;
+            chr = StringConverter.SanitizeChar(chr);
+            result[i/2] = chr;
         }
-        return ctr;
+        return i/2;
     }
 
     /// <summary>Gets the bytes for a 4th Generation String</summary>
     /// <param name="destBuffer">Span of bytes to write encoded string data</param>
     /// <param name="value">Decoded string.</param>
     /// <param name="maxLength">Maximum length of the input <see cref="value"/></param>
-    /// <param name="language">Language specific conversion</param>
     /// <param name="option">Buffer pre-formatting option</param>
     /// <returns>Encoded data.</returns>
-    public static int SetString(Span<byte> destBuffer, ReadOnlySpan<char> value, int maxLength, int language,
+    public static int SetString(Span<byte> destBuffer, ReadOnlySpan<char> value, int maxLength,
         StringConverterOption option = StringConverterOption.ClearZero)
     {
         if (value.Length > maxLength)
@@ -57,12 +55,10 @@ public static class StringConverter4
         if (option is StringConverterOption.ClearZero)
             destBuffer.Clear();
 
-        bool isHalfWidth = language == (int)LanguageID.Korean || !StringConverter.GetIsFullWidthString(value);
         for (int i = 0; i < value.Length; i++)
         {
             var chr = value[i];
-            if (isHalfWidth)
-                chr = UnNormalizeGenderSymbol(chr);
+            chr = StringConverter.UnSanitizeChar5(chr);
             ushort val = ConvertChar2ValueG4(chr);
             WriteUInt16LittleEndian(destBuffer[(i * 2)..], val);
         }

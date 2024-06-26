@@ -16,7 +16,7 @@ public record struct EncounterEnumerator7GG(PKM Entity, EvoCriteria[] Chain, Gam
     private bool Yielded;
     public MatchedEncounter<IEncounterable> Current { get; private set; }
     private YieldState State;
-    private ushort met;
+    private int met;
     readonly object IEnumerator.Current => Current;
 
     public readonly void Reset() => throw new NotSupportedException();
@@ -145,7 +145,7 @@ public record struct EncounterEnumerator7GG(PKM Entity, EvoCriteria[] Chain, Gam
 
     private void InitializeWildLocationInfo()
     {
-        met = Entity.MetLocation;
+        met = Entity.Met_Location;
     }
 
     private bool TryGetNext<TArea, TSlot>(TArea[] areas)

@@ -1,5 +1,4 @@
-using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System;
 using static PKHeX.Core.StadiumSaveType;
 using static System.Buffers.Binary.BinaryPrimitives;
 
@@ -13,7 +12,7 @@ public static class StadiumUtil
     /// <summary>
     /// Checks if the <see cref="magic"/> value is present either with or without byte-swapping.
     /// </summary>
-    public static StadiumSaveType IsMagicPresentEither(ReadOnlySpan<byte> data, [ConstantExpected] int size, [ConstantExpected] uint magic, [ConstantExpected] int count)
+    public static StadiumSaveType IsMagicPresentEither(ReadOnlySpan<byte> data, int size, uint magic, int count)
     {
         if (IsMagicPresent(data, size, magic, count))
             return Regular;
@@ -27,7 +26,7 @@ public static class StadiumUtil
     /// <summary>
     /// Checks if the <see cref="magic"/> value is present without byte-swapping.
     /// </summary>
-    public static bool IsMagicPresent(ReadOnlySpan<byte> data, [ConstantExpected] int size, [ConstantExpected] uint magic, [ConstantExpected] int count)
+    public static bool IsMagicPresent(ReadOnlySpan<byte> data, int size, uint magic, int count)
     {
         // Check footers of first few chunks to see if the magic value is there.
         for (int i = 0; i < count; i++)
@@ -42,7 +41,7 @@ public static class StadiumUtil
     /// <summary>
     /// Checks if the <see cref="magic"/> value is present either with byte-swapping.
     /// </summary>
-    public static bool IsMagicPresentSwap(ReadOnlySpan<byte> data, [ConstantExpected] int size, [ConstantExpected] uint magic, [ConstantExpected] int count)
+    public static bool IsMagicPresentSwap(ReadOnlySpan<byte> data, int size, uint magic, int count)
     {
         // Check footers of first few chunks to see if the magic value is there.
         var right = ReverseEndianness((ushort)(magic >> 16));
@@ -60,11 +59,7 @@ public static class StadiumUtil
         return true;
     }
 
-    /// <summary>
-    /// Checks if the <see cref="magic"/> value is present either with or without byte-swapping.
-    /// </summary>
-    /// <remarks>Only checks for a single instance of the magic value.</remarks>
-    public static StadiumSaveType IsMagicPresentAbsolute(ReadOnlySpan<byte> data, [ConstantExpected] int offset, [ConstantExpected] uint magic)
+    public static StadiumSaveType IsMagicPresentAbsolute(ReadOnlySpan<byte> data, int offset, uint magic)
     {
         var actual = ReadUInt32LittleEndian(data[offset..]);
         if (actual == magic) // POKE

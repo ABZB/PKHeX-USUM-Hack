@@ -4,7 +4,6 @@ namespace PKHeX.Core;
 
 public static partial class Util
 {
-    /// <inheritdoc cref="Random.Shared"/>
     public static Random Rand => Random.Shared;
 
     public static uint Rand32() => Rand32(Rand);

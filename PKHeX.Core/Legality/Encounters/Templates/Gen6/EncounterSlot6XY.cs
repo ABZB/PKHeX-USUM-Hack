@@ -6,13 +6,13 @@ namespace PKHeX.Core;
 public sealed record EncounterSlot6XY(EncounterArea6XY Parent, ushort Species, byte Form, byte LevelMin, byte LevelMax)
     : IEncounterable, IEncounterMatch, IEncounterConvertible<PK6>, IEncounterFormRandom, IFlawlessIVCount
 {
-    public byte Generation => 6;
+    public int Generation => 6;
     public EntityContext Context => EntityContext.Gen6;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public Ball FixedBall => Ball.None;
     public Shiny Shiny => Shiny.Random;
     public bool IsShiny => false;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
     public bool IsRandomUnspecificForm => Form >= EncounterUtil.FormDynamic;
 
     private PersonalInfo6XY PersonalInfo => PersonalTable.XY[Species];
@@ -21,11 +21,11 @@ public sealed record EncounterSlot6XY(EncounterArea6XY Parent, ushort Species, b
     public string Name => $"Wild Encounter ({Version})";
     public string LongName => $"{Name} {Type.ToString().Replace('_', ' ')}";
     public GameVersion Version => Parent.Version;
-    public ushort Location => Parent.Location;
-    public SlotType6 Type => Parent.Type;
+    public int Location => Parent.Location;
+    public SlotType Type => Parent.Type;
 
-    public bool IsFriendSafari => Type == SlotType6.FriendSafari;
-    public bool IsHorde => Type == SlotType6.Horde;
+    public bool IsFriendSafari => Type == SlotType.FriendSafari;
+    public bool IsHorde => Type == SlotType.Horde;
 
     private HiddenAbilityPermission IsHiddenAbilitySlot() => IsHorde || IsFriendSafari ? HiddenAbilityPermission.Possible : HiddenAbilityPermission.Never;
 
@@ -50,26 +50,26 @@ public sealed record EncounterSlot6XY(EncounterArea6XY Parent, ushort Species, b
     public PK6 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language);
-        var version = Version != GameVersion.XY ? Version : GameVersion.XY.Contains(tr.Version) ? tr.Version : GameVersion.X;
+        var version = Version != GameVersion.XY ? Version : GameVersion.XY.Contains(tr.Game) ? (GameVersion)tr.Game : GameVersion.X;
         var form = GetWildForm(Form);
-        var pi = PersonalTable.XY[Species, form];
+        var pi = PersonalInfo;
         var pk = new PK6
         {
             Species = Species,
             Form = form,
             CurrentLevel = LevelMin,
-            MetLocation = Location,
-            MetLevel = LevelMin,
+            Met_Location = Location,
+            Met_Level = LevelMin,
             Ball = (byte)Ball.Poke,
             MetDate = EncounterDate.GetDate3DS(),
 
-            Version = version,
+            Version = (byte)version,
             Language = lang,
-            OriginalTrainerName = tr.OT,
-            OriginalTrainerGender = tr.Gender,
+            OT_Name = tr.OT,
+            OT_Gender = tr.Gender,
             ID32 = tr.ID32,
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
         };
         if (tr is IRegionOrigin r)
             r.CopyRegionOrigin(pk);
@@ -79,7 +79,7 @@ public sealed record EncounterSlot6XY(EncounterArea6XY Parent, ushort Species, b
         if (IsRandomUnspecificForm && Form == EncounterUtil.FormVivillon)
             pk.Form = Vivillon3DS.GetPattern(pk.Country, pk.Region);
 
-        SetPINGA(pk, criteria, pi);
+        SetPINGA(pk, criteria);
         EncounterUtil.SetEncounterMoves(pk, Version, LevelMin);
         pk.SetRandomMemory6();
         pk.ResetPartyStats();
@@ -97,12 +97,12 @@ public sealed record EncounterSlot6XY(EncounterArea6XY Parent, ushort Species, b
         return (byte)Util.Rand.Next(PersonalTable.XY[Species].FormCount);
     }
 
-    private void SetPINGA(PK6 pk, EncounterCriteria criteria, PersonalInfo6XY pi)
+    private void SetPINGA(PK6 pk, EncounterCriteria criteria)
     {
-        var rnd = Util.Rand;
-        pk.PID = rnd.Rand32();
-        pk.EncryptionConstant = rnd.Rand32();
-        pk.Nature = criteria.GetNature();
+        var pi = PersonalTable.XY.GetFormEntry(Species, Form);
+        pk.PID = Util.Rand32();
+        pk.EncryptionConstant = Util.Rand32();
+        pk.Nature = (int)criteria.GetNature();
         pk.Gender = criteria.GetGender(pi);
         pk.RefreshAbility(criteria.GetAbilityFromNumber(Ability));
         criteria.SetRandomIVs(pk, FlawlessIVCount);
@@ -114,7 +114,7 @@ public sealed record EncounterSlot6XY(EncounterArea6XY Parent, ushort Species, b
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (!this.IsLevelWithinRange(pk.MetLevel))
+        if (!this.IsLevelWithinRange(pk.Met_Level))
             return false;
 
         if (Form != evo.Form && !IsRandomUnspecificForm && !IsValidOutOfBoundsForm(pk))

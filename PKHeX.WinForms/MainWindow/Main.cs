@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -34,10 +33,7 @@ public partial class Main : Form
         FormLoadAddEvents();
 #if DEBUG // translation updater -- all controls are added at this point -- call translate now
         if (DevUtil.IsUpdatingTranslations)
-        {
             WinFormsUtil.TranslateInterface(this, CurrentLanguage); // Translate the UI to language.
-            return;
-        }
 #endif
         FormInitializeSecond();
         FormLoadCheckForUpdates();
@@ -93,7 +89,7 @@ public partial class Main : Form
     public static IReadOnlyList<string> GenderSymbols { get; private set; } = GameInfo.GenderSymbolUnicode;
     public static bool HaX { get; private set; }
 
-    private readonly string[] main_langlist = Enum.GetNames<ProgramLanguage>();
+    private readonly string[] main_langlist = Enum.GetNames(typeof(ProgramLanguage));
 
     private static readonly List<IPlugin> Plugins = [];
     #endregion
@@ -146,8 +142,8 @@ public partial class Main : Form
     {
         C_SAV.Menu_Redo = Menu_Redo;
         C_SAV.Menu_Undo = Menu_Undo;
-        dragout.GiveFeedback += (_, e) => e.UseDefaultCursors = false;
-        GiveFeedback += (_, e) => e.UseDefaultCursors = false;
+        dragout.GiveFeedback += (sender, e) => e.UseDefaultCursors = false;
+        GiveFeedback += (sender, e) => e.UseDefaultCursors = false;
         PKME_Tabs.EnableDragDrop(Main_DragEnter, Main_DragDrop);
         C_SAV.EnableDragDrop(Main_DragEnter, Main_DragDrop);
 
@@ -159,9 +155,9 @@ public partial class Main : Form
 
         // Add ContextMenus
         var mnu = new ContextMenuPKM();
-        mnu.RequestEditorLegality += (_, args) => ClickLegality(mnu, args);
-        mnu.RequestEditorQR += (_, args) => ClickQR(mnu, args);
-        mnu.RequestEditorSaveAs += (_, args) => MainMenuSave(mnu, args);
+        mnu.RequestEditorLegality += (o, args) => ClickLegality(mnu, args);
+        mnu.RequestEditorQR += (o, args) => ClickQR(mnu, args);
+        mnu.RequestEditorSaveAs += (o, args) => MainMenuSave(mnu, args);
         dragout.ContextMenuStrip = mnu.mnuL;
         C_SAV.menu.RequestEditorLegality = DisplayLegalityReport;
     }
@@ -179,17 +175,17 @@ public partial class Main : Form
             ErrorWindow.ShowErrorDialog(MsgFileLoadFailAuto, ex, true);
     }
 
-    private void LoadBlankSaveFile(GameVersion version)
+    private void LoadBlankSaveFile(GameVersion ver)
     {
         var current = C_SAV?.SAV;
         var lang = SaveUtil.GetSafeLanguage(current);
         var tr = SaveUtil.GetSafeTrainerName(current, lang);
-        var sav = SaveUtil.GetBlankSAV(version, tr, lang);
+        var sav = SaveUtil.GetBlankSAV(ver, tr, lang);
         if (sav.Version == GameVersion.Invalid) // will fail to load
         {
             var max = GameInfo.VersionDataSource.MaxBy(z => z.Value) ?? throw new Exception();
-            version = (GameVersion)max.Value;
-            sav = SaveUtil.GetBlankSAV(version, tr, lang);
+            ver = (GameVersion)max.Value;
+            sav = SaveUtil.GetBlankSAV(ver, tr, lang);
         }
         OpenSAV(sav, string.Empty);
         C_SAV!.SAV.State.Edited = false; // Prevents form close warning from showing until changes are made
@@ -216,9 +212,9 @@ public partial class Main : Form
         });
     }
 
-    private void NotifyNewVersionAvailable(Version version)
+    private void NotifyNewVersionAvailable(Version ver)
     {
-        var date = $"{2000 + version.Major:00}{version.Minor:00}{version.Build:00}";
+        var date = $"{2000 + ver.Major:00}{ver.Minor:00}{ver.Build:00}";
         var lbl = L_UpdateAvailable;
         lbl.Text = $"{MsgProgramUpdateAvailable} {date}";
         lbl.Click += (_, _) => Process.Start(new ProcessStartInfo(ThreadPath) { UseShellExecute = true });
@@ -231,14 +227,12 @@ public partial class Main : Form
         showChangelog = false;
 
         // Version Check
-        var ver = Program.CurrentVersion;
-        var startup = Settings.Startup;
-        if (startup.ShowChangelogOnUpdate && startup.Version.Length != 0) // already run on system
+        if (Settings.Startup.Version.Length > 0 && Settings.Startup.ShowChangelogOnUpdate) // already run on system
         {
-            bool parsed = Version.TryParse(startup.Version, out var lastrev);
-            showChangelog = parsed && lastrev < ver;
+            bool parsed = Version.TryParse(Settings.Startup.Version, out var lastrev);
+            showChangelog = parsed && lastrev < Program.CurrentVersion;
         }
-        startup.Version = ver.ToString(); // set current version so this doesn't happen until the user updates next time
+        Settings.Startup.Version = Program.CurrentVersion.ToString(); // set current ver so this doesn't happen until the user updates next time
 
         // BAK Prompt
         if (!Settings.Backup.BAKPrompt)
@@ -266,8 +260,6 @@ public partial class Main : Form
 
     private void FormLoadPlugins()
     {
-        if (Plugins.Count != 0)
-            return; // already loaded
 #if !MERGED // merged should load dlls from within too, folder is no longer required
         if (!Directory.Exists(PluginPath))
             return;
@@ -329,11 +321,7 @@ public partial class Main : Form
         report.Show();
         var list = new List<SlotCache>();
         SlotInfoLoader.AddFromSaveFile(C_SAV.SAV, list);
-
-        var settings = Settings.Report;
-        var extra = CollectionsMarshal.AsSpan(settings.ExtraProperties);
-        var hide = CollectionsMarshal.AsSpan(settings.HiddenProperties);
-        report.PopulateData(list, extra, hide);
+        report.PopulateData(list);
     }
 
     private void MainMenuDatabase(object sender, EventArgs e)
@@ -423,29 +411,23 @@ public partial class Main : Form
         PKME_Tabs.UpdateUnicode(GenderSymbols);
         SpriteName.AllowShinySprite = settings.Sprite.ShinySprites;
         SpriteBuilderUtil.SpriterPreference = settings.Sprite.SpritePreference;
-
-        var write = settings.SlotWrite;
-        SaveFile.SetUpdateDex = write.SetUpdateDex ? PKMImportSetting.Update : PKMImportSetting.Skip;
-        SaveFile.SetUpdatePKM = write.SetUpdatePKM ? PKMImportSetting.Update : PKMImportSetting.Skip;
-        SaveFile.SetUpdateRecords = write.SetUpdateRecords ? PKMImportSetting.Update : PKMImportSetting.Skip;
-
+        SaveFile.SetUpdateDex = settings.SlotWrite.SetUpdateDex ? PKMImportSetting.Update : PKMImportSetting.Skip;
+        SaveFile.SetUpdatePKM = settings.SlotWrite.SetUpdatePKM ? PKMImportSetting.Update : PKMImportSetting.Skip;
         C_SAV.ModifyPKM = PKME_Tabs.ModifyPKM = settings.SlotWrite.SetUpdatePKM;
         CommonEdits.ShowdownSetIVMarkings = settings.Import.ApplyMarkings;
         CommonEdits.ShowdownSetBehaviorNature = settings.Import.ApplyNature;
         C_SAV.FlagIllegal = settings.Display.FlagIllegal;
         C_SAV.M.Hover.GlowHover = settings.Hover.HoverSlotGlowEdges;
-        ParseSettings.Initialize(settings.Legality);
+        ParseSettings.InitFromSettings(settings.Legality);
         PKME_Tabs.HideSecretValues = C_SAV.HideSecretDetails = settings.Privacy.HideSecretDetails;
         WinFormsUtil.DetectSaveFileOnFileOpen = settings.Startup.TryDetectRecentSave;
         SelectablePictureBox.FocusBorderDeflate = GenderToggle.FocusBorderDeflate = settings.Display.FocusBorderDeflate;
-        settings.SaveLanguage.Apply();
 
         var converter = settings.Converter;
         EntityConverter.AllowIncompatibleConversion = converter.AllowIncompatibleConversion;
         EntityConverter.RejuvenateHOME = converter.AllowGuessRejuvenateHOME;
         EntityConverter.VirtualConsoleSourceGen1 = converter.VirtualConsoleSourceGen1;
         EntityConverter.VirtualConsoleSourceGen2 = converter.VirtualConsoleSourceGen2;
-        EntityConverter.RetainMetDateTransfer45 = converter.RetainMetDateTransfer45;
 
         SpriteBuilder.LoadSettings(settings.Sprite);
     }
@@ -597,26 +579,11 @@ public partial class Main : Form
         if (obj != null && LoadFile(obj, path))
             return;
 
-        WinFormsUtil.Error(GetHintInvalidFile(input, path),
+        bool isSAV = WinFormsUtil.IsFileExtensionSAV(path);
+        var msg = isSAV ? MsgFileUnsupported : MsgPKMUnsupported;
+        WinFormsUtil.Error(msg,
             $"{MsgFileLoad}{Environment.NewLine}{path}",
             $"{string.Format(MsgFileSize, input.Length)}{Environment.NewLine}{input.Length} bytes (0x{input.Length:X4})");
-    }
-
-    private static string GetHintInvalidFile(ReadOnlySpan<byte> input, string path)
-    {
-        bool isSAV = WinFormsUtil.IsFileExtensionSAV(path);
-        if (!isSAV)
-            return MsgPKMUnsupported;
-
-        // Include a hint for the user to check if the file is all 00 or all FF
-        bool allZero = !input.ContainsAnyExcept<byte>(0x00);
-        if (allZero)
-            return MsgFileLoadAllZero;
-        bool allFF = !input.ContainsAnyExcept<byte>(0xFF);
-        if (allFF)
-            return MsgFileLoadAllFFFF;
-
-        return MsgFileUnsupported;
     }
 
     private bool LoadFile(object? input, string path)
@@ -630,7 +597,7 @@ public partial class Main : Form
             case SaveFile s: return OpenSAV(s, path);
             case IPokeGroup b: return OpenGroup(b);
             case MysteryGift g: return OpenMysteryGift(g, path);
-            case ConcatenatedEntitySet pkms: return OpenPCBoxBin(pkms);
+            case IEnumerable<byte[]> pkms: return OpenPCBoxBin(pkms);
             case IEncounterConvertible enc: return OpenPKM(enc.ConvertToPKM(C_SAV.SAV));
 
             case SAV3GCMemoryCard gc:
@@ -690,12 +657,10 @@ public partial class Main : Form
         return true;
     }
 
-    private bool OpenPCBoxBin(ConcatenatedEntitySet pkms)
+    private bool OpenPCBoxBin(IEnumerable<byte[]> pkms)
     {
-        if (C_SAV.IsBoxDragActive)
-            return true;
-        Cursor = Cursors.Default;
-        if (!C_SAV.OpenPCBoxBin(pkms.Data.Span, out string c))
+        var data = pkms.SelectMany(z => z).ToArray();
+        if (!C_SAV.OpenPCBoxBin(data, out string c))
         {
             WinFormsUtil.Alert(MsgFileLoadIncompatible, c);
             return true;
@@ -730,29 +695,29 @@ public partial class Main : Form
         var state = memCard.GetMemoryCardState();
         switch (state)
         {
-            case MemoryCardSaveStatus.NoPkmSaveGame:
+            case GCMemoryCardState.NoPkmSaveGame:
                 WinFormsUtil.Error(MsgFileGameCubeNoGames, path);
                 return false;
 
-            case MemoryCardSaveStatus.DuplicateCOLO:
-            case MemoryCardSaveStatus.DuplicateXD:
-            case MemoryCardSaveStatus.DuplicateRSBOX:
+            case GCMemoryCardState.DuplicateCOLO:
+            case GCMemoryCardState.DuplicateXD:
+            case GCMemoryCardState.DuplicateRSBOX:
                 WinFormsUtil.Error(MsgFileGameCubeDuplicate, path);
                 return false;
 
-            case MemoryCardSaveStatus.MultipleSaveGame:
+            case GCMemoryCardState.MultipleSaveGame:
                 var game = SelectMemoryCardSaveGame(memCard);
                 if (game == GameVersion.Invalid) //Cancel
                     return false;
                 memCard.SelectSaveGame(game);
                 break;
 
-            case MemoryCardSaveStatus.SaveGameCOLO: memCard.SelectSaveGame(GameVersion.COLO); break;
-            case MemoryCardSaveStatus.SaveGameXD: memCard.SelectSaveGame(GameVersion.XD); break;
-            case MemoryCardSaveStatus.SaveGameRSBOX: memCard.SelectSaveGame(GameVersion.RSBOX); break;
+            case GCMemoryCardState.SaveGameCOLO: memCard.SelectSaveGame(GameVersion.COLO); break;
+            case GCMemoryCardState.SaveGameXD: memCard.SelectSaveGame(GameVersion.XD); break;
+            case GCMemoryCardState.SaveGameRSBOX: memCard.SelectSaveGame(GameVersion.RSBOX); break;
 
             default:
-                WinFormsUtil.Error(!SAV3GCMemoryCard.IsMemoryCardSize(memCard.Data.Length) ? MsgFileGameCubeBad : GetHintInvalidFile(memCard.Data, path), path);
+                WinFormsUtil.Error(!SaveUtil.IsSizeValid(memCard.Data.Length) ? MsgFileGameCubeBad : MsgFileLoadSaveLoadFail, path);
                 return false;
         }
         return true;
@@ -766,7 +731,7 @@ public partial class Main : Form
 
     private bool OpenSAV(SaveFile sav, string path)
     {
-        if (!sav.IsVersionValid())
+        if (sav.Version == GameVersion.Invalid)
         {
             WinFormsUtil.Error(MsgFileLoadSaveLoadFail, path);
             return true;
@@ -860,8 +825,8 @@ public partial class Main : Form
         var date = File.GetLastWriteTime(Environment.ProcessPath!);
         string version = $"d-{date:yyyyMMdd}";
 #else
-        var v = Program.CurrentVersion;
-        string version = $"{2000+v.Major:00}{v.Minor:00}{v.Build:00}";
+        var ver = Program.CurrentVersion;
+        string version = $"{2000+ver.Major:00}{ver.Minor:00}{ver.Build:00}";
 #endif
         return $"PKH{(HaX ? "a" : "e")}X ({version})";
     }
@@ -871,11 +836,11 @@ public partial class Main : Form
         string title = GetProgramTitle() + $" - {sav.GetType().Name}: ";
         if (sav is ISaveFileRevision rev)
             title = title.Insert(title.Length - 2, rev.SaveRevisionString);
-        var version = GameInfo.GetVersionName(sav.Version);
+        var ver = GameInfo.GetVersionName(sav.Version);
         if (Settings.Privacy.HideSAVDetails)
-            return title + $"[{version}]";
+            return title + $"[{ver}]";
         if (!sav.State.Exportable) // Blank save file
-            return title + $"{sav.Metadata.FileName} [{sav.OT} ({version})]";
+            return title + $"{sav.Metadata.FileName} [{sav.OT} ({ver})]";
         return title + Path.GetFileNameWithoutExtension(Util.CleanFileName(sav.Metadata.BAKName)); // more descriptive
     }
 
@@ -893,19 +858,19 @@ public partial class Main : Form
             return false;
 
         var meta = sav.Metadata;
-        var backupName = meta.GetBackupFileName(dir);
+        string backupName = Path.Combine(dir, Util.CleanFileName(meta.BAKName));
         if (File.Exists(backupName))
             return false; // Already backed up.
 
         // Ensure the file we are copying exists.
         var src = meta.FilePath;
-        if (src is null || !File.Exists(src))
+        if (src is not { } x || !File.Exists(x))
             return false;
 
         try
         {
             // Don't need to force overwrite, but on the off-chance it was written externally, we force ours.
-            File.Copy(src, backupName, true);
+            File.Copy(x, backupName, true);
             return true;
         }
         catch (Exception ex)
@@ -928,14 +893,12 @@ public partial class Main : Form
 
     private static bool SanityCheckSAV(ref SaveFile sav)
     {
-        if (sav.Generation <= 3)
-            SaveLanguage.TryRevise(sav);
-
         if (sav.State.Exportable && sav is SAV3 s3)
         {
             if (ModifierKeys == Keys.Control || s3.IsCorruptPokedexFF())
             {
-                var games = GetGameList([GameVersion.R, GameVersion.S, GameVersion.E, GameVersion.FR, GameVersion.LG]);
+                GameVersion[] g = [GameVersion.R, GameVersion.S, GameVersion.E, GameVersion.FR, GameVersion.LG];
+                var games = g.Select(z => GameInfo.VersionDataSource.First(v => v.Value == (int)z));
                 var msg = string.Format(MsgFileLoadVersionDetect, $"3 ({s3.Version})");
                 using var dialog = new SAV_GameSelect(games, msg, MsgFileLoadSaveSelectVersion);
                 dialog.ShowDialog();
@@ -954,12 +917,13 @@ public partial class Main : Form
                     s.Metadata.SetExtraInfo(origin);
                 sav = s;
             }
-            else if (s3 is SAV3FRLG frlg && !frlg.Version.IsValidSavedVersion()) // IndeterminateSubVersion
+            else if (s3 is SAV3FRLG frlg) // IndeterminateSubVersion
             {
                 string fr = GameInfo.GetVersionName(GameVersion.FR);
                 string lg = GameInfo.GetVersionName(GameVersion.LG);
                 string dual = "{1}/{2} " + MsgFileLoadVersionDetect;
-                var games = GetGameList([GameVersion.FR, GameVersion.LG]);
+                GameVersion[] g = [GameVersion.FR, GameVersion.LG];
+                var games = g.Select(z => GameInfo.VersionDataSource.First(v => v.Value == (int)z));
                 var msg = string.Format(dual, "3", fr, lg);
                 using var dialog = new SAV_GameSelect(games, msg, MsgFileLoadSaveSelectVersion);
                 dialog.ShowDialog();
@@ -970,17 +934,6 @@ public partial class Main : Form
         }
 
         return true;
-
-        static ComboItem[] GetGameList(ReadOnlySpan<GameVersion> g)
-        {
-            var result = new ComboItem[g.Length];
-            for (int i = 0; i < g.Length; i++)
-            {
-                int id = (int)g[i];
-                result[i] = GameInfo.VersionDataSource.First(v => v.Value == id);
-            }
-            return result;
-        }
     }
 
     public static void SetCountrySubRegion(ComboBox CB, string type)
@@ -1012,9 +965,6 @@ public partial class Main : Form
         LocalizeUtil.InitializeStrings(lang, sav, HaX);
         WinFormsUtil.TranslateInterface(this, lang); // Translate the UI to language.
         LocalizedDescriptionAttribute.Localizer = WinFormsTranslator.GetDictionary(lang);
-
-        SizeCP.ResetSizeLocalizations(lang);
-        PKME_Tabs.SizeCP.TryResetStats();
 
         if (sav is not FakeSaveFile)
         {
@@ -1162,7 +1112,7 @@ public partial class Main : Form
         if (menu != null)
             menu.Enabled = pk.Species != 0 || HaX; // Species
 
-        pb.Image = pk.Sprite(C_SAV.SAV);
+        pb.Image = pk.Sprite(C_SAV.SAV, -1, -1, flagIllegal: false);
         if (pb.BackColor == SlotUtil.BadDataColor)
             pb.BackColor = SlotUtil.GoodDataColor;
     }

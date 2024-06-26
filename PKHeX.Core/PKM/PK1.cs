@@ -19,14 +19,6 @@ public sealed class PK1 : GBPKML, IPersonalType
     public PK1(bool jp = false) : base(PokeCrypto.SIZE_1PARTY, jp) { }
     public PK1(byte[] decryptedData, bool jp = false) : base(EnsurePartySize(decryptedData), jp) { }
 
-    public PK1(ReadOnlySpan<byte> data, ReadOnlySpan<byte> ot, ReadOnlySpan<byte> nick)
-        : this(ot.Length == StringLengthJapanese)
-    {
-        data.CopyTo(Data);
-        ot.CopyTo(OriginalTrainerTrash);
-        nick.CopyTo(NicknameTrash);
-    }
-
     private static byte[] EnsurePartySize(byte[] data)
     {
         if (data.Length != PokeCrypto.SIZE_1PARTY)
@@ -37,12 +29,12 @@ public sealed class PK1 : GBPKML, IPersonalType
     public override PK1 Clone()
     {
         PK1 clone = new((byte[])Data.Clone(), Japanese);
-        OriginalTrainerTrash.CopyTo(clone.OriginalTrainerTrash);
-        NicknameTrash.CopyTo(clone.NicknameTrash);
+        OT_Trash.CopyTo(clone.OT_Trash);
+        Nickname_Trash.CopyTo(clone.Nickname_Trash);
         return clone;
     }
 
-    protected override byte[] Encrypt() => PokeList1.WrapSingle(this);
+    protected override byte[] Encrypt() => new PokeList1(this).Write();
 
     #region Stored Attributes
     public byte SpeciesInternal { get => Data[0]; set => Data[0] = value; } // raw access
@@ -76,7 +68,7 @@ public sealed class PK1 : GBPKML, IPersonalType
     #endregion
 
     #region Party Attributes
-    public override byte Stat_Level { get => Data[0x21]; set => Stat_LevelBox = Data[0x21] = value; }
+    public override int Stat_Level { get => Data[0x21]; set => Stat_LevelBox = Data[0x21] = (byte)value; }
     public override int Stat_HPMax { get => ReadUInt16BigEndian(Data.AsSpan(0x22)); set => WriteUInt16BigEndian(Data.AsSpan(0x22), (ushort)value); }
     public override int Stat_ATK { get => ReadUInt16BigEndian(Data.AsSpan(0x24)); set => WriteUInt16BigEndian(Data.AsSpan(0x24), (ushort)value); }
     public override int Stat_DEF { get => ReadUInt16BigEndian(Data.AsSpan(0x26)); set => WriteUInt16BigEndian(Data.AsSpan(0x26), (ushort)value); }
@@ -99,20 +91,20 @@ public sealed class PK1 : GBPKML, IPersonalType
         return false;
     }
 
-    private void SetSpeciesValues(ushort species)
+    private void SetSpeciesValues(ushort value)
     {
-        var internalID = SpeciesConverter.GetInternal1(species);
-        if (SpeciesInternal == internalID)
+        var updated = SpeciesConverter.GetInternal1(value);
+        if (SpeciesInternal == updated)
             return;
 
-        SpeciesInternal = internalID;
+        SpeciesInternal = updated;
 
-        var pi = PersonalTable.RB[species];
+        var pi = PersonalTable.RB[value];
         Type1 = pi.Type1;
         Type2 = pi.Type2;
 
         // Before updating catch rate, check if non-standard
-        if (IsValidCatchRateAnyPreEvo((byte)species, CatchRate))
+        if (IsValidCatchRateAnyPreEvo((byte)value, CatchRate))
             return;
 
         // Matches nothing possible; just reset to current Species' rate.
@@ -134,17 +126,17 @@ public sealed class PK1 : GBPKML, IPersonalType
         return IsCatchRatePreEvolutionRate(baby, species, rate);
     }
 
-    public override GameVersion Version { get => GameVersion.RBY; set { } }
-    public override int PokerusStrain { get => 0; set { } }
-    public override int PokerusDays { get => 0; set { } }
+    public override int Version { get => (int)GameVersion.RBY; set { } }
+    public override int PKRS_Strain { get => 0; set { } }
+    public override int PKRS_Days { get => 0; set { } }
     public override bool CanHoldItem(ReadOnlySpan<ushort> valid) => false;
-    public override ushort MetLocation { get => 0; set { } }
-    public override byte OriginalTrainerGender { get => 0; set { } }
-    public override byte MetLevel { get => 0; set { } }
-    public override byte CurrentFriendship { get => 0; set { } }
+    public override int Met_Location { get => 0; set { } }
+    public override int OT_Gender { get => 0; set { } }
+    public override int Met_Level { get => 0; set { } }
+    public override int CurrentFriendship { get => 0; set { } }
     public override bool IsEgg { get => false; set { } }
     public override int HeldItem { get => 0; set { } }
-    public override byte OriginalTrainerFriendship { get => 0; set { } }
+    public override int OT_Friendship { get => 0; set { } }
 
     // Maximums
     public override ushort MaxMoveID => Legal.MaxMoveID_1;
@@ -153,14 +145,14 @@ public sealed class PK1 : GBPKML, IPersonalType
     public override int MaxItemID => Legal.MaxItemID_1;
 
     // Extra
-    public byte Gen2Item => ItemConverter.GetItemFuture1(CatchRate);
+    public int Gen2Item => ItemConverter.GetItemFuture1(CatchRate);
 
     public PK2 ConvertToPK2()
     {
         PK2 pk2 = new(Japanese) {Species = Species};
         Data.AsSpan(7, 0x1A).CopyTo(pk2.Data.AsSpan(1));
-        OriginalTrainerTrash.CopyTo(pk2.OriginalTrainerTrash);
-        NicknameTrash.CopyTo(pk2.NicknameTrash);
+        OT_Trash.CopyTo(pk2.OT_Trash);
+        Nickname_Trash.CopyTo(pk2.Nickname_Trash);
 
         pk2.HeldItem = Gen2Item;
         pk2.CurrentFriendship = pk2.PersonalInfo.BaseFriendship;
@@ -173,14 +165,14 @@ public sealed class PK1 : GBPKML, IPersonalType
     {
         var rnd = Util.Rand;
         var lang = TransferLanguage(RecentTrainerCache.Language);
-        var version = EntityConverter.VirtualConsoleSourceGen1;
+        var version = (byte)EntityConverter.VirtualConsoleSourceGen1;
         if ((lang == 1) != Japanese)
             lang = Japanese ? 1 : 2;
-        if (version == GameVersion.BU && !Japanese)
-            version = GameVersion.RD;
+        if (version == (byte)GameVersion.BU && !Japanese)
+            version = (byte)GameVersion.RD;
 
         var pi = PersonalTable.SM[Species];
-        int ability = TransporterLogic.IsHiddenDisallowedVC1(Species) ? 0 : 2; // Hidden
+        int abil = TransporterLogic.IsHiddenDisallowedVC1(Species) ? 0 : 2; // Hidden
         var pk7 = new PK7
         {
             EncryptionConstant = rnd.Rand32(),
@@ -188,7 +180,7 @@ public sealed class PK1 : GBPKML, IPersonalType
             TID16 = TID16,
             CurrentLevel = CurrentLevel,
             EXP = EXP,
-            MetLevel = CurrentLevel,
+            Met_Level = CurrentLevel,
             Nature = Experience.GetNatureVC(EXP),
             PID = rnd.Rand32(),
             Ball = 4,
@@ -202,22 +194,22 @@ public sealed class PK1 : GBPKML, IPersonalType
             Move2_PPUps = Move2_PPUps,
             Move3_PPUps = Move3_PPUps,
             Move4_PPUps = Move4_PPUps,
-            MetLocation = Locations.Transfer1, // "Kanto region", hardcoded.
+            Met_Location = Locations.Transfer1, // "Kanto region", hardcoded.
             Gender = Gender,
             IsNicknamed = false,
 
             CurrentHandler = 1,
-            HandlingTrainerName = RecentTrainerCache.OriginalTrainerName,
-            HandlingTrainerGender = RecentTrainerCache.OriginalTrainerGender,
+            HT_Name = RecentTrainerCache.OT_Name,
+            HT_Gender = RecentTrainerCache.OT_Gender,
 
             Language = lang,
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, 7),
-            OriginalTrainerName = GetTransferTrainerName(lang),
-            OriginalTrainerFriendship = pi.BaseFriendship,
-            HandlingTrainerFriendship = pi.BaseFriendship,
+            OT_Name = GetTransferTrainerName(lang),
+            OT_Friendship = pi.BaseFriendship,
+            HT_Friendship = pi.BaseFriendship,
 
-            Ability = pi.GetAbilityAtIndex(ability),
-            AbilityNumber = 1 << ability,
+            Ability = pi.GetAbilityAtIndex(abil),
+            AbilityNumber = 1 << abil,
         };
 
         bool special = Species == (int)Core.Species.Mew;
@@ -233,7 +225,7 @@ public sealed class PK1 : GBPKML, IPersonalType
         else if (IsNicknamedBank)
         {
             pk7.IsNicknamed = true;
-            pk7.Nickname = StringConverter12Transporter.GetString(NicknameTrash, Japanese);
+            pk7.Nickname = StringConverter12Transporter.GetString(Nickname_Trash, Japanese);
         }
 
         pk7.HealPP();
@@ -243,30 +235,8 @@ public sealed class PK1 : GBPKML, IPersonalType
 
     private string GetTransferTrainerName(int lang)
     {
-        if (OriginalTrainerTrash[0] == StringConverter1.TradeOTCode) // In-game Trade
+        if (OT_Trash[0] == StringConverter12.G1TradeOTCode) // In-game Trade
             return StringConverter12Transporter.GetTradeNameGen1(lang);
-        return StringConverter12Transporter.GetString(OriginalTrainerTrash, Japanese);
-    }
-
-    public override string GetString(ReadOnlySpan<byte> data)
-        => StringConverter1.GetString(data, Japanese);
-    public override int LoadString(ReadOnlySpan<byte> data, Span<char> destBuffer)
-        => StringConverter1.LoadString(data, destBuffer, Japanese);
-    public override int SetString(Span<byte> destBuffer, ReadOnlySpan<char> value, int maxLength, StringConverterOption option)
-        => StringConverter1.SetString(destBuffer, value, maxLength, Japanese, option);
-    public override int GetStringTerminatorIndex(ReadOnlySpan<byte> data)
-        => TrashBytesUTF16.GetTerminatorIndex(data, StringConverter4.Terminator);
-    public override int GetStringLength(ReadOnlySpan<byte> data)
-        => TrashBytesUTF16.GetStringLength(data, StringConverter4.Terminator);
-    public override int GetBytesPerChar() => 2;
-
-    /// <summary>
-    /// Gets a checksum over all the entity's data using a single list to wrap all components.
-    /// </summary>
-    public ushort GetSingleListChecksum()
-    {
-        Span<byte> tmp = stackalloc byte[PokeList1.GetListLengthSingle(Japanese)];
-        PokeList1.WrapSingle(this, tmp);
-        return Checksums.CRC16_CCITT(tmp);
+        return StringConverter12Transporter.GetString(OT_Trash, Japanese);
     }
 }

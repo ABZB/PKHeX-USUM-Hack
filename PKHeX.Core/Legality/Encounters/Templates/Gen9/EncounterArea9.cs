@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
@@ -12,13 +11,13 @@ public sealed record EncounterArea9 : IEncounterArea<EncounterSlot9>, IAreaLocat
     public EncounterSlot9[] Slots { get; }
     public GameVersion Version { get; }
 
-    public readonly byte Location;
-    public readonly byte CrossFrom; // Actual location if not default
-    public byte ActualLocation() => CrossFrom == 0 ? Location : CrossFrom;
+    public readonly ushort Location;
 
-    public bool IsMatchLocation(ushort location) => Location == location;
+    public bool IsMatchLocation(int location) => Location == location;
 
-    public static EncounterArea9[] GetAreas(BinLinkerAccessor input, [ConstantExpected] GameVersion game)
+    public ushort CrossFrom { get; }
+
+    public static EncounterArea9[] GetAreas(BinLinkerAccessor input, GameVersion game)
     {
         var result = new EncounterArea9[input.Length];
         for (int i = 0; i < result.Length; i++)
@@ -26,7 +25,7 @@ public sealed record EncounterArea9 : IEncounterArea<EncounterSlot9>, IAreaLocat
         return result;
     }
 
-    private EncounterArea9(ReadOnlySpan<byte> areaData, [ConstantExpected] GameVersion game)
+    private EncounterArea9(ReadOnlySpan<byte> areaData, GameVersion game)
     {
         Location = areaData[0];
         CrossFrom = areaData[2];

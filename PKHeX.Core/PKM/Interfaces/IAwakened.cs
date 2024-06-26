@@ -233,11 +233,11 @@ public static class AwakeningUtil
     {
         // GO Park transfers start with 2 AVs for all stats.
         // Every other encounter is either all 0, or can legally start at 0 (trades).
-        if (pk.Version == GameVersion.GO)
+        if (pk.Version == (int)GameVersion.GO)
             result.Fill(GP1.InitialAV);
 
         // Leveling up in-game adds 1 AV to a "random" index.
-        var start = pk.MetLevel;
+        var start = pk.Met_Level;
         var end = pk.CurrentLevel;
         if (start == end)
             return;

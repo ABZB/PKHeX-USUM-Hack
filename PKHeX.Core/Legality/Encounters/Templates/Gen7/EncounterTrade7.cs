@@ -7,18 +7,18 @@ namespace PKHeX.Core;
 /// </summary>
 public sealed record EncounterTrade7 : IEncounterable, IEncounterMatch, IFixedTrainer, IFixedNickname, IEncounterConvertible<PK7>, IMemoryOTReadOnly, IFixedGender, IFixedNature
 {
-    public byte Generation => 7;
+    public int Generation => 7;
     public EntityContext Context => EntityContext.Gen7;
-    public ushort Location => Locations.LinkTrade6NPC;
-    public byte OriginalTrainerMemory => 1;
-    public byte OriginalTrainerMemoryIntensity => 3;
-    public byte OriginalTrainerMemoryFeeling => 5;
-    public ushort OriginalTrainerMemoryVariable => 40;
+    public int Location => Locations.LinkTrade6NPC;
+    public byte OT_Memory => 1;
+    public byte OT_Intensity => 3;
+    public byte OT_Feeling => 5;
+    public ushort OT_TextVar => 40;
     public Shiny Shiny => Shiny.Never;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public Ball FixedBall => Ball.Poke;
     public bool IsShiny => false;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
     public bool IsFixedTrainer => true;
     public bool IsFixedNickname => true;
 
@@ -61,43 +61,42 @@ public sealed record EncounterTrade7 : IEncounterable, IEncounterMatch, IFixedTr
 
     public PK7 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language, version);
         var pi = PersonalTable.USUM[Species, Form];
-        var rnd = Util.Rand;
         var pk = new PK7
         {
-            PID = rnd.Rand32(),
-            EncryptionConstant = rnd.Rand32(),
+            PID = Util.Rand32(),
+            EncryptionConstant = Util.Rand32(),
             Species = Species,
             Form = Form,
             CurrentLevel = Level,
-            MetLocation = Location,
-            MetLevel = Level,
+            Met_Location = Location,
+            Met_Level = Level,
             MetDate = EncounterDate.GetDate3DS(),
             Gender = Gender,
-            Nature = Nature,
+            Nature = (byte)Nature,
             Ball = (byte)FixedBall,
 
             ID32 = ID32,
-            Version = version,
+            Version = (byte)version,
             Language = lang,
-            OriginalTrainerGender = OTGender,
-            OriginalTrainerName = TrainerNames[lang],
+            OT_Gender = OTGender,
+            OT_Name = TrainerNames[lang],
 
-            OriginalTrainerMemory = OriginalTrainerMemory,
-            OriginalTrainerMemoryIntensity = OriginalTrainerMemoryIntensity,
-            OriginalTrainerMemoryFeeling = OriginalTrainerMemoryFeeling,
-            OriginalTrainerMemoryVariable = OriginalTrainerMemoryVariable,
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Memory = OT_Memory,
+            OT_Intensity = OT_Intensity,
+            OT_Feeling = OT_Feeling,
+            OT_TextVar = OT_TextVar,
+            OT_Friendship = pi.BaseFriendship,
 
             IsNicknamed = true,
             Nickname = Nicknames[lang],
 
-            HandlingTrainerName = tr.OT,
-            HandlingTrainerGender = tr.Gender,
+            HT_Name = tr.OT,
+            HT_Gender = tr.Gender,
             CurrentHandler = 1,
-            HandlingTrainerFriendship = pi.BaseFriendship,
+            HT_Friendship = pi.BaseFriendship,
         };
         if (tr is IRegionOrigin r)
             r.CopyRegionOrigin(pk);
@@ -127,7 +126,7 @@ public sealed record EncounterTrade7 : IEncounterable, IEncounterMatch, IFixedTr
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (pk.MetLevel != Level)
+        if (pk.Met_Level != Level)
             return false;
         if (IVs.IsSpecified)
         {
@@ -140,7 +139,7 @@ public sealed record EncounterTrade7 : IEncounterable, IEncounterMatch, IFixedTr
             return false;
         if (evo.Form != Form && !FormInfo.IsFormChangeable(Species, Form, pk.Form, Context, pk.Context))
             return false;
-        if (pk.OriginalTrainerGender != OTGender)
+        if (pk.OT_Gender != OTGender)
             return false;
         if (!IsMatchEggLocation(pk))
             return false;
@@ -154,7 +153,7 @@ public sealed record EncounterTrade7 : IEncounterable, IEncounterMatch, IFixedTr
         var expect = EggLocation;
         if (pk is PB8)
             expect = Locations.Default8bNone;
-        return pk.EggLocation == expect;
+        return pk.Egg_Location == expect;
     }
     private bool IsMatchNatureGenderShiny(PKM pk)
     {
@@ -162,7 +161,7 @@ public sealed record EncounterTrade7 : IEncounterable, IEncounterMatch, IFixedTr
             return false;
         if (Gender != pk.Gender)
             return false;
-        if (Nature != Nature.Random && pk.Nature != Nature)
+        if (Nature != Nature.Random && pk.Nature != (int)Nature)
             return false;
         return true;
     }

@@ -45,7 +45,7 @@ public static class EncounterFinder
 
             // Looks like we might have a good enough match. Check if this is really a good match.
             info.EncounterMatch = enc;
-            if (e.Comment.Length != 0)
+            if (e.Comment.Length > 0)
                 info.Parse.Add(e);
             if (!VerifySecondaryChecks(pk, info, encounter))
                 continue;
@@ -67,14 +67,10 @@ public static class EncounterFinder
             break;
         }
 
-        var manual = info.ManualFlag;
-        if (manual != EncounterYieldFlag.None)
-        {
-            if (!info.FrameMatches) // if false, all valid RNG frame matches have already been consumed
-                info.Parse.Add(new CheckResult(ParseSettings.Settings.FramePattern.GetSeverity(info.Generation), CheckIdentifier.PID, LEncConditionBadRNGFrame));
-            else if (!info.PIDIVMatches) // if false, all valid PIDIV matches have already been consumed
-                info.Parse.Add(new CheckResult(Severity.Invalid, CheckIdentifier.PID, LPIDTypeMismatch));
-        }
+        if (info is { FrameMatches: false }) // if false, all valid RNG frame matches have already been consumed
+            info.Parse.Add(new CheckResult(ParseSettings.RNGFrameNotFound, CheckIdentifier.PID, LEncConditionBadRNGFrame)); // todo for further confirmation
+        if (!info.PIDIVMatches) // if false, all valid PIDIV matches have already been consumed
+            info.Parse.Add(new CheckResult(Severity.Invalid, CheckIdentifier.PID, LPIDTypeMismatch));
     }
 
     /// <summary>
@@ -119,14 +115,14 @@ public static class EncounterFinder
         // Memories of Knowing a move which is later forgotten can be problematic with encounters that have special moves.
         if (pk is ITrainerMemories m)
         {
-            if (m is IMemoryOT o && MemoryPermissions.IsMemoryOfKnownMove(o.OriginalTrainerMemory))
+            if (m is IMemoryOT o && MemoryPermissions.IsMemoryOfKnownMove(o.OT_Memory))
             {
                 var mem = MemoryVariableSet.Read(m, 0);
                 bool valid = MemoryPermissions.CanKnowMove(pk, mem, info.EncounterMatch.Context, info);
                 if (!valid && iterator.PeekIsNext())
                     return false;
             }
-            if (m is IMemoryHT h && MemoryPermissions.IsMemoryOfKnownMove(h.HandlingTrainerMemory) && !pk.HasMove(h.HandlingTrainerMemoryVariable))
+            if (m is IMemoryHT h && MemoryPermissions.IsMemoryOfKnownMove(h.HT_Memory) && !pk.HasMove(h.HT_TextVar))
             {
                 var mem = MemoryVariableSet.Read(m, 1);
 
@@ -171,9 +167,9 @@ public static class EncounterFinder
         LearnVerifier.Verify(info.Moves, pk, info.EncounterMatch, info.EvoChainsAllGens);
     }
 
-    private static string GetHintWhyNotFound(PKM pk, byte generation)
+    private static string GetHintWhyNotFound(PKM pk, int generation)
     {
-        if (WasGiftEgg(pk, generation, pk.EggLocation))
+        if (WasGiftEgg(pk, generation, (ushort)pk.Egg_Location))
             return LEncGift;
         if (WasEventEgg(pk, generation))
             return LEncGiftEggEvent;
@@ -182,29 +178,29 @@ public static class EncounterFinder
         return LEncInvalid;
     }
 
-    private static bool WasGiftEgg(PKM pk, byte generation, ushort eggLocation) => !pk.FatefulEncounter && generation switch
+    private static bool WasGiftEgg(PKM pk, int generation, ushort eggLocation) => !pk.FatefulEncounter && generation switch
     {
-        3 => pk.IsEgg && (byte)pk.MetLocation == 253, // Gift Egg, indistinguishable from normal eggs after hatch
+        3 => pk.IsEgg && (byte)pk.Met_Location == 253, // Gift Egg, indistinguishable from normal eggs after hatch
         4 => eggLocation - 2009u <= (2014 - 2009) || (pk.Format != 4 && (eggLocation == Locations.Faraway4 && pk.HGSS)),
         5 => eggLocation is Locations.Breeder5,
         _ => eggLocation is Locations.Breeder6,
     };
 
-    private static bool WasEventEgg(PKM pk, byte generation) => generation switch
+    private static bool WasEventEgg(PKM pk, int gen) => gen switch
     {
         // Event Egg, indistinguishable from normal eggs after hatch
         // can't tell after transfer
-        3 => pk is { Context: EntityContext.Gen3, IsEgg: true } && Locations.IsEventLocation3(pk.MetLocation),
+        3 => pk is { Context: EntityContext.Gen3, IsEgg: true } && Locations.IsEventLocation3(pk.Met_Location),
 
         // Manaphy was the only generation 4 released event egg
-        _ => pk.FatefulEncounter && pk.EggDay != 0,
+        _ => pk.FatefulEncounter && pk.Egg_Day != 0,
     };
 
-    private static bool WasEvent(PKM pk, byte generation) => pk.FatefulEncounter || generation switch
+    private static bool WasEvent(PKM pk, int gen) => pk.FatefulEncounter || gen switch
     {
-        3 => Locations.IsEventLocation3(pk.MetLocation) && pk.Format == 3,
-        4 => Locations.IsEventLocation4(pk.MetLocation) && pk.Format == 4,
-      >=5 => Locations.IsEventLocation5(pk.MetLocation),
+        3 => Locations.IsEventLocation3(pk.Met_Location) && pk.Format == 3,
+        4 => Locations.IsEventLocation4(pk.Met_Location) && pk.Format == 4,
+        >=5 => Locations.IsEventLocation5(pk.Met_Location),
         _ => false,
     };
 }
