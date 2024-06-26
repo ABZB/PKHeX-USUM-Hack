@@ -1143,3 +1143,4 @@ Paradox
 Paradox Ancient
 Paradox Future
 δ
+δ-1
