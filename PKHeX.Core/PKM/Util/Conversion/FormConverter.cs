@@ -74,6 +74,18 @@ public static class FormConverter
             Wigglytuff when generation >= 7 => GetFormsParadox(species, types, forms),
             Feraligatr or Scyther when generation >= 7 => GetFormsOrre(types, forms),
 
+            Exeggutor when generation == 7 => [
+                types[Kantonian], // Johtonian
+                forms[810], // Alolan
+                forms[Judean], // Judean
+                forms[Ultra], // Ultra
+            ],
+            Persian when generation == 7 => [
+                types[Kantonian], // Johtonian
+                forms[810], // Alolan
+                forms[Galarian], // Judean
+                forms[Ultra], // Ultra
+            ],
 
             _ => GetFormsAlolan(context, types, forms, species),
         };
@@ -96,10 +108,10 @@ public static class FormConverter
             Crobat when generation >= 7 => GetFormsDeltaHolon(types, forms),
 
             Scizor when generation == 7 => [
-                types[1146], // Johtonian
-                forms[1137], // Orrean
-                forms[1094], // Hisuian (Kleavor)
-                forms[1067], // Ultra
+                types[Johtonian], // Johtonian
+                forms[Orrean], // Orrean
+                forms[Hisuian], // Hisuian (Kleavor)
+                forms[Ultra], // Ultra
             ],
             _ => EMPTY,
         };
@@ -323,6 +335,12 @@ public static class FormConverter
                 forms[(int)Xerneas], // Neutral
                 forms[1012], // Active
             ],
+            Yveltal => [
+                forms[0],
+                forms[DeltaHolon],
+                forms[DeltaHolon1],
+                forms[Ultra],
+            ],
             Hoopa => [
                 forms[(int)Hoopa], // Confined
                 forms[1018], // Unbound
@@ -387,7 +405,7 @@ public static class FormConverter
                 types[0], // Normal
                 forms[1065], // Dusk Mane
                 forms[1066], // Dawn Wings
-                forms[1067], // Ultra Necrozma
+                forms[Ultra], // Ultra Necrozma
             ],
             Necrozma => [
                 types[0], // Normal
@@ -563,7 +581,7 @@ public static class FormConverter
 
         return (Species)species switch
         {
-            Meowth or Persian when generation >= 7 => [
+            Meowth when generation >= 7 => [
                 types[0],
                 forms[810], // Alolan
                 forms[Galarian], // Galarian
@@ -578,7 +596,6 @@ public static class FormConverter
                 or Meowth or Persian
                 or Geodude or Graveler or Golem
                 or Grimer or Muk
-                or Exeggutor
                 or Marowak => [
                     types[0],
                     forms[810], // Alolan
@@ -875,10 +892,16 @@ public static class FormConverter
 
     private static string[] GetFormsParadox(ushort species, IReadOnlyList<string> types, IReadOnlyList<string> forms) => (Species)species switch
     {
-        Donphan or Volcarona => [
+        Donphan => [
             types[0], // Normal
-            $"{forms[Paradox]} {forms[ParadoxAncient]}",
-            $"{forms[Paldean]} {forms[ParadoxFuture]}",
+            forms[ParadoxAncient],
+            forms[ParadoxFuture],
+            forms[Ultra],
+        ],
+        Volcarona => [
+            types[0], // Normal
+            forms[ParadoxAncient],
+            forms[ParadoxFuture],
         ],
         _ =>
         [
@@ -940,6 +963,8 @@ public static class FormConverter
             forms[Galarian], // Galarian
         ];
     }
+
+    private const int Ultra = 1067;
 
     private const int Galarian = 1068;
     private const int Gigantamax = 1069;
@@ -1025,7 +1050,8 @@ public static class FormConverter
     private const int ParadoxFuture = 1143;
     private const int DeltaHolon = 1144;
     private const int DeltaHolon1 = 1145;
-    private const int Johto = 1146;
+    private const int Johtonian = 1146;
+    private const int Kantonian = 1147;
 
     public static string GetGigantamaxName(IReadOnlyList<string> forms) => forms[Gigantamax];
 
