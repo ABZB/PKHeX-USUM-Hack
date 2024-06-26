@@ -74,14 +74,14 @@ public static class FormConverter
             Wigglytuff when generation >= 7 => GetFormsParadox(species, types, forms),
             Feraligatr or Scyther when generation >= 7 => GetFormsOrre(types, forms),
 
-            Exeggutor when generation == 7 => [
-                types[Kantonian], // Johtonian
+            Exeggutor when generation >= 7 => [
+                forms[Kantonian],
                 forms[810], // Alolan
                 forms[Judean], // Judean
                 forms[Ultra], // Ultra
             ],
-            Persian when generation == 7 => [
-                types[Kantonian], // Johtonian
+            Persian when generation >=7 => [
+                forms[Kantonian],
                 forms[810], // Alolan
                 forms[Galarian], // Judean
                 forms[Ultra], // Ultra
@@ -108,7 +108,7 @@ public static class FormConverter
             Crobat when generation >= 7 => GetFormsDeltaHolon(types, forms),
 
             Scizor when generation == 7 => [
-                types[Johtonian], // Johtonian
+                forms[Johtonian], // Johtonian
                 forms[Orrean], // Orrean
                 forms[Hisuian], // Hisuian (Kleavor)
                 forms[Ultra], // Ultra
@@ -169,13 +169,14 @@ public static class FormConverter
                 forms[920], // Fan
                 forms[921], // Mow
             ],
-            Dialga or Palkia when generation >= 8 => [
+            Dialga or Palkia when generation >= 7 => [
                 types[0], // Normal
-                forms[922], // Origin
+                forms[804], // Mega
             ],
             Giratina => [
                 forms[(int)Giratina], // Altered
                 forms[922], // Origin
+                forms[804], // Mega
             ],
             Shaymin => [
                 forms[(int)Shaymin], // Land
@@ -336,7 +337,7 @@ public static class FormConverter
                 forms[1012], // Active
             ],
             Yveltal => [
-                forms[0],
+                types[0],
                 forms[DeltaHolon],
                 forms[DeltaHolon1],
                 forms[Ultra],
