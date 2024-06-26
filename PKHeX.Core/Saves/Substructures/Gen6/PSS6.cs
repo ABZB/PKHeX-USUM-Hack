@@ -19,7 +19,7 @@ public static class PSS6
             result.Add("----");
             result.Add(headers[g]);
             result.Add("----");
-            // uint count = ReadUInt32LittleEndian(Data.Slice(0x4E20));
+            // uint count = ReadUInt32LittleEndian(data.AsSpan(offset + 0x4E20));
             ReadTrainers(result, data, offset, 100);
             offset += 0x5000; // Advance to next block
         }
@@ -60,13 +60,11 @@ public static class PSS6
         // uint unk4  = ReadUInt16LittleEndian(data[0x54..]);
         byte regionID = data[0x56];
         byte countryID = data[0x57];
-        // byte birthMonth = data[0x58];
-        // byte birthDay = data[0x59];
-        var game = (GameVersion)data[0x5A];
+        byte game = data[0x5A];
         // ulong outfit = ReadUInt64LittleEndian(data.AsSpan(ofs + 0x5C));
         int favpkm = ReadUInt16LittleEndian(data[0x9C..]) & 0x7FF;
 
-        var gamename = GetGameName(game);
+        string gamename = GetGameName(game);
         var (country, region) = GeoLocation.GetCountryRegionText(countryID, regionID, GameInfo.CurrentLanguage);
         result.Add($"OT: {otname}");
         result.Add($"Message: {message}");
@@ -77,12 +75,14 @@ public static class PSS6
         return false;
     }
 
-    private static string GetGameName(GameVersion game)
+    private static string GetGameName(int game)
     {
         const string unk = "UNKNOWN GAME";
-        if (!GameVersion.Gen6.Contains(game))
+        if (game < 0)
             return unk;
         var list = GameInfo.Strings.gamelist;
-        return list[(byte)game];
+        if (game >= list.Length)
+            return unk;
+        return list[game];
     }
 }

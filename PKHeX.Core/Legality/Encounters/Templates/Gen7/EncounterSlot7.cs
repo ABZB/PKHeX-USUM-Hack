@@ -6,22 +6,22 @@ namespace PKHeX.Core;
 public sealed record EncounterSlot7(EncounterArea7 Parent, ushort Species, byte Form, byte LevelMin, byte LevelMax)
     : IEncounterable, IEncounterMatch, IEncounterConvertible<PK7>, IEncounterFormRandom, IFlawlessIVCountConditional
 {
-    public byte Generation => 7;
+    public int Generation => 7;
     public EntityContext Context => EntityContext.Gen7;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public Ball FixedBall => Location == Locations.Pelago7 ? Ball.Poke : Ball.None;
     public Shiny Shiny => Shiny.Random;
     public bool IsShiny => false;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
     public bool IsRandomUnspecificForm => Form >= EncounterUtil.FormDynamic;
 
     public string Name => $"Wild Encounter ({Version})";
     public string LongName => $"{Name} {Type.ToString().Replace('_', ' ')}";
     public GameVersion Version => Parent.Version;
-    public ushort Location => Parent.Location;
-    public SlotType7 Type => Parent.Type;
+    public int Location => Parent.Location;
+    public SlotType Type => Parent.Type;
 
-    public bool IsSOS => Type == SlotType7.SOS;
+    public bool IsSOS => Type == SlotType.SOS;
 
     public AbilityPermission Ability => IsHiddenAbilitySlot() switch
     {
@@ -53,18 +53,18 @@ public sealed record EncounterSlot7(EncounterArea7 Parent, ushort Species, byte 
             Species = Species,
             Form = form,
             CurrentLevel = LevelMin,
-            MetLocation = Location,
-            MetLevel = LevelMin,
-            Version = Version,
+            Met_Location = Location,
+            Met_Level = LevelMin,
+            Version = (byte)Version,
             MetDate = EncounterDate.GetDate3DS(),
             Ball = (byte)Ball.Poke,
 
             Language = lang,
-            OriginalTrainerName = tr.OT,
-            OriginalTrainerGender = tr.Gender,
+            OT_Name = tr.OT,
+            OT_Gender = tr.Gender,
             ID32 = tr.ID32,
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
         };
         if (tr is IRegionOrigin r)
             r.CopyRegionOrigin(pk);
@@ -88,10 +88,9 @@ public sealed record EncounterSlot7(EncounterArea7 Parent, ushort Species, byte 
 
     private void SetPINGA(PK7 pk, EncounterCriteria criteria, PersonalInfo7 pi)
     {
-        var rnd = Util.Rand;
-        pk.PID = rnd.Rand32();
-        pk.EncryptionConstant = rnd.Rand32();
-        pk.Nature = criteria.GetNature();
+        pk.PID = Util.Rand32();
+        pk.EncryptionConstant = Util.Rand32();
+        pk.Nature = (int)criteria.GetNature();
         pk.Gender = criteria.GetGender(pi);
         criteria.SetRandomIVs(pk);
 
@@ -107,7 +106,7 @@ public sealed record EncounterSlot7(EncounterArea7 Parent, ushort Species, byte 
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (!this.IsLevelWithinRange(pk.MetLevel))
+        if (!this.IsLevelWithinRange(pk.Met_Level))
             return false;
 
         if (Form != evo.Form && Species is not ((int)Core.Species.Furfrou or (int)Core.Species.Oricorio))

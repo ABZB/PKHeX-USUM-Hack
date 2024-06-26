@@ -28,26 +28,23 @@ public static class StringConverter6
     public static int LoadString(ReadOnlySpan<byte> data, Span<char> result)
     {
         int i = 0;
-        int ctr = 0;
         for (; i < data.Length; i += 2)
         {
             var value = ReadUInt16LittleEndian(data[i..]);
             if (value == TerminatorNull)
                 break;
-            result[ctr++] = StringConverter.NormalizeGenderSymbol((char)value);
+            result[i/2] = StringConverter.SanitizeChar((char)value);
         }
-        return ctr;
+        return i/2;
     }
 
     /// <summary>Gets the bytes for a Generation 6 string.</summary>
     /// <param name="destBuffer">Span of bytes to write encoded string data</param>
     /// <param name="value">Decoded string.</param>
     /// <param name="maxLength">Maximum length of the input <see cref="value"/></param>
-    /// <param name="language">Language specific conversion</param>
     /// <param name="option">Buffer pre-formatting option</param>
     /// <returns>Encoded data.</returns>
     public static int SetString(Span<byte> destBuffer, ReadOnlySpan<char> value, int maxLength,
-        int language,
         StringConverterOption option = StringConverterOption.ClearZero)
     {
         if (value.Length > maxLength)
@@ -56,13 +53,13 @@ public static class StringConverter6
         if (option is StringConverterOption.ClearZero)
             destBuffer.Clear();
 
-        bool isHalfWidth = language == (int)LanguageID.Korean || !StringConverter.GetIsFullWidthString(value);
+        bool isFullWidth = StringConverter.GetIsFullWidthString(value);
         for (int i = 0; i < value.Length; i++)
         {
-            var chr = value[i];
-            if (isHalfWidth)
-                chr = StringConverter.UnNormalizeGenderSymbol(chr);
-            WriteUInt16LittleEndian(destBuffer[(i * 2)..], chr);
+            char c = value[i];
+            if (!isFullWidth)
+                c = StringConverter.UnSanitizeChar(c);
+            WriteUInt16LittleEndian(destBuffer[(i * 2)..], c);
         }
 
         int count = value.Length * 2;

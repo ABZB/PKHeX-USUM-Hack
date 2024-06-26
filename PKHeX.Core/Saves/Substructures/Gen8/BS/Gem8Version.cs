@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using static PKHeX.Core.Gem8Version;
 
 namespace PKHeX.Core;
@@ -17,19 +17,19 @@ public enum Gem8Version
     V1_0 = 0x25, // 37
 
     /// <summary>
-    /// November 2021 pre-release patch.
+    /// Pre-release patch.
     /// </summary>
     /// <remarks><see cref="SaveUtil.SIZE_G8BDSP_1"/></remarks>
     V1_1 = 0x2C, // 44
 
     /// <summary>
-    /// February 2022 patch.
+    /// February patch.
     /// </summary>
     /// <remarks><see cref="SaveUtil.SIZE_G8BDSP_2"/></remarks>
     V1_2 = 0x32, // 50
 
     /// <summary>
-    /// March 2022 patch.
+    /// March patch.
     /// </summary>
     /// <remarks><see cref="SaveUtil.SIZE_G8BDSP_3"/></remarks>
     V1_3 = 0x34, // 52

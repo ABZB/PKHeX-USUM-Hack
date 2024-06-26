@@ -8,26 +8,28 @@ namespace PKHeX.Core;
 /// <param name="AlphaType">0=Never, 1=Random, 2=Guaranteed</param>
 /// <param name="FlawlessIVCount"></param>
 public sealed record EncounterSlot8a(EncounterArea8a Parent, ushort Species, byte Form, byte LevelMin, byte LevelMax, byte AlphaType, byte FlawlessIVCount, Gender Gender)
-    : IEncounterable, IEncounterMatch, IEncounterConvertible<PA8>, IAlphaReadOnly, IMasteryInitialMoveShop8, IFlawlessIVCount, ISeedCorrelation64<PKM>
+    : IEncounterable, IEncounterMatch, IEncounterConvertible<PA8>, IAlphaReadOnly, IMasteryInitialMoveShop8, IFlawlessIVCount
 {
-    public byte Generation => 8;
+    public int Generation => 8;
     public EntityContext Context => EntityContext.Gen8a;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public AbilityPermission Ability => AbilityPermission.Any12;
     public Ball FixedBall => Ball.None;
     public Shiny Shiny => Shiny.Random;
     public bool IsShiny => false;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
 
     public bool IsAlpha => AlphaType is not 0;
 
     public string Name => $"Wild Encounter ({Version})";
     public string LongName => $"{Name} {Type.ToString().Replace('_', ' ')}";
     public GameVersion Version => Parent.Version;
-    public ushort Location => Parent.Location;
-    public SlotType8a Type => Parent.Type;
+    public int Location => Parent.Location;
+    public SlotType Type => Parent.Type;
 
-    public bool HasAlphaMove => IsAlpha && Type is not SlotType8a.Landmark;
+    public bool HasAlphaMove => IsAlpha && Type is not SlotType.Landmark;
+
+    private const byte ScaleMax = 255;
 
     #region Generating
     PKM IEncounterConvertible.ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria) => ConvertToPKM(tr, criteria);
@@ -43,17 +45,20 @@ public sealed record EncounterSlot8a(EncounterArea8a Parent, ushort Species, byt
             Species = Species,
             Form = Form,
             CurrentLevel = LevelMin,
-            MetLocation = Location,
-            MetLevel = LevelMin,
+            Met_Location = Location,
+            Met_Level = LevelMin,
             MetDate = EncounterDate.GetDateSwitch(),
-            Version = GameVersion.PLA,
+            Version = (byte)GameVersion.PLA,
             IsAlpha = IsAlpha,
             Ball = (int)Ball.LAPoke,
 
-            OriginalTrainerName = tr.OT,
-            OriginalTrainerGender = tr.Gender,
+            OT_Name = tr.OT,
+            OT_Gender = tr.Gender,
             ID32 = tr.ID32,
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
+
+            HeightScalar = IsAlpha ? ScaleMax : PokeSizeUtil.GetRandomScalar(),
+            WeightScalar = IsAlpha ? ScaleMax : PokeSizeUtil.GetRandomScalar(),
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
         };
         SetPINGA(pk, criteria, pi);
@@ -77,7 +82,7 @@ public sealed record EncounterSlot8a(EncounterArea8a Parent, ushort Species, byt
                 var lvl = Overworld8aRNG.GetRandomLevel(slotSeed, LevelMin, LevelMax);
                 if (criteria.ForceMinLevelRange && lvl != LevelMin)
                     continue;
-                pk.MetLevel = pk.CurrentLevel = lvl;
+                pk.CurrentLevel = pk.Met_Level = lvl;
             }
             break;
         }
@@ -100,10 +105,10 @@ public sealed record EncounterSlot8a(EncounterArea8a Parent, ushort Species, byt
     // hardcoded 7 to assume max dex progress + shiny charm.
     private const int MaxRollCount = 7;
 
-    private static byte GetRollCount(SlotType8a type) => (byte)(MaxRollCount + type switch
+    private static byte GetRollCount(SlotType type) => (byte)(MaxRollCount + type switch
     {
-        SlotType8a.MassOutbreakMassive => 12,
-        SlotType8a.MassOutbreakRegular => 25,
+        SlotType.OverworldMMO => 12,
+        SlotType.OverworldMass => 25,
         _ => 0,
     });
 
@@ -139,7 +144,7 @@ public sealed record EncounterSlot8a(EncounterArea8a Parent, ushort Species, byt
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (!this.IsLevelWithinRange(pk.MetLevel))
+        if (!this.IsLevelWithinRange(pk.Met_Level))
             return false;
         if (Form != evo.Form && Species is not ((int)Core.Species.Rotom or (int)Core.Species.Burmy or (int)Core.Species.Wormadam))
             return false;
@@ -182,7 +187,7 @@ public sealed record EncounterSlot8a(EncounterArea8a Parent, ushort Species, byt
 
         var alphaMove = pa.AlphaMove;
         bool hasAlphaMove = alphaMove != 0;
-        if (!pa.IsAlpha || Type is SlotType8a.Landmark)
+        if (!pa.IsAlpha || Type is SlotType.Landmark)
             return !hasAlphaMove ? EncounterMatchRating.Match : EncounterMatchRating.DeferredErrors;
 
         var pi = PersonalTable.LA.GetFormEntry(Species, Form);
@@ -212,8 +217,8 @@ public sealed record EncounterSlot8a(EncounterArea8a Parent, ushort Species, byt
         if (pk is not IMoveShop8Mastery p)
             return true; // Can't check.
 
-        bool allowAlphaPurchaseBug = Type is not SlotType8a.MassOutbreakMassive; // Everything else Alpha is pre-1.1
-        var level = pk.MetLevel;
+        bool allowAlphaPurchaseBug = Type is not SlotType.OverworldMMO; // Everything else Alpha is pre-1.1
+        var level = pk.Met_Level;
         var (learn, mastery) = GetLevelUpInfo();
         ushort alpha = pk is PA8 pa ? pa.AlphaMove : (ushort)0;
         if (!p.IsValidPurchasedEncounter(learn, level, alpha, allowAlphaPurchaseBug))
@@ -233,21 +238,4 @@ public sealed record EncounterSlot8a(EncounterArea8a Parent, ushort Species, byt
         return p.IsValidMasteredEncounter(moves, learn, mastery, level, alpha, allowAlphaPurchaseBug);
     }
     #endregion
-
-    public bool TryGetSeed(PKM pk, out ulong seed)
-    {
-        // Check if it matches any single-roll seed.
-        var pi = PersonalTable.LA[Species, Form];
-        var param = GetParams(pi) with { RollCount = 1 };
-        var solver = new XoroMachineSkip(pk.EncryptionConstant, pk.PID);
-        foreach (var s in solver)
-        {
-            if (!Overworld8aRNG.Verify(pk, s, param))
-                continue;
-            seed = s;
-            return true;
-        }
-        seed = default;
-        return false;
-    }
 }

@@ -47,7 +47,7 @@ public sealed class DuplicateEncryptionChecker : IBulkAnalyzer
         var (cs, ca) = cr;
 
         const CheckIdentifier ident = PID;
-        var gen = pa.Info.Generation;
+        int gen = pa.Info.Generation;
         bool gbaNDS = gen is 3 or 4 or 5;
 
         if (!gbaNDS)

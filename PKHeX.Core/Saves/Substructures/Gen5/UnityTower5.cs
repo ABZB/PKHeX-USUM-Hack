@@ -2,15 +2,9 @@ using System;
 
 namespace PKHeX.Core;
 
-public sealed class UnityTower5(SAV5 SAV, Memory<byte> raw) : SaveBlock<SAV5>(SAV, raw), IGeonet
+public sealed class UnityTower5 : SaveBlock<SAV5>
 {
-    private const int UnityTowerOffset = 0x320;
-    private const int GeonetGlobalFlagOffset = 0x344;
-    private const int UnityTowerFlagOffset = 0x345;
-    private const int GeonetOffset = 0x348;
-
-    public const int CountryCount = 232;
-    private const int Japan = 105;
+    private const int CountryCount = 232;
 
     private static ReadOnlySpan<byte> LegalCountries =>
     [
@@ -27,69 +21,61 @@ public sealed class UnityTower5(SAV5 SAV, Memory<byte> raw) : SaveBlock<SAV5>(SA
 
     public static byte GetSubregionCount(byte country) => country switch
     {
-        009 => 24, // Argentina
-        012 =>  8, // Australia
-        028 => 27, // Brazil
-        036 => 13, // Canada
-        043 => 33, // China
-        072 =>  6, // Finland
-        073 => 22, // France
-        079 => 16, // Germany
-        095 => 35, // India
-        102 => 20, // Italy
-        105 => 50, // Japan
-        155 => 22, // Norway
-        166 => 16, // Poland
-        174 =>  8, // Russian Federation
-        195 => 17, // Spain
-        200 => 22, // Sweden
-        218 => 12, // United Kingdom
-        220 => 51, // United States of America
+        009 => 24,
+        012 => 8,
+        028 => 27,
+        036 => 13,
+        043 => 33,
+        072 => 6,
+        073 => 22,
+        079 => 16,
+        095 => 35,
+        102 => 20,
+        105 => 50,
+        155 => 22,
+        166 => 16,
+        174 => 8,
+        195 => 17,
+        200 => 22,
+        218 => 12,
+        220 => 51,
         _ => 0,
     };
 
-    public bool GlobalFlag { get => Data[GeonetGlobalFlagOffset] != 0; set => Data[GeonetGlobalFlagOffset] = (byte)(value ? 1 : 0); }
-    public bool UnityTowerFlag { get => Data[UnityTowerFlagOffset] != 0; set => Data[UnityTowerFlagOffset] = (byte)(value ? 1 : 0); }
-
-    public GeonetPoint GetCountrySubregion(byte country, byte subregion)
+    public enum Point
     {
-        int index = GeonetOffset + ((country - 1) * 16) + (subregion / 4);
-        int shift = 2 * (subregion % 4);
-        return (GeonetPoint)(((Data[index] & 0b11 << shift) >> shift));
+        None = 0, // never communicated with
+        Blue = 1, // first communicated with today
+        Yellow = 2, // already communicated with
+        Red = 3, // own registered location
     }
 
-    public void SetCountrySubregion(byte country, byte subregion, GeonetPoint point)
+    public UnityTower5(SAV5BW SAV, int offset) : base(SAV) => Offset = offset;
+    public UnityTower5(SAV5B2W2 SAV, int offset) : base(SAV) => Offset = offset;
+
+    private const int UnityTowerOffset = 0x320;
+    private const int GeonetGlobalFlagOffset = 0x344;
+    private const int UnityTowerFlagOffset = 0x345;
+    private const int GeonetOffset = 0x348;
+
+    public bool GlobalFlag { get => Data[Offset + GeonetGlobalFlagOffset] != 0; set => Data[Offset + GeonetGlobalFlagOffset] = (byte)(value ? 1 : 0); }
+    public bool UnityTowerFlag { get => Data[Offset + UnityTowerFlagOffset] != 0; set => Data[Offset + UnityTowerFlagOffset] = (byte)(value ? 1 : 0); }
+
+    public void SetCountrySubregion(byte country, byte subregion, Point point)
     {
-        int index = GeonetOffset + ((country - 1) * 16) + (subregion / 4);
+        int index = Offset + GeonetOffset + ((country - 1) * 16) + (subregion / 4);
         int shift = 2 * (subregion % 4);
         Data[index] = (byte)((Data[index] & ~(0b11 << shift)) | ((int)point << shift));
     }
 
-    /// <summary>
-    /// Gets whether the floor is unlocked for the specified country.
-    /// </summary>
-    /// <param name="country">Country index</param>
-    /// <returns>Floor status.</returns>
-    public bool GetUnityTowerFloor(byte country)
+    public void SetUnityTowerFloor(byte country, bool unlocked)
     {
-        int index = UnityTowerOffset + (country / 8);
+        int index = Offset + UnityTowerOffset + (country / 8);
         int shift = country % 8;
-        return ((Data[index] & 0b1 << shift) >> shift) != 0b0;
+        Data[index] = (byte)((Data[index] & ~(0b1 << shift)) | (unlocked ? 0b1 : 0b0) << shift);
     }
 
-    /// <summary>
-    /// Sets whether the floor is unlocked for the specified country.
-    /// </summary>
-    /// <param name="country">Country index</param>
-    /// <param name="isUnlocked">Floor status</param>
-    public void SetUnityTowerFloor(byte country, bool isUnlocked)
-    {
-        int index = UnityTowerOffset + (country / 8);
-        int shift = country % 8;
-        Data[index] = (byte)((Data[index] & ~(0b1 << shift)) | (isUnlocked ? 0b1 : 0b0) << shift);
-    }
-
-    private void SetAllSubregions(byte country, GeonetPoint type, bool floor)
+    private void SetAllSubregions(byte country, Point type, bool floor)
     {
         SetUnityTowerFloor(country, floor);
 
@@ -107,9 +93,11 @@ public sealed class UnityTower5(SAV5 SAV, Memory<byte> raw) : SaveBlock<SAV5>(SA
     public void SetAll()
     {
         for (byte country = 1; country <= CountryCount; country++)
-            SetAllSubregions(country, GeonetPoint.Yellow, true);
+            SetAllSubregions(country, Point.Yellow, true);
 
-        SetSAVCountry();
+        if (SAV.Country > 0)
+            SetCountrySubregion((byte)SAV.Country, (byte)SAV.Region, Point.Red);
+
         GlobalFlag = true;
         UnityTowerFlag = true;
     }
@@ -117,9 +105,11 @@ public sealed class UnityTower5(SAV5 SAV, Memory<byte> raw) : SaveBlock<SAV5>(SA
     public void SetAllLegal()
     {
         foreach (var country in LegalCountries)
-            SetAllSubregions(country, GeonetPoint.Yellow, true);
+            SetAllSubregions(country, Point.Yellow, true);
 
-        SetSAVCountry();
+        if (SAV.Country > 0)
+            SetCountrySubregion((byte)SAV.Country, (byte)SAV.Region, Point.Red);
+
         GlobalFlag = true;
         UnityTowerFlag = true;
     }
@@ -127,16 +117,12 @@ public sealed class UnityTower5(SAV5 SAV, Memory<byte> raw) : SaveBlock<SAV5>(SA
     public void ClearAll()
     {
         for (byte country = 1; country <= CountryCount; country++)
-            SetAllSubregions(country, GeonetPoint.None, false);
+            SetAllSubregions(country, Point.None, false);
 
-        SetSAVCountry();
-        GlobalFlag = (SAV.Country > 0 && SAV.Country != Japan);
-        UnityTowerFlag = false;
-    }
-
-    public void SetSAVCountry()
-    {
         if (SAV.Country > 0)
-            SetCountrySubregion((byte)SAV.Country, (byte)SAV.Region, GeonetPoint.Red);
+            SetCountrySubregion((byte)SAV.Country, (byte)SAV.Region, Point.Red);
+
+        GlobalFlag = (SAV.Country > 0 && SAV.Country != 103);
+        UnityTowerFlag = false;
     }
 }

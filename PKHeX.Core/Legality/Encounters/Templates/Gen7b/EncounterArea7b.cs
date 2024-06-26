@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
@@ -14,9 +13,9 @@ public sealed record EncounterArea7b : IEncounterArea<EncounterSlot7b>, IAreaLoc
 
     public readonly ushort Location;
 
-    public bool IsMatchLocation(ushort location) => Location == location;
+    public bool IsMatchLocation(int location) => Location == location;
 
-    public static EncounterArea7b[] GetAreas(BinLinkerAccessor input, [ConstantExpected] GameVersion game)
+    public static EncounterArea7b[] GetAreas(BinLinkerAccessor input, GameVersion game)
     {
         var result = new EncounterArea7b[input.Length];
         for (int i = 0; i < result.Length; i++)
@@ -24,21 +23,21 @@ public sealed record EncounterArea7b : IEncounterArea<EncounterSlot7b>, IAreaLoc
         return result;
     }
 
-    private EncounterArea7b(ReadOnlySpan<byte> data, [ConstantExpected] GameVersion game)
+    private EncounterArea7b(ReadOnlySpan<byte> data, GameVersion game)
     {
         Location = ReadUInt16LittleEndian(data);
         Version = game;
-        Slots = ReadSlots(data[2..]);
+        Slots = ReadSlots(data);
     }
 
     private EncounterSlot7b[] ReadSlots(ReadOnlySpan<byte> data)
     {
         const int size = 4;
-        int count = data.Length / size;
+        int count = (data.Length - 2) / size;
         var slots = new EncounterSlot7b[count];
         for (int i = 0; i < slots.Length; i++)
         {
-            int offset = size * i;
+            int offset = 2 + (size * i);
             var entry = data.Slice(offset, size);
             slots[i] = ReadSlot(entry);
         }

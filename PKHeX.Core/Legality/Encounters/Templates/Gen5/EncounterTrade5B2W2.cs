@@ -8,16 +8,16 @@ namespace PKHeX.Core;
 /// </summary>
 public sealed record EncounterTrade5B2W2 : IEncounterable, IEncounterMatch, IFixedTrainer, IFixedNickname, IEncounterConvertible<PK5>, IFixedGender, IFixedNature, IFixedIVSet
 {
-    public byte Generation => 5;
+    public int Generation => 5;
     public EntityContext Context => EntityContext.Gen5;
-    public ushort Location => Locations.LinkTrade5NPC;
+    public int Location => Locations.LinkTrade5NPC;
     public bool IsFixedNickname { get; init; }
     public GameVersion Version { get; }
     public Shiny Shiny => Shiny.Never;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public Ball FixedBall => Ball.Poke;
     public bool IsShiny => false;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
     public bool IsFixedTrainer => true;
 
     public required ushort Species { get; init; }
@@ -68,7 +68,7 @@ public sealed record EncounterTrade5B2W2 : IEncounterable, IEncounterMatch, IFix
 
     public PK5 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language, version);
         var pi = PersonalTable.B2W2[Species];
         var pk = new PK5
@@ -77,18 +77,18 @@ public sealed record EncounterTrade5B2W2 : IEncounterable, IEncounterMatch, IFix
             Species = Species,
             Form = Form,
             CurrentLevel = Level,
-            MetLocation = Location,
-            MetLevel = Level,
+            Met_Location = Location,
+            Met_Level = Level,
             MetDate = EncounterDate.GetDateNDS(),
             Ball = (byte)FixedBall,
 
             ID32 = ID32,
-            Version = version,
+            Version = (byte)version,
             Language = lang,
-            OriginalTrainerGender = OTGender,
-            OriginalTrainerName = TrainerNames[lang],
+            OT_Gender = OTGender,
+            OT_Name = TrainerNames[lang],
 
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
 
             IsNicknamed = IsFixedNickname,
             Nickname = IsFixedNickname ? Nicknames[lang] : SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
@@ -105,7 +105,7 @@ public sealed record EncounterTrade5B2W2 : IEncounterable, IEncounterMatch, IFix
     {
         if (pk.IsShiny)
             pk.PID ^= 0x1000_0000;
-        var nature = criteria.GetNature(Nature);
+        var nature = (int)criteria.GetNature(Nature);
         var gender = criteria.GetGender(Gender, pi);
         var ability = criteria.GetAbilityFromNumber(Ability);
         PIDGenerator.SetRandomWildPID5(pk, nature, ability, gender);
@@ -122,7 +122,7 @@ public sealed record EncounterTrade5B2W2 : IEncounterable, IEncounterMatch, IFix
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (pk.MetLevel != Level)
+        if (pk.Met_Level != Level)
             return false;
         if (IVs.IsSpecified && !Legal.GetIsFixedIVSequenceValidNoRand(IVs, pk))
             return false;
@@ -132,7 +132,7 @@ public sealed record EncounterTrade5B2W2 : IEncounterable, IEncounterMatch, IFix
             return false;
         if (evo.Form != Form && !FormInfo.IsFormChangeable(Species, Form, pk.Form, Context, pk.Context))
             return false;
-        if (pk.OriginalTrainerGender != OTGender)
+        if (pk.OT_Gender != OTGender)
             return false;
         if (!IsMatchEggLocation(pk))
             return false;
@@ -144,7 +144,7 @@ public sealed record EncounterTrade5B2W2 : IEncounterable, IEncounterMatch, IFix
         var expect = EggLocation;
         if (pk is PB8)
             expect = Locations.Default8bNone;
-        return pk.EggLocation == expect;
+        return pk.Egg_Location == expect;
     }
     private bool IsMatchNatureGenderShiny(PKM pk)
     {
@@ -152,7 +152,7 @@ public sealed record EncounterTrade5B2W2 : IEncounterable, IEncounterMatch, IFix
             return false;
         if (Gender != FixedGenderUtil.GenderRandom && Gender != pk.Gender)
             return false;
-        if (Nature != Nature.Random && pk.Nature != Nature)
+        if (Nature != Nature.Random && pk.Nature != (int)Nature)
             return false;
         return true;
     }

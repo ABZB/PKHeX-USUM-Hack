@@ -8,7 +8,7 @@ namespace PKHeX.Core;
 public sealed class LearnGroup1 : ILearnGroup
 {
     public static readonly LearnGroup1 Instance = new();
-    private const byte Generation = 1;
+    private const int Generation = 1;
     public ushort MaxMoveID => Legal.MaxMoveID_1;
 
     public ILearnGroup? GetPrevious(PKM pk, EvolutionHistory history, IEncounterTemplate enc, LearnOption option) => pk.Context switch
@@ -92,10 +92,7 @@ public sealed class LearnGroup1 : ILearnGroup
             return;
 
         Span<ushort> moves = stackalloc ushort[4];
-        if (enc is IMoveset m)
-            m.Moves.CopyTo(moves);
-        else
-            GetEncounterMoves(enc, moves);
+        GetEncounterMoves(enc, moves);
 
         // Count the amount of initial moves not present in the current list.
         int count = CountMissing(current, moves);
@@ -137,7 +134,7 @@ public sealed class LearnGroup1 : ILearnGroup
             x.CopyTo(moves);
         else
             GetEncounterMoves(enc, moves);
-        LearnVerifierHistory.MarkInitialMoves(result, current, moves, enc.Version == GameVersion.YW ? LearnEnvironment.YW : LearnEnvironment.RB);
+        LearnVerifierHistory.MarkInitialMoves(result, current, moves);
 
         // Flag empty slots if never visited Gen2 move deleter.
         if (pk is not PK1 pk1)

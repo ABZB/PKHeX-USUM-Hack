@@ -1,7 +1,6 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using static PKHeX.Core.AreaWeather8;
-using static PKHeX.Core.SlotType8;
+using static PKHeX.Core.AreaSlotType8;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
@@ -24,7 +23,7 @@ public sealed record EncounterArea8 : IEncounterArea<EncounterSlot8>, IAreaLocat
     /// </remarks>
     public readonly bool PermitCrossover;
 
-    public bool IsMatchLocation(ushort location)
+    public bool IsMatchLocation(int location)
     {
         if (Location == location)
             return true;
@@ -39,7 +38,7 @@ public sealed record EncounterArea8 : IEncounterArea<EncounterSlot8>, IAreaLocat
         return others.Contains((byte)location);
     }
 
-    public static bool CanCrossoverTo(int fromLocation, int toLocation, SlotType8 type)
+    public static bool CanCrossoverTo(int fromLocation, int toLocation, AreaSlotType8 type)
     {
         if (!type.CanCrossover())
             return false;
@@ -51,13 +50,13 @@ public sealed record EncounterArea8 : IEncounterArea<EncounterSlot8>, IAreaLocat
     /// </summary>
     public const int BoostLevel = 60;
 
-    public static bool IsWildArea(ushort location) => IsWildArea8(location) || IsWildArea8Armor(location) || IsWildArea8Crown(location);
-    public static bool IsBoostedArea60(ushort location) => IsWildArea(location);
-    public static bool IsBoostedArea60Fog(ushort location) => IsWildArea8(location); // IoA doesn't have fog restriction by badges, and all Crown stuff is above 60.
+    public static bool IsWildArea(int location) => IsWildArea8(location) || IsWildArea8Armor(location) || IsWildArea8Crown(location);
+    public static bool IsBoostedArea60(int location) => IsWildArea(location);
+    public static bool IsBoostedArea60Fog(int location) => IsWildArea8(location); // IoA doesn't have fog restriction by badges, and all Crown stuff is above 60.
 
-    public static bool IsWildArea8(ushort location)      => location is >= 122 and <= 154; // Rolling Fields -> Lake of Outrage
-    public static bool IsWildArea8Armor(ushort location) => location is >= 164 and <= 194; // Fields of Honor -> Honeycalm Island
-    public static bool IsWildArea8Crown(ushort location) => location is >= 204 and <= 234 and not 206; // Slippery Slope -> Dyna Tree Hill, skip Freezington
+    public static bool IsWildArea8(int location)      => location is >= 122 and <= 154; // Rolling Fields -> Lake of Outrage
+    public static bool IsWildArea8Armor(int location) => location is >= 164 and <= 194; // Fields of Honor -> Honeycalm Island
+    public static bool IsWildArea8Crown(int location) => location is >= 204 and <= 234 and not 206; // Slippery Slope -> Dyna Tree Hill, skip Freezington
 
     /// <summary>
     /// Location, and areas that it can feed encounters to.
@@ -291,15 +290,15 @@ public sealed record EncounterArea8 : IEncounterArea<EncounterSlot8>, IAreaLocat
         _ => None,
     };
 
-    public static bool IsCrossoverBleedPossible(SlotType8 type, int fromLocation, byte toLocation) => true;
+    public static bool IsCrossoverBleedPossible(AreaSlotType8 type, int fromLocation, byte toLocation) => true;
 
-    public static bool IsWeatherBleedPossible(SlotType8 type, AreaWeather8 permit, byte location)
+    public static bool IsWeatherBleedPossible(AreaSlotType8 type, AreaWeather8 permit, byte location)
     {
         var weather = GetWeatherBleed(type, location);
         return weather.HasFlag(permit);
     }
 
-    private static AreaWeather8 GetWeatherBleed(SlotType8 type, byte location) => type switch
+    private static AreaWeather8 GetWeatherBleed(AreaSlotType8 type, byte location) => type switch
     {
         SymbolMain or SymbolMain2 or SymbolMain3 => GetWeatherBleedSymbol(location),
         HiddenMain or HiddenMain2                => GetWeatherBleedHiddenGrass(location),
@@ -308,7 +307,7 @@ public sealed record EncounterArea8 : IEncounterArea<EncounterSlot8>, IAreaLocat
         _ => None,
     };
 
-    public static EncounterArea8[] GetAreas(BinLinkerAccessor input, [ConstantExpected] GameVersion game, [ConstantExpected] bool symbol = false)
+    public static EncounterArea8[] GetAreas(BinLinkerAccessor input, GameVersion game, bool symbol = false)
     {
         var result = new EncounterArea8[input.Length];
         for (int i = 0; i < result.Length; i++)
@@ -316,7 +315,7 @@ public sealed record EncounterArea8 : IEncounterArea<EncounterSlot8>, IAreaLocat
         return result;
     }
 
-    private EncounterArea8(ReadOnlySpan<byte> areaData, [ConstantExpected] bool symbol, [ConstantExpected] GameVersion game)
+    private EncounterArea8(ReadOnlySpan<byte> areaData, bool symbol, GameVersion game)
     {
         PermitCrossover = symbol;
         Location = areaData[0];
@@ -338,7 +337,7 @@ public sealed record EncounterArea8 : IEncounterArea<EncounterSlot8>, IAreaLocat
             var min = meta[2];
             var max = meta[3];
             var count = meta[4];
-            var slotType = (SlotType8)meta[5];
+            var slotType = (AreaSlotType8)meta[5];
             ofs += 6;
 
             // Read slots

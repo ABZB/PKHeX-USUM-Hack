@@ -1,16 +1,18 @@
-using System;
+﻿using System;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
 
-public sealed class Situation6(SAV6 SAV, Memory<byte> raw) : SaveBlock<SAV6>(SAV, raw)
+public sealed class Situation6 : SaveBlock<SAV6>
 {
+    public Situation6(SAV6 SAV, int offset) : base(SAV) => Offset = offset;
+
     public int M
     {
-        get => ReadUInt16LittleEndian(Data[0x02..]);
+        get => ReadUInt16LittleEndian(Data.AsSpan(Offset + 0x02));
         set
         {
-            var span = Data[0x02..];
+            var span = Data.AsSpan(Offset + 0x02);
             WriteUInt16LittleEndian(span, (ushort)value);
             WriteUInt16LittleEndian(span[0xF2..], (ushort)value);
         }
@@ -18,10 +20,10 @@ public sealed class Situation6(SAV6 SAV, Memory<byte> raw) : SaveBlock<SAV6>(SAV
 
     public int R
     {
-        get => ReadUInt16LittleEndian(Data[0x06..]);
+        get => ReadUInt16LittleEndian(Data.AsSpan(Offset + 0x06));
         set
         {
-            var span = Data[0x06..];
+            var span = Data.AsSpan(Offset + 0x06);
             WriteUInt16LittleEndian(span, (ushort)value);
             WriteUInt16LittleEndian(span[0xF0..], (ushort)value);
         }
@@ -29,10 +31,10 @@ public sealed class Situation6(SAV6 SAV, Memory<byte> raw) : SaveBlock<SAV6>(SAV
 
     public float X
     {
-        get => ReadSingleLittleEndian(Data[0x10..]);
+        get => ReadSingleLittleEndian(Data.AsSpan(Offset + 0x10));
         set
         {
-            var span = Data[0x10..];
+            var span = Data.AsSpan(Offset + 0x10);
             WriteSingleLittleEndian(span, value);
             WriteSingleLittleEndian(span[0xF4..], value);
         }
@@ -40,10 +42,10 @@ public sealed class Situation6(SAV6 SAV, Memory<byte> raw) : SaveBlock<SAV6>(SAV
 
     public float Z
     {
-        get => ReadSingleLittleEndian(Data[0x14..]);
+        get => ReadSingleLittleEndian(Data.AsSpan(Offset + 0x14));
         set
         {
-            var span = Data[0x14..];
+            var span = Data.AsSpan(Offset + 0x14);
             WriteSingleLittleEndian(span, value);
             WriteSingleLittleEndian(span[0xF4..], value);
         }
@@ -51,10 +53,10 @@ public sealed class Situation6(SAV6 SAV, Memory<byte> raw) : SaveBlock<SAV6>(SAV
 
     public float Y
     {
-        get => ReadSingleLittleEndian(Data[0x18..]);
+        get => ReadSingleLittleEndian(Data.AsSpan(Offset + 0x18));
         set
         {
-            var span = Data[0x18..];
+            var span = Data.AsSpan(Offset + 0x18);
             WriteSingleLittleEndian(span, value);
             WriteSingleLittleEndian(span[0xF4..], value);
         }
@@ -63,7 +65,7 @@ public sealed class Situation6(SAV6 SAV, Memory<byte> raw) : SaveBlock<SAV6>(SAV
     // xy only
     public int Style
     {
-        get => Data[0x14D];
-        set => Data[0x14D] = (byte)value;
+        get => Data[Offset + 0x14D];
+        set => Data[Offset + 0x14D] = (byte)value;
     }
 }

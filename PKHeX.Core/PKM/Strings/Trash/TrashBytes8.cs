@@ -7,10 +7,10 @@ namespace PKHeX.Core;
 /// </summary>
 public static class TrashBytes8
 {
-    /// <inheritdoc cref="TrashBytesUTF16.GetStringLength"/>
+    /// <inheritdoc cref="TrashBytes.GetStringLength"/>
     public static int GetStringLength(ReadOnlySpan<byte> buffer)
     {
-        int index = GetTerminatorIndex(buffer);
+        int index = FindTerminatorIndex(buffer);
         return index == -1 ? buffer.Length : index;
     }
 
@@ -19,6 +19,6 @@ public static class TrashBytes8
     /// </summary>
     /// <param name="buffer">Backing buffer of the string.</param>
     /// <returns>Index of the terminator, or -1 if not found.</returns>
-    public static int GetTerminatorIndex(ReadOnlySpan<byte> buffer)
+    public static int FindTerminatorIndex(ReadOnlySpan<byte> buffer)
         => buffer.IndexOf<byte>(0xFF);
 }

@@ -13,7 +13,7 @@ public interface IPersonalEncounter
     /// <summary>
     /// Amount of Hatching Step Cycles required to hatch if in an egg.
     /// </summary>
-    byte HatchCycles { get; set; }
+    int HatchCycles { get; set; }
 
     /// <summary>
     /// Catch Rate
@@ -23,7 +23,7 @@ public interface IPersonalEncounter
     /// <summary>
     /// Initial Friendship when captured or received.
     /// </summary>
-    byte BaseFriendship { get; set; }
+    int BaseFriendship { get; set; }
 
     /// <summary>
     /// Escape factor used for fleeing the Safari Zone or calling for help in SOS Battles.

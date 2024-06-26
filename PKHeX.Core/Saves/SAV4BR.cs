@@ -7,7 +7,7 @@ namespace PKHeX.Core;
 /// <summary>
 /// Generation 4 <see cref="SaveFile"/> object for Pokémon Battle Revolution saves.
 /// </summary>
-public sealed class SAV4BR : SaveFile, IBoxDetailName
+public sealed class SAV4BR : SaveFile
 {
     protected internal override string ShortSummary => $"{Version} #{SaveCount:0000}";
     public override string Extension => string.Empty;
@@ -102,12 +102,13 @@ public sealed class SAV4BR : SaveFile, IBoxDetailName
     public override int MaxAbilityID => Legal.MaxAbilityID_4;
     public override int MaxItemID => Legal.MaxItemID_4_HGSS;
     public override int MaxBallID => Legal.MaxBallID_4;
-    public override GameVersion MaxGameID => Legal.MaxGameID_4;
+    public override int MaxGameID => Legal.MaxGameID_4;
 
     public override int MaxEV => EffortValues.Max255;
-    public override byte Generation => 4;
+    public override int Generation => 4;
     public override EntityContext Context => EntityContext.Gen4;
-    public override int MaxStringLengthTrainer => 7;
+    protected override int GiftCountMax => 1;
+    public override int MaxStringLengthOT => 7;
     public override int MaxStringLengthNickname => 10;
     public override int MaxMoney => 999999;
     public override int Language => (int)LanguageID.English; // prevent KOR from inhabiting
@@ -153,18 +154,18 @@ public sealed class SAV4BR : SaveFile, IBoxDetailName
     }
 
     // Trainer Info
-    public override GameVersion Version { get => GameVersion.BATREV; set { } }
+    public override GameVersion Version { get => GameVersion.BATREV; protected set { } }
 
     private string GetOTName(int slot)
     {
-        var ofs = 0x390 + (SIZE_SLOT * slot);
+        var ofs = 0x390 + (0x6FF00 * slot);
         var span = Data.AsSpan(ofs, 16);
         return GetString(span);
     }
 
     private void SetOTName(int slot, ReadOnlySpan<char> name)
     {
-        var ofs = 0x390 + (SIZE_SLOT * slot);
+        var ofs = 0x390 + (0x6FF00 * slot);
         var span = Data.AsSpan(ofs, 16);
         SetString(span, name, 7, StringConverterOption.ClearZero);
     }
@@ -174,17 +175,6 @@ public sealed class SAV4BR : SaveFile, IBoxDetailName
     // Storage
     public override int GetPartyOffset(int slot) => Party + (SIZE_PARTY * slot);
     public override int GetBoxOffset(int box) => Box + (SIZE_STORED * box * 30);
-
-    public override uint Money
-    {
-        get => (uint)((Data[(_currentSlot * SIZE_SLOT) + 0x12861] << 16) | (Data[(_currentSlot * SIZE_SLOT) + 0x12862] << 8) | Data[(_currentSlot * SIZE_SLOT) + 0x12863]);
-        set
-        {
-            Data[(_currentSlot * SIZE_SLOT) + 0x12861] = (byte)((value >> 16) & 0xFF);
-            Data[(_currentSlot * SIZE_SLOT) + 0x12862] = (byte)((value >> 8) & 0xFF);
-            Data[(_currentSlot * SIZE_SLOT) + 0x12863] = (byte)(value & 0xFF);
-        }
-    }
 
     public override ushort TID16
     {
@@ -216,18 +206,18 @@ public sealed class SAV4BR : SaveFile, IBoxDetailName
         return Data.AsSpan(ofs, BoxNameLength);
     }
 
-    public string GetBoxName(int box)
+    public override string GetBoxName(int box)
     {
         if (BoxName < 0)
-            return BoxDetailNameExtensions.GetDefaultBoxNameCaps(box);
+            return $"BOX {box + 1}";
 
         var span = GetBoxNameSpan(box);
         if (ReadUInt16BigEndian(span) == 0)
-            return BoxDetailNameExtensions.GetDefaultBoxNameCaps(box);
+            return $"BOX {box + 1}";
         return GetString(span);
     }
 
-    public void SetBoxName(int box, ReadOnlySpan<char> value)
+    public override void SetBoxName(int box, ReadOnlySpan<char> value)
     {
         if (BoxName < 0)
             return;
@@ -254,8 +244,9 @@ public sealed class SAV4BR : SaveFile, IBoxDetailName
     {
         var pk4 = (BK4)pk;
         // Apply to this Save File
-        pk4.UpdateHandler(this);
-        pk.RefreshChecksum();
+        var now = EncounterDate.GetDateNDS();
+        if (pk4.Trade(OT, ID32, Gender, now.Day, now.Month, now.Year))
+            pk.RefreshChecksum();
     }
 
     protected override void SetPartyValues(PKM pk, bool isParty)
@@ -367,10 +358,7 @@ public sealed class SAV4BR : SaveFile, IBoxDetailName
         }
     }
 
-    public override string GetString(ReadOnlySpan<byte> data)
-        => StringConverter4GC.GetStringUnicode(data);
-    public override int LoadString(ReadOnlySpan<byte> data, Span<char> destBuffer)
-        => StringConverter4GC.LoadStringUnicode(data, destBuffer);
-    public override int SetString(Span<byte> destBuffer, ReadOnlySpan<char> value, int maxLength, StringConverterOption option)
-        => StringConverter4GC.SetStringUnicode(value, destBuffer, maxLength, option);
+    public override string GetString(ReadOnlySpan<byte> data) => StringConverter4GC.GetStringUnicode(data);
+
+    public override int SetString(Span<byte> destBuffer, ReadOnlySpan<char> value, int maxLength, StringConverterOption option) => StringConverter4GC.SetStringUnicode(value, destBuffer, maxLength, option);
 }

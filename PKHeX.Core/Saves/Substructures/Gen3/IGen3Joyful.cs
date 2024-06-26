@@ -1,4 +1,4 @@
-namespace PKHeX.Core;
+﻿namespace PKHeX.Core;
 
 public interface IGen3Joyful
 {
@@ -10,7 +10,4 @@ public interface IGen3Joyful
     uint JoyfulBerriesScore { get; set; }
     ushort JoyfulBerriesInRow { get; set; }
     ushort JoyfulBerries5InRow { get; set; }
-
-    uint BerryPowder { get; set; }
-    uint SecurityKey { get; set; }
 }

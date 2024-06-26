@@ -4,71 +4,37 @@ using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
 
-/// <summary>
-/// Battle Video Request Utility for Gen 7
-/// </summary>
 public static class BVRequestUtil
 {
-    private const int Size = 16;
-
-    public static string GetBattleVideoURL7(ReadOnlySpan<char> code)
+    public static string GetSMBattleVideoURL(string code)
     {
-        var valid = TryGetBattleVideoID(code, out var result);
+        code = code.Replace("-", string.Empty);
+        Debug.Assert(code.Length == 16);
+        var video_id = StrToU64(code, out bool valid);
         if (!valid)
             return string.Empty;
-        return GetBattleVideoURL7(result);
+        return $"https://ctr-bnda-live.s3.amazonaws.com/10.CTR_BNDA_datastore/ds/1/data/{video_id:D11}-00001"; // Sun datastore
     }
 
-    public static string GetBattleVideoURL7(ulong video_id)
+    public static ulong StrToU64(ReadOnlySpan<char> input, out bool valid)
     {
-        // Sun datastore
-        return $"https://ctr-bnda-live.s3.amazonaws.com/10.CTR_BNDA_datastore/ds/1/data/{video_id:D11}-00001";
-    }
-
-    private static bool TryGetBattleVideoID(ReadOnlySpan<char> code, out ulong result)
-    {
-        Span<char> noDash = stackalloc char[Size];
-        var length = SanitizeNoDashes(code, noDash);
-        if (length != noDash.Length) // didn't fill expected length
-        {
-            result = 0;
-            return false; // invalid length
-        }
-
-        return TryGetID(noDash, out result);
-    }
-
-    private static int SanitizeNoDashes(ReadOnlySpan<char> input, Span<char> result)
-    {
-        int ctr = 0;
-        foreach (var c in input)
-        {
-            // Check for both dashes (user entry)
-            if (c is '-' or 'ー')
-                continue;
-            if (ctr == result.Length)
-                return -1; // fail
-            result[ctr++] = c;
-        }
-        return ctr;
-    }
-
-    public static bool TryGetID(ReadOnlySpan<char> input, out ulong result)
-    {
-        Debug.Assert(input.Length == 16);
         var chk = Pull(input[..4]) >> 4; // first four chars are checksum bits
-        result = Pull(input[4..]); // next 12 chars are the 70 value bits
+        var result = Pull(input[4..]); // next 12 chars are the 70 value bits
 
         Span<byte> temp = stackalloc byte[8];
         WriteUInt64LittleEndian(temp, result);
         var actual = Checksums.CRC16_CCITT(temp);
-        return chk == actual;
+        valid = chk == actual;
+        return result;
 
         static ulong Pull(ReadOnlySpan<char> input)
         {
             ulong val = 0;
             foreach (char c in input)
             {
+                if (c == '-')
+                    continue;
+
                 val <<= 5;
                 val |= Get5BitFromChar(c) & 0b11111;
             }
@@ -81,7 +47,7 @@ public static class BVRequestUtil
         Span<byte> temp = stackalloc byte[8];
         WriteUInt64LittleEndian(temp, input);
         uint chk = Checksums.CRC16_CCITT(temp);
-        Span<char> buff = stackalloc char[Size];
+        Span<char> buff = stackalloc char[16];
         int ctr = 15;
         Push(buff, ref ctr, 12, input); // store value bits
         Push(buff, ref ctr, 04, chk << 4); // store checksum bits
@@ -103,7 +69,7 @@ public static class BVRequestUtil
         for (int i = 0, ctr = 0; i < buff.Length; i++)
         {
             buff2[ctr++] = buff[i];
-            if (i % spacer == (spacer - 1) && ctr < buff2.Length)
+            if (i % spacer == 3 && ctr < buff2.Length)
                 buff2[ctr++] = '-'; // add dash between every chunk of size {spacer}
         }
         return new string(buff2);

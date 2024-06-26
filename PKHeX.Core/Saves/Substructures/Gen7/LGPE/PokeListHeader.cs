@@ -15,9 +15,6 @@ namespace PKHeX.Core;
 /// </remarks>
 public sealed class PokeListHeader : SaveBlock<SAV7b>
 {
-    public PokeListHeader(SAV7b sav, Memory<byte> raw, bool exportable) : base(sav, raw)
-        => PokeListInfo = Initialize(exportable);
-
     /// <summary>
     /// Raw representation of data, cast to ushort[].
     /// </summary>
@@ -28,23 +25,23 @@ public sealed class PokeListHeader : SaveBlock<SAV7b>
     private const int MAX_SLOTS = 1000;
     private const int SLOT_EMPTY = 1001;
 
-    private int[] Initialize(bool exportable)
+    public PokeListHeader(SAV7b sav, int offset) : base(sav)
     {
-        var info = LoadPointerData();
-        if (!exportable)
+        Offset = offset;
+        var info = PokeListInfo = LoadPointerData();
+        if (!sav.State.Exportable)
         {
-            info.AsSpan().Fill(SLOT_EMPTY);
+            for (int i = 0; i < COUNT; i++)
+                info[i] = SLOT_EMPTY;
         }
         else
         {
-            // Count the party slots that are valid
             for (int i = 0; i < 6; i++)
             {
                 if (info[i] < MAX_SLOTS)
                     ++_partyCount;
             }
         }
-        return info;
     }
 
     private int _partyCount;
@@ -98,14 +95,14 @@ public sealed class PokeListHeader : SaveBlock<SAV7b>
 
     public int Count
     {
-        get => ReadUInt16LittleEndian(Data[(COUNT * 2)..]);
-        set => WriteUInt16LittleEndian(Data[(COUNT * 2)..], (ushort)value);
+        get => ReadUInt16LittleEndian(Data.AsSpan(Offset + (COUNT * 2)));
+        set => WriteUInt16LittleEndian(Data.AsSpan(Offset + (COUNT * 2)), (ushort)value);
     }
 
     private int[] LoadPointerData()
     {
-        var span = Data;
-        var list = new int[COUNT];
+        var span = Data.AsSpan(Offset);
+        var list = new int[7];
         for (int i = 0; i < list.Length; i++)
             list[i] = ReadUInt16LittleEndian(span[(i * 2)..]);
         return list;
@@ -113,7 +110,7 @@ public sealed class PokeListHeader : SaveBlock<SAV7b>
 
     private void SetPointerData(ReadOnlySpan<int> vals)
     {
-        var span = Data;
+        var span = Data.AsSpan(Offset);
         for (int i = 0; i < vals.Length; i++)
             WriteUInt16LittleEndian(span[(i*2)..], (ushort)vals[i]);
         vals.CopyTo(PokeListInfo);

@@ -55,16 +55,14 @@ public sealed class SaveHandlerGCI : ISaveHandler
         var header = input[..headerSize].ToArray();
         var data = input[headerSize..].ToArray();
 
-        return new SaveHandlerSplitResult(data, header, [], this);
+        return new SaveHandlerSplitResult(data, header, []);
     }
-
-    public void Finalize(Span<byte> data) { }
 
     /// <summary>
     /// Checks if the game code is one of the recognizable versions.
     /// </summary>
     /// <param name="gameCode">4 character game code string</param>
-    /// <returns>Magic version ID enumeration; <see cref="GameVersion.Invalid"/> if no match.</returns>
+    /// <returns>Magic version ID enumeration; <see cref="GameVersion.Unknown"/> if no match.</returns>
     public static GameVersion GetGameCode(ReadOnlySpan<byte> gameCode)
     {
         if (IsGameMatchHeader(HEADER_COLO, gameCode))
@@ -74,6 +72,6 @@ public sealed class SaveHandlerGCI : ISaveHandler
         if (IsGameMatchHeader(HEADER_RSBOX, gameCode))
             return GameVersion.RSBOX;
 
-        return GameVersion.Invalid;
+        return GameVersion.Unknown;
     }
 }

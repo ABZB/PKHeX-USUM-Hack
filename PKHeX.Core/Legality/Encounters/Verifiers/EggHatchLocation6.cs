@@ -1,14 +1,8 @@
 namespace PKHeX.Core;
 
-/// <summary>
-/// Hatch Location validity for <see cref="GameVersion.Gen6"/>.
-/// </summary>
 public static class EggHatchLocation6
 {
-    /// <summary>
-    /// Returns true if the hatch location is valid for X and Y.
-    /// </summary>
-    public static bool IsValidMet6XY(ushort location)
+    public static bool IsValidMet6XY(int location)
     {
         const int min = 6;
         const int max = 168;
@@ -21,10 +15,7 @@ public static class EggHatchLocation6
         return location != 80; // unused
     }
 
-    /// <summary>
-    /// Returns true if the hatch location is valid for Omega Ruby and Alpha Sapphire.
-    /// </summary>
-    public static bool IsValidMet6AO(ushort location)
+    public static bool IsValidMet6AO(int location)
     {
         const int min = 170;
         const int max = 354;

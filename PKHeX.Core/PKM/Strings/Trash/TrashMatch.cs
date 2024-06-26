@@ -1,4 +1,4 @@
-namespace PKHeX.Core;
+﻿namespace PKHeX.Core;
 
 public enum TrashMatch
 {
@@ -7,7 +7,10 @@ public enum TrashMatch
     /// </summary>
     NotPresent,
 
-    NotEmpty,
+    /// <summary>
+    /// Expected under-layer of trash was found.
+    /// </summary>
+    Present,
 
     /// <summary>
     /// Displayed string is too long, with all bytes covering the initial trash.
@@ -15,19 +18,7 @@ public enum TrashMatch
     TooLongToTell,
 
     /// <summary>
-    /// Expected under-layer of trash was found.
+    /// Ignored due to other issues that would be flagged by other checks.
     /// </summary>
-    Present,
-
-    PresentNone,
-
-    PresentSingle,
-
-    PresentMulti,
-}
-
-public static class TrashMatchExtensions
-{
-    public static bool IsPresent(this TrashMatch match) => match >= TrashMatch.Present;
-    public static bool IsInvalid(this TrashMatch match) => match < TrashMatch.TooLongToTell;
+    Skipped,
 }

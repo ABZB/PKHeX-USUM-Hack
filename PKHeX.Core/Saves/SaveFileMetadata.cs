@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace PKHeX.Core;
 
@@ -30,7 +28,6 @@ public sealed record SaveFileMetadata(SaveFile SAV)
 
     private byte[] Footer = []; // .dsv
     private byte[] Header = []; // .gci
-    private ISaveHandler? Handler;
 
     private string BAKSuffix => $" [{SAV.ShortSummary}].bak";
 
@@ -55,23 +52,20 @@ public sealed record SaveFileMetadata(SaveFile SAV)
     /// <returns>Final save file data.</returns>
     public byte[] Finalize(byte[] data, BinaryExportSetting setting)
     {
-        if (Footer.Length != 0 && setting.HasFlag(BinaryExportSetting.IncludeFooter))
-            data = [..data, ..Footer];
-        if (Header.Length != 0 && setting.HasFlag(BinaryExportSetting.IncludeHeader))
-            data = [..Header, ..data];
-        if (setting != BinaryExportSetting.None)
-            Handler?.Finalize(data);
+        if (Footer.Length > 0 && setting.HasFlag(BinaryExportSetting.IncludeFooter))
+            return [..data, ..Footer];
+        if (Header.Length > 0 && setting.HasFlag(BinaryExportSetting.IncludeHeader))
+            return [..Header, ..data];
         return data;
     }
 
     /// <summary>
     /// Sets the details of any trimmed header and footer arrays to a <see cref="SaveFile"/> object.
     /// </summary>
-    public void SetExtraInfo(byte[] header, byte[] footer, ISaveHandler handler)
+    public void SetExtraInfo(byte[] header, byte[] footer)
     {
         Header = header;
         Footer = footer;
-        Handler = handler;
     }
 
     /// <summary>
@@ -99,67 +93,9 @@ public sealed record SaveFileMetadata(SaveFile SAV)
 
     private static string GetFileName(string path, string bak)
     {
-        var fileName = Path.GetFileName(path);
-
-        // Trim off existing backup name if present
         var bakName = Util.CleanFileName(bak);
-        if (fileName.EndsWith(bakName, StringComparison.Ordinal))
-            fileName = fileName[..^bakName.Length];
-
-        if (fileName.StartsWith("savedata ", StringComparison.OrdinalIgnoreCase) && fileName.Contains(".bin"))
-            return fileName[..8] + ".bin";
-        if (fileName.StartsWith("main"))
-            return "main";
-
-        var extensions = CollectionsMarshal.AsSpan(CustomSaveExtensions);
-        return TrimNames(fileName, extensions);
-    }
-
-    public static readonly List<string> CustomSaveExtensions =
-    [
-        "sav", // standard
-        "dat", // VC data
-        "gci", // Dolphin GameCubeImage
-        "dsv", // DeSmuME
-        "srm", // RetroArch save files
-        "fla", // flash
-        "SaveRAM", // BizHawk
-    ];
-
-    private static string TrimNames(string fileName, ReadOnlySpan<string> extensions)
-    {
-        foreach (var ext in extensions)
-        {
-            var index = fileName.LastIndexOf(ext, StringComparison.OrdinalIgnoreCase);
-            if (index == -1)
-                continue;
-            // Check for a period before the extension
-            if (index == 0 || fileName[index - 1] != '.')
-                continue;
-
-            var result = fileName.AsSpan();
-            result = result[..(index-1)];
-
-            // Files can have (#) appended to them, so we need to trim that off
-            var open = result.LastIndexOf('(');
-            var close = result.LastIndexOf(')');
-            if (open != -1 && close != -1 && close > open && char.IsDigit(result[open + 1]))
-                result = result[..open].Trim();
-            var copy = result.IndexOf(" - Copy", StringComparison.OrdinalIgnoreCase);
-            if (copy == -1)
-                copy = result.IndexOf("_-_Copy", StringComparison.OrdinalIgnoreCase);
-            if (copy != -1)
-                result = result[..copy].Trim();
-
-            // Re-add the extension
-            return $"{result}.{ext}";
-        }
-        return fileName;
-    }
-
-    public string GetBackupFileName(string destDir)
-    {
-        return Path.Combine(destDir, Util.CleanFileName(BAKName));
+        var fn = Path.GetFileName(path);
+        return fn.EndsWith(bakName, StringComparison.Ordinal) ? fn[..^bakName.Length] : fn;
     }
 
     private void SetAsBlank()
@@ -192,7 +128,7 @@ public sealed record SaveFileMetadata(SaveFile SAV)
         var flags = BinaryExportSetting.None;
         if (ext == ".dsv")
             flags |= BinaryExportSetting.IncludeFooter;
-        if (ext == ".gci" || SAV is IGCSaveFile {MemoryCard: null} || ext == ".sram")
+        if (ext == ".gci" || SAV is IGCSaveFile {MemoryCard: null})
             flags |= BinaryExportSetting.IncludeHeader;
         return flags;
     }

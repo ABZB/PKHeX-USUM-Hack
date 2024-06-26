@@ -6,11 +6,11 @@ namespace PKHeX.Core;
 public sealed record EncounterStatic3XD(ushort Species, byte Level)
     : IEncounterable, IEncounterMatch, IEncounterConvertible<XK3>, IFatefulEncounterReadOnly, IRandomCorrelation, IMoveset
 {
-    public byte Generation => 3;
+    public int Generation => 3;
     public EntityContext Context => EntityContext.Gen3;
     public GameVersion Version => GameVersion.XD;
-    ushort ILocation.EggLocation => 0;
-    ushort ILocation.Location => Location;
+    int ILocation.EggLocation => 0;
+    int ILocation.Location => Location;
     public bool IsShiny => false;
     private bool Gift => FixedBall == Ball.Poke;
     public Shiny Shiny => Shiny.Random;
@@ -21,7 +21,7 @@ public sealed record EncounterStatic3XD(ushort Species, byte Level)
 
     public required byte Location { get; init; }
     public byte Form => 0;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public Moveset Moves { get; init; }
 
     public string Name => "Static Encounter";
@@ -44,17 +44,17 @@ public sealed record EncounterStatic3XD(ushort Species, byte Level)
         {
             Species = Species,
             CurrentLevel = LevelMin,
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
 
-            MetLocation = Location,
-            MetLevel = LevelMin,
-            Version = GameVersion.CXD,
+            Met_Location = Location,
+            Met_Level = LevelMin,
+            Version = (byte)GameVersion.CXD,
             Ball = (byte)(FixedBall != Ball.None ? FixedBall : Ball.Poke),
             FatefulEncounter = FatefulEncounter,
 
             Language = lang,
-            OriginalTrainerName = tr.OT,
-            OriginalTrainerGender = 0,
+            OT_Name = tr.OT,
+            OT_Gender = 0,
             ID32 = tr.ID32,
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
         };
@@ -71,8 +71,8 @@ public sealed record EncounterStatic3XD(ushort Species, byte Level)
 
     private void SetPINGA(XK3 pk, EncounterCriteria criteria, PersonalInfo3 pi)
     {
-        var gender = criteria.GetGender(pi);
-        var nature = criteria.GetNature();
+        int gender = criteria.GetGender(pi);
+        int nature = (int)criteria.GetNature();
         var ability = criteria.GetAbilityFromNumber(Ability);
         do
         {
@@ -108,14 +108,14 @@ public sealed record EncounterStatic3XD(ushort Species, byte Level)
             return true;
 
         var expect = pk is PB8 ? Locations.Default8bNone : 0;
-        return pk.EggLocation == expect;
+        return pk.Egg_Location == expect;
     }
 
     private bool IsMatchLevel(PKM pk, EvoCriteria evo)
     {
         if (pk.Format != 3) // Met Level lost on PK3=>PK4
             return evo.LevelMax >= Level;
-        return pk.MetLevel == Level;
+        return pk.Met_Level == Level;
     }
 
     private bool IsMatchLocation(PKM pk)
@@ -123,7 +123,7 @@ public sealed record EncounterStatic3XD(ushort Species, byte Level)
         if (pk.Format != 3)
             return true; // transfer location verified later
 
-        var met = pk.MetLocation;
+        var met = pk.Met_Location;
         return Location == met;
     }
 

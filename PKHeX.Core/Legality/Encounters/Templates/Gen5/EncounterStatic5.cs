@@ -6,13 +6,13 @@ namespace PKHeX.Core;
 public sealed record EncounterStatic5(GameVersion Version)
     : IEncounterable, IEncounterMatch, IEncounterConvertible<PK5>, IFixedGender
 {
-    public byte Generation => 5;
+    public int Generation => 5;
     public EntityContext Context => EntityContext.Gen5;
     public bool Roaming { get; init; }
-    ushort ILocation.Location => Location;
-    ushort ILocation.EggLocation => EggLocation;
+    int ILocation.Location => Location;
+    int ILocation.EggLocation => EggLocation;
     public bool IsShiny => false;
-    public bool IsEgg => EggLocation != 0;
+    public bool EggEncounter => EggLocation != 0;
     private bool Gift => FixedBall == Ball.Poke;
 
     public Ball FixedBall { get; init; }
@@ -40,7 +40,7 @@ public sealed record EncounterStatic5(GameVersion Version)
 
     public PK5 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language, version);
         var pi = PersonalTable.B2W2[Species];
         var pk = new PK5
@@ -48,28 +48,28 @@ public sealed record EncounterStatic5(GameVersion Version)
             Species = Species,
             Form = Form,
             CurrentLevel = LevelMin,
-            MetLocation = Location,
-            MetLevel = LevelMin,
+            Met_Location = Location,
+            Met_Level = LevelMin,
             MetDate = EncounterDate.GetDateNDS(),
             Ball = (byte)(FixedBall is Ball.None ? Ball.Poke : FixedBall),
 
             ID32 = tr.ID32,
-            Version = version,
+            Version = (byte)version,
             Language = lang,
-            OriginalTrainerGender = tr.Gender,
-            OriginalTrainerName = tr.OT,
+            OT_Gender = tr.Gender,
+            OT_Name = tr.OT,
 
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
 
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
         };
 
-        if (IsEgg)
+        if (EggEncounter)
         {
             // Fake as hatched.
-            pk.MetLocation = Locations.HatchLocation5;
-            pk.MetLevel = EggStateLegality.EggMetLevel;
-            pk.EggLocation = EggLocation;
+            pk.Met_Location = Locations.HatchLocation5;
+            pk.Met_Level = EggStateLegality.EggMetLevel;
+            pk.Egg_Location = EggLocation;
             pk.EggMetDate = pk.MetDate;
         }
 
@@ -83,8 +83,8 @@ public sealed record EncounterStatic5(GameVersion Version)
 
     private void SetPINGA(PK5 pk, EncounterCriteria criteria, PersonalInfo5B2W2 pi)
     {
-        var gender = criteria.GetGender(Gender, pi);
-        var nature = criteria.GetNature();
+        int gender = criteria.GetGender(Gender, pi);
+        int nature = (int)criteria.GetNature();
         var ability = criteria.GetAbilityFromNumber(Ability);
         var type = Shiny == Shiny.Always ? PIDType.G5MGShiny : PIDType.None;
         PIDGenerator.SetRandomWildPID5(pk, nature, ability, gender, type);
@@ -137,7 +137,7 @@ public sealed record EncounterStatic5(GameVersion Version)
             return false;
         if (!IsMatchLocation(pk))
             return false;
-        if (pk.MetLevel != Level)
+        if (pk.Met_Level != Level)
             return false;
         if (Gender != FixedGenderUtil.GenderRandom && pk.Gender != Gender)
             return false;
@@ -160,8 +160,8 @@ public sealed record EncounterStatic5(GameVersion Version)
 
     private bool IsMatchLocation(PKM pk)
     {
-        var met = pk.MetLocation;
-        if (IsEgg)
+        var met = pk.Met_Location;
+        if (EggEncounter)
             return true;
         if (!Roaming)
             return met == Location;
@@ -170,20 +170,20 @@ public sealed record EncounterStatic5(GameVersion Version)
 
     private bool IsMatchEggLocation(PKM pk)
     {
-        if (!IsEgg)
+        if (!EggEncounter)
         {
             var expect = pk is PB8 ? Locations.Default8bNone : EggLocation;
-            return pk.EggLocation == expect;
+            return pk.Egg_Location == expect;
         }
 
-        var eggLoc = pk.EggLocation;
+        var eggloc = pk.Egg_Location;
         if (!pk.IsEgg) // hatched
-            return eggLoc == EggLocation || eggLoc == Locations.LinkTrade5;
+            return eggloc == EggLocation || eggloc == Locations.LinkTrade5;
 
         // Unhatched:
-        if (eggLoc != EggLocation)
+        if (eggloc != EggLocation)
             return false;
-        if (pk.MetLocation is not (0 or Locations.LinkTrade5))
+        if (pk.Met_Location is not (0 or Locations.LinkTrade5))
             return false;
         return true;
     }
@@ -193,7 +193,7 @@ public sealed record EncounterStatic5(GameVersion Version)
     // 17,18,29,    // Route 4, 5, 16 Daytime
     // 19,20,21,    // Route 6, 7, 8 Evening
     // 22,23,24,    // Route 9, 10, 11 Night former half
-    private static bool IsRoamerMet(ushort location)
+    private static bool IsRoamerMet(int location)
     {
         if ((uint)location >= 32)
             return false;

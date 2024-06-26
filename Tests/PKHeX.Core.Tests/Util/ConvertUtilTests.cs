@@ -50,32 +50,32 @@ public class ConvertUtilTests
     }
 
     [Theory]
-    [InlineData(0x12345678, 12345678u)]
-    public void CheckConvertBCD_Little(uint raw, uint expect)
+    [InlineData(0x12345678, 12345678)]
+    public void CheckConvertBCD_Little(uint raw, int expect)
     {
         Span<byte> data = stackalloc byte[4];
         WriteUInt32LittleEndian(data, raw);
 
-        var result = BinaryCodedDecimal.ReadUInt32LittleEndian(data);
+        var result = BinaryCodedDecimal.ToInt32LE(data);
         result.Should().Be(expect);
 
         Span<byte> newData = stackalloc byte[4];
-        BinaryCodedDecimal.WriteUInt32LittleEndian(newData, result);
+        BinaryCodedDecimal.WriteBytesLE(newData, result);
         data.SequenceEqual(newData).Should().BeTrue();
     }
 
     [Theory]
-    [InlineData(0x12345678, 12345678u)]
-    public void CheckConvertBCD_Big(uint raw, uint expect)
+    [InlineData(0x78563412, 12345678)]
+    public void CheckConvertBCD_Big(uint raw, int expect)
     {
         Span<byte> data = stackalloc byte[4];
-        WriteUInt32BigEndian(data, raw);
+        WriteUInt32LittleEndian(data, raw);
 
-        var result = BinaryCodedDecimal.ReadUInt32BigEndian(data);
+        var result = BinaryCodedDecimal.ToInt32BE(data);
         result.Should().Be(expect);
 
         Span<byte> newData = stackalloc byte[4];
-        BinaryCodedDecimal.WriteUInt32BigEndian(newData, result);
+        BinaryCodedDecimal.WriteBytesBE(newData, result);
         data.SequenceEqual(newData).Should().BeTrue();
     }
 }

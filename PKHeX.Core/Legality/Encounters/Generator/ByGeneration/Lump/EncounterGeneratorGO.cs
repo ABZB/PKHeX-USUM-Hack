@@ -8,7 +8,7 @@ public sealed class EncounterGeneratorGO : IEncounterGenerator
 
     public IEnumerable<IEncounterable> GetEncounters(PKM pk, EvoCriteria[] chain, LegalInfo info)
     {
-        var loc = pk.MetLocation;
+        var loc = pk.Met_Location;
         if (loc == Locations.GO7)
             return EncounterGenerator7GO.Instance.GetEncounters(pk, chain, info);
         if (loc == Locations.GO8 && pk is not PB7)

@@ -21,7 +21,7 @@ public sealed partial class SAV_EventFlags2 : Form
         InitializeComponent();
         WinFormsUtil.TranslateInterface(this, Main.CurrentLanguage);
 
-        var editor = Editor = new EventWorkspace<SAV2, byte>(sav, sav.Version);
+        var editor = Editor = new EventWorkspace<SAV2, byte>(sav);
         DragEnter += Main_DragEnter;
         DragDrop += Main_DragDrop;
 
@@ -114,7 +114,7 @@ public sealed partial class SAV_EventFlags2 : Form
             cells[0].Value = values[index];
             cells[1].Value = name;
         }
-        dgv.CellValueChanged += (_, e) =>
+        dgv.CellValueChanged += (s, e) =>
         {
             if (e.ColumnIndex != 0 || e.RowIndex == -1)
                 return;
@@ -125,7 +125,7 @@ public sealed partial class SAV_EventFlags2 : Form
             if (NUD_Flag.Value == index)
                 c_CustomFlag.Checked = chk;
         };
-        dgv.CellMouseUp += (_, e) =>
+        dgv.CellMouseUp += (s, e) =>
         {
             if (e.RowIndex == -1)
                 return;
@@ -185,7 +185,7 @@ public sealed partial class SAV_EventFlags2 : Form
             cb.InitializeBinding();
             cb.DataSource = map;
 
-            lbl.Click += (_, _) => mtb.Value = 0;
+            lbl.Click += (sender, e) => mtb.Value = 0;
             bool updating = false;
             mtb.ValueChanged += ChangeConstValue;
             void ChangeConstValue(object? sender, EventArgs e)
@@ -204,7 +204,7 @@ public sealed partial class SAV_EventFlags2 : Form
                     MT_Stat.Text = ((int)mtb.Value).ToString();
                 updating = false;
             }
-            cb.SelectedValueChanged += (_, _) =>
+            cb.SelectedValueChanged += (o, args) =>
             {
                 if (editing || updating)
                     return;
@@ -266,7 +266,7 @@ public sealed partial class SAV_EventFlags2 : Form
 
     private void ChangeSAV(object sender, EventArgs e)
     {
-        if (TB_NewSAV.Text.Length != 0 && TB_OldSAV.Text.Length != 0)
+        if (TB_NewSAV.Text.Length > 0 && TB_OldSAV.Text.Length > 0)
             DiffSaves();
     }
 

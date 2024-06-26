@@ -1,5 +1,5 @@
 using System;
-using static PKHeX.Core.StringConverter1;
+using static PKHeX.Core.StringConverter12;
 
 namespace PKHeX.Core;
 
@@ -8,18 +8,18 @@ namespace PKHeX.Core;
 /// </summary>
 public static class TrashBytesGB
 {
-    /// <inheritdoc cref="TrashBytesUTF16.GetStringLength"/>
+    /// <inheritdoc cref="TrashBytes.GetStringLength"/>
     public static int GetStringLength(ReadOnlySpan<byte> buffer)
     {
-        int index = GetTerminatorIndex(buffer);
+        int index = FindTerminatorIndex(buffer);
         return index == -1 ? buffer.Length : index;
     }
 
     /// <summary>
-    /// Returns a 8-bit aligned index of the terminator.
+    /// Returns a 16-bit aligned index of the terminator.
     /// </summary>
     /// <param name="buffer">Backing buffer of the string.</param>
     /// <returns>Index of the terminator, or -1 if not found.</returns>
-    public static int GetTerminatorIndex(ReadOnlySpan<byte> buffer)
-        => buffer.IndexOfAny(TerminatorZero, TerminatorCode);
+    public static int FindTerminatorIndex(ReadOnlySpan<byte> buffer)
+        => buffer.IndexOfAny(G1TerminatorZero, G1TerminatorCode);
 }

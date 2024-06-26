@@ -7,14 +7,14 @@ namespace PKHeX.Core;
 /// </summary>
 public sealed record EncounterTrade7b(GameVersion Version) : IEncounterable, IEncounterMatch, IFixedTrainer, IEncounterConvertible<PB7>
 {
-    public byte Generation => 7;
+    public int Generation => 7;
     public EntityContext Context => EntityContext.Gen7b;
-    public ushort Location => Locations.LinkTrade6NPC;
+    public int Location => Locations.LinkTrade6NPC;
     public Shiny Shiny => Shiny.Random;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public Ball FixedBall => Ball.Poke;
     public bool IsShiny => false;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
     public bool IsFixedTrainer => true;
     public AbilityPermission Ability => AbilityPermission.Any12;
 
@@ -43,7 +43,7 @@ public sealed record EncounterTrade7b(GameVersion Version) : IEncounterable, IEn
 
     public PB7 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language, version);
         var pi = PersonalTable.GG[Species, Form];
         var pk = new PB7
@@ -51,25 +51,28 @@ public sealed record EncounterTrade7b(GameVersion Version) : IEncounterable, IEn
             Species = Species,
             Form = Form,
             CurrentLevel = Level,
-            MetLocation = Location,
-            MetLevel = Level,
+            Met_Location = Location,
+            Met_Level = Level,
             MetDate = EncounterDate.GetDateSwitch(),
             Ball = (byte)FixedBall,
 
             ID32 = ID32,
-            Version = version,
+            Version = (byte)version,
             Language = lang,
-            OriginalTrainerGender = OTGender,
-            OriginalTrainerName = TrainerNames[lang],
+            OT_Gender = OTGender,
+            OT_Name = TrainerNames[lang],
 
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
+
+            HeightScalar = PokeSizeUtil.GetRandomScalar(),
+            WeightScalar = PokeSizeUtil.GetRandomScalar(),
 
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
 
-            HandlingTrainerName = tr.OT,
-            HandlingTrainerGender = tr.Gender,
+            HT_Name = tr.OT,
+            HT_Gender = tr.Gender,
             CurrentHandler = 1,
-            HandlingTrainerFriendship = pi.BaseFriendship,
+            HT_Friendship = pi.BaseFriendship,
         };
 
         EncounterUtil.SetEncounterMoves(pk, version, Level);
@@ -84,15 +87,11 @@ public sealed record EncounterTrade7b(GameVersion Version) : IEncounterable, IEn
 
     private void SetPINGA(PB7 pk, EncounterCriteria criteria, PersonalInfo7GG pi)
     {
-        var rnd = Util.Rand;
-        pk.PID = rnd.Rand32();
-        pk.EncryptionConstant = rnd.Rand32();
-        pk.Nature = criteria.GetNature();
+        pk.PID = Util.Rand32();
+        pk.EncryptionConstant = Util.Rand32();
+        pk.Nature = (int)criteria.GetNature();
         pk.Gender = criteria.GetGender(pi);
         pk.RefreshAbility(criteria.GetAbilityFromNumber(Ability));
-
-        pk.HeightScalar = PokeSizeUtil.GetRandomScalar(rnd);
-        pk.WeightScalar = PokeSizeUtil.GetRandomScalar(rnd);
         criteria.SetRandomIVs(pk, IVs);
     }
 
@@ -104,7 +103,7 @@ public sealed record EncounterTrade7b(GameVersion Version) : IEncounterable, IEn
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (pk.MetLevel != Level)
+        if (pk.Met_Level != Level)
             return false;
         if (IVs.IsSpecified)
         {
@@ -115,7 +114,7 @@ public sealed record EncounterTrade7b(GameVersion Version) : IEncounterable, IEn
             return false;
         if (evo.Form != Form && !FormInfo.IsFormChangeable(Species, Form, pk.Form, Context, pk.Context))
             return false;
-        if (pk.OriginalTrainerGender != OTGender)
+        if (pk.OT_Gender != OTGender)
             return false;
         if (!IsMatchEggLocation(pk))
             return false;
@@ -125,7 +124,7 @@ public sealed record EncounterTrade7b(GameVersion Version) : IEncounterable, IEn
     private bool IsMatchEggLocation(PKM pk)
     {
         var expect = pk is PB8 ? Locations.Default8bNone : EggLocation;
-        return pk.EggLocation == expect;
+        return pk.Egg_Location == expect;
     }
 
     public EncounterMatchRating GetMatchRating(PKM pk) => EncounterMatchRating.Match;

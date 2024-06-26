@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace PKHeX.Core;
 
@@ -6,7 +6,7 @@ namespace PKHeX.Core;
 /// Contest photo language data
 /// </summary>
 /// <remarks>CON_PHOTO_LANG_DATA size: 0x18</remarks>
-public sealed class ContestPhotoLanguage8b(SAV8BS sav, Memory<byte> raw) : SaveBlock<SAV8BS>(sav, raw)
+public sealed class ContestPhotoLanguage8b : SaveBlock<SAV8BS>
 {
     // structure:
     // 5 (Style, Beautiful, Cute, Clever, Strong) bytes of language IDs
@@ -14,7 +14,9 @@ public sealed class ContestPhotoLanguage8b(SAV8BS sav, Memory<byte> raw) : SaveB
     // 2 s64 reserved
     private const int COUNT_CONTEST = 5;
 
-    public byte GetLanguage(int contest) => Data[GetContestOffset(contest)];
+    public ContestPhotoLanguage8b(SAV8BS sav, int offset) : base(sav) => Offset = offset;
+
+    public byte GetLanguage(int contest) => Data[Offset + GetContestOffset(contest)];
 
     private static int GetContestOffset(int contest)
     {
@@ -23,5 +25,5 @@ public sealed class ContestPhotoLanguage8b(SAV8BS sav, Memory<byte> raw) : SaveB
         return contest;
     }
 
-    public void SetLanguage(int contest, int language) => Data[GetContestOffset(contest)] = (byte)language;
+    public void SetLanguage(int contest, int language) => Data[Offset + GetContestOffset(contest)] = (byte)language;
 }

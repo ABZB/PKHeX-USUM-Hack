@@ -1,35 +1,33 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PKHeX.Core;
 
-public static class BattleVideo
+public abstract class BattleVideo : IPokeGroup
 {
-    public static IBattleVideo? GetVariantBattleVideo(byte[] data)
+    public abstract IReadOnlyList<PKM> BattlePKMs { get; }
+    public abstract int Generation { get; }
+
+    public IEnumerable<PKM> Contents => BattlePKMs;
+
+    public static BattleVideo? GetVariantBattleVideo(byte[] data)
     {
-        if (BattleVideo7.IsValid(data))
-            return new BattleVideo7(data);
-        if (BattleVideo6.IsValid(data))
-            return new BattleVideo6(data);
-        if (BattleVideo5.IsValid(data))
-            return new BattleVideo5(data);
-        if (BattleVideo4.IsValid(data))
-            return new BattleVideo4(data);
-        if (BattleVideo3.IsValid(data))
-            return new BattleVideo3(data);
+        if (BV6.IsValid(data))
+            return new BV6(data);
+        if (BV7.IsValid(data))
+            return new BV7(data);
+        if (BV3.IsValid(data))
+            return new BV3(data);
         return null;
     }
 
     public static bool IsValid(ReadOnlySpan<byte> data)
     {
-        if (BattleVideo7.IsValid(data))
+        if (BV6.IsValid(data))
             return true;
-        if (BattleVideo6.IsValid(data))
+        if (BV7.IsValid(data))
             return true;
-        if (BattleVideo5.IsValid(data))
-            return true;
-        if (BattleVideo4.IsValid(data))
-            return true;
-        if (BattleVideo3.IsValid(data))
+        if (BV3.IsValid(data))
             return true;
         return false;
     }

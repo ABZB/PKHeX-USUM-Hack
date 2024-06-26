@@ -23,8 +23,6 @@ public sealed class SaveHandlerDeSmuME : ISaveHandler
         var footer = input[RealSize..].ToArray();
         var data = input[..RealSize].ToArray();
 
-        return new SaveHandlerSplitResult(data, [], footer, this);
+        return new SaveHandlerSplitResult(data, [], footer);
     }
-
-    public void Finalize(Span<byte> data) { }
 }

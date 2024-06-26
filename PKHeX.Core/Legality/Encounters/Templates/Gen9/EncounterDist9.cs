@@ -8,16 +8,16 @@ namespace PKHeX.Core;
 public sealed record EncounterDist9
     : IEncounterable, IEncounterMatch, IEncounterConvertible<PK9>, ITeraRaid9, IMoveset, IFlawlessIVCount, IFixedGender, IFixedNature
 {
-    public byte Generation => 9;
-    ushort ILocation.Location => Location;
+    public int Generation => 9;
+    int ILocation.Location => Location;
     public const ushort Location = Locations.TeraCavern9;
     public EntityContext Context => EntityContext.Gen9;
     public GameVersion Version => GameVersion.SV;
     public bool IsDistribution => Index != 0;
     public Ball FixedBall => Ball.None;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public bool IsShiny => Shiny == Shiny.Always;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
 
     public required ushort Species { get; init; }
     public required byte Form { get; init; }
@@ -241,7 +241,7 @@ public sealed record EncounterDist9
     public PK9 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language);
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         var pi = PersonalTable.SV[Species, Form];
         var pk = new PK9
         {
@@ -249,17 +249,17 @@ public sealed record EncounterDist9
             Species = Species,
             Form = Form,
             CurrentLevel = LevelMin,
-            OriginalTrainerFriendship = pi.BaseFriendship,
-            MetLocation = Location,
-            MetLevel = LevelMin,
+            OT_Friendship = pi.BaseFriendship,
+            Met_Location = Location,
+            Met_Level = LevelMin,
             MetDate = EncounterDate.GetDateSwitch(),
-            Version = version,
+            Version = (byte)version,
             Ball = (byte)Ball.Poke,
 
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
-            ObedienceLevel = LevelMin,
-            OriginalTrainerName = tr.OT,
-            OriginalTrainerGender = tr.Gender,
+            Obedience_Level = LevelMin,
+            OT_Name = tr.OT,
+            OT_Gender = tr.Gender,
             ID32 = tr.ID32,
         };
         SetPINGA(pk, criteria, pi);
@@ -287,7 +287,7 @@ public sealed record EncounterDist9
     #region Matching
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (!this.IsLevelWithinRange(pk.MetLevel))
+        if (!this.IsLevelWithinRange(pk.Met_Level))
             return false;
         if (Gender != FixedGenderUtil.GenderRandom && pk.Gender != Gender)
             return false;
@@ -306,7 +306,7 @@ public sealed record EncounterDist9
     private bool IsMatchEggLocation(PKM pk)
     {
         var expect = pk is PB8 ? Locations.Default8bNone : EggLocation;
-        return pk.EggLocation == expect;
+        return pk.Egg_Location == expect;
     }
 
     private bool IsMatchLocation(PKM pk)
@@ -326,11 +326,11 @@ public sealed record EncounterDist9
         return IsMatchDeferred(pk);
     }
 
-    private static bool IsMatchLocationExact(PKM pk) => pk.MetLocation == Location;
+    private static bool IsMatchLocationExact(PKM pk) => pk.Met_Location == Location;
 
     private static bool IsMatchLocationRemapped(PKM pk)
     {
-        var met = pk.MetLocation;
+        var met = (ushort)pk.Met_Location;
         var version = pk.Version;
         if (pk.Context == EntityContext.Gen8)
             return LocationsHOME.IsValidMetSV(met, version);
@@ -353,14 +353,7 @@ public sealed record EncounterDist9
             }
             else if (Ability.IsSingleValue(out int index) && 1 << index != num) // Fixed regular ability
             {
-                var a = Ability;
-                if (a is OnlyHidden)
-                {
-                    if (!AbilityVerifier.CanAbilityPatch(9, PersonalTable.SV.GetFormEntry(Species, Form), pk.Species))
-                        return DeferredErrors;
-                    a = num == 1 ? OnlyFirst : OnlySecond;
-                }
-                if (a is OnlyFirst or OnlySecond && !AbilityVerifier.CanAbilityCapsule(9, PersonalTable.SV.GetFormEntry(Species, Form)))
+                if (Ability is OnlyFirst or OnlySecond && !AbilityVerifier.CanAbilityCapsule(9, PersonalTable.SV.GetFormEntry(Species, Form)))
                     return DeferredErrors;
             }
         }

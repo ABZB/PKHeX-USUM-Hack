@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using static PKHeX.Core.MessageStrings;
-using static PKHeX.Core.GeonetPoint;
 
 namespace PKHeX.Core;
 
@@ -16,14 +14,6 @@ public static partial class Util
             list.Sort(1, list.Count - 1, Comparer); // keep null value as first
         return list;
     }
-
-    public static List<ComboItem> GetGeonetPointList() =>
-    [
-        new (MsgGeonetPointNone,   (int)None),
-        new (MsgGeonetPointBlue,   (int)Blue),
-        new (MsgGeonetPointYellow, (int)Yellow),
-        new (MsgGeonetPointRed,    (int)Red),
-    ];
 
     private static List<ComboItem> GetCBListFromCSV(ReadOnlySpan<string> inputCSV, int index)
     {

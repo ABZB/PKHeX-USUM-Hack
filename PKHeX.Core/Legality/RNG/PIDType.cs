@@ -1,12 +1,10 @@
-using static PKHeX.Core.PIDType;
-
 namespace PKHeX.Core;
 
 /// <summary>
 /// PID + IV correlation.
 /// </summary>
 /// <remarks>This is just a catch-all enumeration to describe the different correlations.</remarks>
-public enum PIDType : byte
+public enum PIDType
 {
     /// <summary> No relationship between the PID and IVs </summary>
     None,
@@ -29,19 +27,19 @@ public enum PIDType : byte
     /// <remarks><see cref="LCRNG"/></remarks>
     Method_4,
 
-    /// <summary> Method H1_Unown (FR/LG) </summary>
+    /// <summary> Method H1_Unown (FRLG) </summary>
     /// <remarks><see cref="LCRNG"/></remarks>
     Method_1_Unown,
 
-    /// <summary> Method H2_Unown (FR/LG) </summary>
+    /// <summary> Method H2_Unown (FRLG) </summary>
     /// <remarks><see cref="LCRNG"/></remarks>
     Method_2_Unown,
 
-    /// <summary> Method H3_Unown (FR/LG) </summary>
+    /// <summary> Method H3_Unown (FRLG) </summary>
     /// <remarks><see cref="LCRNG"/></remarks>
     Method_3_Unown,
 
-    /// <summary> Method H4_Unown (FR/LG) </summary>
+    /// <summary> Method H4_Unown (FRLG) </summary>
     /// <remarks><see cref="LCRNG"/></remarks>
     Method_4_Unown,
 
@@ -62,13 +60,13 @@ public enum PIDType : byte
     BACD_U,
 
     /// <summary>
-    /// Event Reversed Order PID restricted to 16bit Origin Seed, anti-shiny.
+    /// Event Reversed Order PID restricted to 16bit Origin Seed, antishiny.
     /// </summary>
     /// <remarks><see cref="LCRNG"/> seed is clamped to 16bits.</remarks>
     BACD_R_A,
 
     /// <summary>
-    /// Event Reversed Order PID without Origin Seed restrictions, anti-shiny.
+    /// Event Reversed Order PID without Origin Seed restrictions, antishiny.
     /// </summary>
     /// <remarks><see cref="LCRNG"/></remarks>
     BACD_U_A,
@@ -86,13 +84,13 @@ public enum PIDType : byte
     BACD_U_S,
 
     /// <summary>
-    /// Event Reversed Order PID restricted to 16bit Origin Seed, anti-shiny (nyx)
+    /// Event Reversed Order PID restricted to 16bit Origin Seed, antishiny (nyx)
     /// </summary>
     /// <remarks><see cref="LCRNG"/> seed is clamped to 16bits.</remarks>
     BACD_R_AX,
 
     /// <summary>
-    /// Event Reversed Order PID without Origin Seed restrictions, anti-shiny (nyx)
+    /// Event Reversed Order PID without Origin Seed restrictions, antishiny (nyx)
     /// </summary>
     /// <remarks><see cref="LCRNG"/></remarks>
     BACD_U_AX,
@@ -172,10 +170,10 @@ public enum PIDType : byte
     Pokewalker,
 
     /// <summary>
-    /// Generation 8 Xoroshiro correlation
+    /// Generation 8 Raid PID
     /// </summary>
     /// <remarks>Formulaic based on PID &amp; EC values from a 64bit-seed.</remarks>
-    Xoroshiro,
+    Raid8,
 
     /// <summary>
     /// Generation 8 Overworld Spawn PID
@@ -196,14 +194,4 @@ public enum PIDType : byte
     Tera9,
 
     #endregion
-}
-
-public static class PIDTypeExtensions
-{
-    /// <summary>
-    /// Checks if the provided PIDType is one of the in-game Method-X types for Gen3.
-    /// </summary>
-    public static bool IsClassicMethod(this PIDType type) => type
-        is Method_1 or Method_2 or Method_3 or Method_4
-        or Method_1_Unown or Method_2_Unown or Method_3_Unown or Method_4_Unown;
 }

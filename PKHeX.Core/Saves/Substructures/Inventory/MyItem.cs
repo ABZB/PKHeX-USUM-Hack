@@ -1,9 +1,10 @@
-using System;
 using System.Collections.Generic;
 
 namespace PKHeX.Core;
 
-public abstract class MyItem(SaveFile SAV, Memory<byte> raw) : SaveBlock<SaveFile>(SAV, raw)
+public abstract class MyItem : SaveBlock<SaveFile>
 {
     public abstract IReadOnlyList<InventoryPouch> Inventory { get; set; }
+    protected MyItem(SaveFile SAV) : base(SAV) { }
+    protected MyItem(SaveFile SAV, byte[] data) : base(SAV, data) { }
 }

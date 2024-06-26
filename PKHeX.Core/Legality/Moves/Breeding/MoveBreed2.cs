@@ -161,7 +161,7 @@ public static class MoveBreed2
             if (move > Legal.MaxMoveID_2) // byte
                 continue;
 
-            if (baseEgg.Contains(move))
+            if (baseEgg.IndexOf(move) != -1)
                 possible[i] |= 1 << (int)Base;
 
             if (inheritLevelUp && learn.GetIsLearn(move))

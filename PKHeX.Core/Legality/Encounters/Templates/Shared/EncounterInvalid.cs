@@ -13,8 +13,8 @@ public sealed record EncounterInvalid : IEncounterable
     public byte Form { get; }
     public byte LevelMin { get; }
     public byte LevelMax { get; }
-    public bool IsEgg { get; }
-    public byte Generation { get; }
+    public bool EggEncounter { get; }
+    public int Generation { get; }
     public EntityContext Context { get; }
     public GameVersion Version { get; }
     public bool IsShiny => false;
@@ -22,8 +22,8 @@ public sealed record EncounterInvalid : IEncounterable
 
     public string Name => "Invalid";
     public string LongName => "Invalid";
-    public ushort Location => 0;
-    public ushort EggLocation => 0;
+    public int Location => 0;
+    public int EggLocation => 0;
     public AbilityPermission Ability => AbilityPermission.Any12H;
     public Ball FixedBall => Ball.None;
 
@@ -33,11 +33,11 @@ public sealed record EncounterInvalid : IEncounterable
     {
         Species = pk.Species;
         Form = pk.Form;
-        LevelMin = pk.MetLevel;
-        LevelMax = pk.CurrentLevel;
-        IsEgg = pk.WasEgg;
+        LevelMin = (byte)pk.Met_Level;
+        LevelMax = (byte)pk.CurrentLevel;
+        EggEncounter = pk.WasEgg;
         Generation = pk.Generation;
-        Version = pk.Version;
+        Version = (GameVersion)pk.Version;
         Context = pk.Context;
     }
 

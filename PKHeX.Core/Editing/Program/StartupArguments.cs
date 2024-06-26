@@ -15,6 +15,7 @@ public sealed class StartupArguments
 
     // ReSharper disable once UnassignedGetOnlyAutoProperty
     public Exception? Error { get; }
+    // ReSharper disable once CollectionNeverQueried.Global
     public readonly List<object> Extra = [];
 
     /// <summary>
@@ -22,7 +23,7 @@ public sealed class StartupArguments
     /// </summary>
     public void ReadArguments(IEnumerable<string> args)
     {
-        foreach (var path in args)
+        foreach (string path in args)
         {
             var other = FileUtil.GetSupportedFile(path, SAV);
             if (other is SaveFile s)
@@ -51,8 +52,6 @@ public sealed class StartupArguments
 
         if (Entity is { } x)
             SAV = ReadSettingsDefinedPKM(startup, x) ?? GetBlank(x);
-        else if (Extra.OfType<SAV3GCMemoryCard>().FirstOrDefault() is { } mc && SaveUtil.GetVariantSAV(mc) is { } mcSav)
-            SAV = mcSav;
         else
             SAV = ReadSettingsAnyPKM(startup) ?? GetBlankSaveFile(startup.DefaultSaveVersion, SAV);
     }
@@ -91,11 +90,11 @@ public sealed class StartupArguments
     private static SaveFile GetBlank(PKM pk)
     {
         var ctx = pk.Context;
-        var version = ctx.GetSingleGameVersion();
+        var ver = ctx.GetSingleGameVersion();
         if (pk is { Format: 1, Japanese: true })
-            version = GameVersion.BU;
+            ver = GameVersion.BU;
 
-        return SaveUtil.GetBlankSAV(version, pk.OriginalTrainerName, (LanguageID)pk.Language);
+        return SaveUtil.GetBlankSAV(ver, pk.OT_Name, (LanguageID)pk.Language);
     }
 
     private static SaveFile GetBlankSaveFile(GameVersion version, SaveFile? current)
@@ -105,9 +104,9 @@ public sealed class StartupArguments
         var sav = SaveUtil.GetBlankSAV(version, tr, lang);
         if (sav.Version == GameVersion.Invalid) // will fail to load
         {
-            var max = GameInfo.VersionDataSource.MaxBy(z => z.Value)!;
-            var maxVer = (GameVersion)max.Value;
-            sav = SaveUtil.GetBlankSAV(maxVer, tr, lang);
+            var max = GameInfo.VersionDataSource.MaxBy(z => z.Value) ?? throw new Exception();
+            var ver = (GameVersion)max.Value;
+            sav = SaveUtil.GetBlankSAV(ver, tr, lang);
         }
         return sav;
     }

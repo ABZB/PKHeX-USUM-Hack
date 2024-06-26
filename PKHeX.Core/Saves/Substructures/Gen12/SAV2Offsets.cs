@@ -66,8 +66,6 @@ internal sealed class SAV2Offsets
 
         switch (version)
         {
-            case GameVersion.GD:
-            case GameVersion.SI:
             case GameVersion.GS:
                 TimePlayed = 0x2053;
                 Palette = 0x206B;
@@ -136,8 +134,6 @@ internal sealed class SAV2Offsets
 
         switch (version)
         {
-            case GameVersion.GD:
-            case GameVersion.SI:
             case GameVersion.GS:
                 RTCFlags = 0x1000;
 

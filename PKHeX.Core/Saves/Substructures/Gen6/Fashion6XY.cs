@@ -2,11 +2,13 @@ using System;
 
 namespace PKHeX.Core;
 
-public sealed class Fashion6XY(SAV6XY sav, Memory<byte> raw) : SaveBlock<SAV6XY>(sav, raw)
+public sealed class Fashion6XY : SaveBlock<SAV6XY>
 {
+    public Fashion6XY(SAV6XY sav, int offset) : base(sav) => Offset = offset;
+
     public void UnlockAllAccessories()
     {
-        SAV.SetData(Data, AllAccessories);
+        SAV.SetData(AllAccessories, Offset);
     }
 
     private static ReadOnlySpan<byte> AllAccessories =>

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using PKHeX.Core;
@@ -23,9 +22,6 @@ public partial class SAV_Database : Form
     private readonly SAVEditor BoxView;
     private readonly PKMEditor PKME_Tabs;
     private readonly EntityInstructionBuilder UC_Builder;
-
-    private const int GridWidth = 6;
-    private const int GridHeight = 11;
 
     public SAV_Database(PKMEditor f1, SAVEditor saveditor)
     {
@@ -51,7 +47,7 @@ public partial class SAV_Database : Form
         var grid = DatabasePokeGrid;
         var smallWidth = grid.Width;
         var smallHeight = grid.Height;
-        grid.InitializeGrid(GridWidth, GridHeight, SpriteUtil.Spriter);
+        grid.InitializeGrid(6, 11, SpriteUtil.Spriter);
         grid.SetBackground(Resources.box_wp_clean);
         var newWidth = grid.Width;
         var newHeight = grid.Height;
@@ -67,26 +63,30 @@ public partial class SAV_Database : Form
         foreach (var slot in PKXBOXES)
         {
             // Enable Click
-            slot.MouseClick += (_, e) =>
+            slot.MouseClick += (sender, e) =>
             {
+                if (sender == null)
+                    return;
                 switch (ModifierKeys)
                 {
-                    case Keys.Control: ClickView(slot, e); break;
-                    case Keys.Alt: ClickDelete(slot, e); break;
-                    case Keys.Shift: ClickSet(slot, e); break;
+                    case Keys.Control: ClickView(sender, e); break;
+                    case Keys.Alt: ClickDelete(sender, e); break;
+                    case Keys.Shift: ClickSet(sender, e); break;
                 }
             };
 
             slot.ContextMenuStrip = mnu;
             if (Main.Settings.Hover.HoverSlotShowText)
             {
-                slot.MouseMove += (_, args) => ShowSet.UpdatePreviewPosition(args.Location);
-                slot.MouseEnter += (_, _) => ShowHoverTextForSlot(slot);
-                slot.MouseLeave += (_, _) => ShowSet.Clear();
+                slot.MouseMove += (o, args) => ShowSet.UpdatePreviewPosition(args.Location);
+                slot.MouseEnter += (o, args) => ShowHoverTextForSlot(slot, args);
+                slot.MouseLeave += (o, args) => ShowSet.Clear();
             }
-            slot.Enter += (_, _) =>
+            slot.Enter += (sender, e) =>
             {
-                var index = Array.IndexOf(PKXBOXES, slot);
+                if (sender is not PictureBox pb)
+                    return;
+                var index = Array.IndexOf(PKXBOXES, sender);
                 if (index < 0)
                     return;
                 index += (SCR_Box.Value * RES_MIN);
@@ -94,7 +94,7 @@ public partial class SAV_Database : Form
                     return;
 
                 var pk = Results[index];
-                slot.AccessibleDescription = ShowdownParsing.GetLocalizedPreviewText(pk.Entity, Main.CurrentLanguage);
+                pb.AccessibleDescription = ShowdownParsing.GetLocalizedPreviewText(pk.Entity, Main.CurrentLanguage);
             };
         }
 
@@ -118,14 +118,14 @@ public partial class SAV_Database : Form
         });
         task.Start();
 
-        Menu_SearchSettings.DropDown.Closing += (_, e) =>
+        Menu_SearchSettings.DropDown.Closing += (sender, e) =>
         {
             if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
                 e.Cancel = true;
         };
         CB_Format.Items[0] = MsgAny;
         CenterToParent();
-        Closing += (_, _) => ShowSet.Clear();
+        Closing += (sender, e) => ShowSet.Clear();
     }
 
     private readonly PictureBox[] PKXBOXES;
@@ -134,8 +134,8 @@ public partial class SAV_Database : Form
     private List<SlotCache> RawDB = [];
     private int slotSelected = -1; // = null;
     private Image? slotColor;
-    private const int RES_MIN = GridWidth * 1;
-    private const int RES_MAX = GridWidth * GridHeight;
+    private const int RES_MAX = 66;
+    private const int RES_MIN = 6;
     private readonly string Counter;
     private readonly string Viewed;
     private const int MAXFORMAT = PKX.Generation;
@@ -236,9 +236,9 @@ public partial class SAV_Database : Form
         L_Count.Text = string.Format(Counter, Results.Count);
         slotSelected = Results.Count - 1;
         slotColor = SpriteUtil.Spriter.Set;
-        if ((SCR_Box.Maximum + 1) * GridWidth < Results.Count)
+        if ((SCR_Box.Maximum + 1) * 6 < Results.Count)
             SCR_Box.Maximum++;
-        SCR_Box.Value = Math.Max(0, SCR_Box.Maximum - (PKXBOXES.Length / GridWidth) + 1);
+        SCR_Box.Value = Math.Max(0, SCR_Box.Maximum - (PKXBOXES.Length / 6) + 1);
         FillPKXBoxes(SCR_Box.Value);
         WinFormsUtil.Alert(MsgDBAddFromTabsSuccess);
     }
@@ -344,10 +344,7 @@ public partial class SAV_Database : Form
 
         ReportGrid reportGrid = new();
         reportGrid.Show();
-        var settings = Main.Settings.Report;
-        var extra = CollectionsMarshal.AsSpan(settings.ExtraProperties);
-        var hide = CollectionsMarshal.AsSpan(settings.HiddenProperties);
-        reportGrid.PopulateData(Results, extra, hide);
+        reportGrid.PopulateData(Results);
     }
 
     private sealed class SearchFolderDetail(string path, bool ignoreBackupFiles)
@@ -447,7 +444,7 @@ public partial class SAV_Database : Form
     private static void TryAddPKMsFromMemoryCard(ConcurrentBag<SlotCache> dbTemp, SAV3GCMemoryCard mc, string file)
     {
         var state = mc.GetMemoryCardState();
-        if (state == MemoryCardSaveStatus.Invalid)
+        if (state == GCMemoryCardState.Invalid)
             return;
 
         if (mc.HasCOLO)
@@ -532,16 +529,16 @@ public partial class SAV_Database : Form
     {
         var settings = new SearchSettings
         {
-            Format = (byte)(MAXFORMAT - CB_Format.SelectedIndex + 1), // 0->(n-1) => 1->n
+            Format = MAXFORMAT - CB_Format.SelectedIndex + 1, // 0->(n-1) => 1->n
             SearchFormat = (SearchComparison)CB_FormatComparator.SelectedIndex,
-            Generation = (byte)CB_Generation.SelectedIndex,
+            Generation = CB_Generation.SelectedIndex,
 
-            Version = (GameVersion)WinFormsUtil.GetIndex(CB_GameOrigin),
+            Version = WinFormsUtil.GetIndex(CB_GameOrigin),
             HiddenPowerType = WinFormsUtil.GetIndex(CB_HPType),
 
             Species = GetU16(CB_Species),
             Ability = WinFormsUtil.GetIndex(CB_Ability),
-            Nature = (Nature)WinFormsUtil.GetIndex(CB_Nature),
+            Nature = WinFormsUtil.GetIndex(CB_Nature),
             Item = WinFormsUtil.GetIndex(CB_HeldItem),
 
             BatchInstructions = RTB_Instructions.Text,
@@ -596,11 +593,11 @@ public partial class SAV_Database : Form
         var search = SearchDatabase();
 
         bool legalSearch = Menu_SearchLegal.Checked ^ Menu_SearchIllegal.Checked;
-        bool wordFilter = ParseSettings.Settings.WordFilter.CheckWordFilter;
+        bool wordFilter = ParseSettings.CheckWordFilter;
         if (wordFilter && legalSearch && WinFormsUtil.Prompt(MessageBoxButtons.YesNo, MsgDBSearchLegalityWordfilter) == DialogResult.No)
-            ParseSettings.Settings.WordFilter.CheckWordFilter = false;
+            ParseSettings.CheckWordFilter = false;
         var results = await Task.Run(() => search.ToList()).ConfigureAwait(true);
-        ParseSettings.Settings.WordFilter.CheckWordFilter = wordFilter;
+        ParseSettings.CheckWordFilter = wordFilter;
 
         if (results.Count == 0)
         {
@@ -652,7 +649,7 @@ public partial class SAV_Database : Form
         int begin = start * RES_MIN;
         int end = Math.Min(RES_MAX, Results.Count - begin);
         for (int i = 0; i < end; i++)
-            PKXBOXES[i].Image = Results[i + begin].Entity.Sprite(SAV, flagIllegal: true, storage: Results[i + begin].Source.Type);
+            PKXBOXES[i].Image = Results[i + begin].Entity.Sprite(SAV, -1, -1, true);
         for (int i = end; i < RES_MAX; i++)
             PKXBOXES[i].Image = null;
 
@@ -755,10 +752,9 @@ public partial class SAV_Database : Form
 
     private static DateTime GetRevisedTime(SlotCache arg)
     {
-        // This isn't displayed to the user, so just return the quickest -- Utc (not local time).
         var src = arg.Source;
         if (src is not SlotInfoFile f)
-            return DateTime.UtcNow;
+            return DateTime.Now;
         return File.GetLastWriteTimeUtc(f.Path);
     }
 
@@ -767,8 +763,9 @@ public partial class SAV_Database : Form
 
     private void L_Viewed_MouseEnter(object sender, EventArgs e) => hover.SetToolTip(L_Viewed, L_Viewed.Text);
 
-    private void ShowHoverTextForSlot(PictureBox pb)
+    private void ShowHoverTextForSlot(object sender, EventArgs e)
     {
+        var pb = (PictureBox)sender;
         int index = Array.IndexOf(PKXBOXES, pb);
         if (!GetShiftedIndex(ref index))
             return;
@@ -785,7 +782,7 @@ public partial class SAV_Database : Form
         // If we already have text, add a new line (except if the last line is blank).
         var tb = RTB_Instructions;
         var batchText = tb.Text;
-        if (batchText.Length != 0 && !batchText.EndsWith('\n'))
+        if (batchText.Length > 0 && !batchText.EndsWith('\n'))
             tb.AppendText(Environment.NewLine);
         tb.AppendText(s);
     }

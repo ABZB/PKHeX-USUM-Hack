@@ -30,9 +30,8 @@ public static class SlotInfoLoader
             return;
 
         var data = File.ReadAllBytes(file);
-        if (!FileUtil.TryGetPKM(data, out var pk, fi.Extension, dest))
-            return;
-        if (pk.Species is 0)
+        _ = FileUtil.TryGetPKM(data, out var pk, fi.Extension, dest);
+        if (pk?.Species is not > 0)
             return;
 
         var info = new SlotInfoFile(file);

@@ -5,14 +5,14 @@ namespace PKHeX.Core;
 /// <summary>Generation 5 Trade with Fixed PID</summary>
 public sealed record EncounterTrade5BW : IEncounterable, IEncounterMatch, IFixedTrainer, IFixedNickname, IFixedGender, IFixedNature, IEncounterConvertible<PK5>
 {
-    public byte Generation => 5;
+    public int Generation => 5;
     public EntityContext Context => EntityContext.Gen5;
-    public ushort Location => Locations.LinkTrade5NPC;
+    public int Location => Locations.LinkTrade5NPC;
     public bool IsFixedNickname => true;
     public GameVersion Version { get; }
     public Shiny Shiny => Shiny.Never;
-    public bool IsEgg => false;
-    public ushort EggLocation => 0;
+    public bool EggEncounter => false;
+    public int EggLocation => 0;
     public Ball FixedBall => Ball.Poke;
     public bool IsShiny => false;
     public bool IsFixedTrainer => true;
@@ -66,7 +66,7 @@ public sealed record EncounterTrade5BW : IEncounterable, IEncounterMatch, IFixed
 
     public PK5 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language, version);
         var pi = PersonalTable.BW[Species];
         var pk = new PK5
@@ -75,20 +75,20 @@ public sealed record EncounterTrade5BW : IEncounterable, IEncounterMatch, IFixed
             Species = Species,
             Form = Form,
             CurrentLevel = Level,
-            MetLocation = Location,
-            MetLevel = Level,
+            Met_Location = Location,
+            Met_Level = Level,
             MetDate = EncounterDate.GetDateNDS(),
             Gender = Gender,
-            Nature = Nature,
+            Nature = (byte)Nature,
             Ball = (byte)FixedBall,
 
             ID32 = ID32,
-            Version = version,
+            Version = (byte)version,
             Language = lang == 1 ? 0 : lang, // Trades for JPN games have language ID of 0, not 1.
-            OriginalTrainerGender = OTGender,
-            OriginalTrainerName = TrainerNames[lang],
+            OT_Gender = OTGender,
+            OT_Name = TrainerNames[lang],
 
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
 
             IsNicknamed = IsFixedNickname,
             Nickname = IsFixedNickname ? Nicknames[lang] : SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
@@ -112,7 +112,7 @@ public sealed record EncounterTrade5BW : IEncounterable, IEncounterMatch, IFixed
 
     public bool IsMatchExact(PKM pk, EvoCriteria evo)
     {
-        if (pk.MetLevel != Level)
+        if (pk.Met_Level != Level)
             return false;
         if (!Legal.GetIsFixedIVSequenceValidNoRand(IVs, pk))
             return false;
@@ -122,7 +122,7 @@ public sealed record EncounterTrade5BW : IEncounterable, IEncounterMatch, IFixed
             return false;
         if (evo.Form != Form && !FormInfo.IsFormChangeable(Species, Form, pk.Form, Context, pk.Context))
             return false;
-        if (pk.OriginalTrainerGender != OTGender)
+        if (pk.OT_Gender != OTGender)
             return false;
         if (!IsMatchEggLocation(pk))
             return false;
@@ -133,7 +133,7 @@ public sealed record EncounterTrade5BW : IEncounterable, IEncounterMatch, IFixed
     {
         if (PID != pk.EncryptionConstant)
             return false;
-        if (Nature != pk.Nature)
+        if ((int)Nature != pk.Nature)
             return false;
         return true;
     }
@@ -143,7 +143,7 @@ public sealed record EncounterTrade5BW : IEncounterable, IEncounterMatch, IFixed
         var expect = EggLocation;
         if (pk is PB8)
             expect = Locations.Default8bNone;
-        return pk.EggLocation == expect;
+        return pk.Egg_Location == expect;
     }
 
     public EncounterMatchRating GetMatchRating(PKM pk) => EncounterMatchRating.Match;

@@ -15,7 +15,7 @@ public record struct EncounterEnumerator3(PKM Entity, EvoCriteria[] Chain, GameV
     private EncounterMatchRating Rating = EncounterMatchRating.MaxNotMatch;
     public MatchedEncounter<IEncounterable> Current { get; private set; }
     private YieldState State;
-    private ushort met;
+    private int met;
     private bool mustBeSlot;
     private bool hasOriginalLocation;
 
@@ -244,7 +244,7 @@ public record struct EncounterEnumerator3(PKM Entity, EvoCriteria[] Chain, GameV
 
     private void InitializeWildLocationInfo()
     {
-        met = Entity.MetLocation;
+        met = Entity.Met_Location;
         mustBeSlot = Entity.Ball is (int)Ball.Safari; // never static
         hasOriginalLocation = Entity.Format == 3;
     }

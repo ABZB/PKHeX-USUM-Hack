@@ -14,10 +14,10 @@ public sealed class EncounterGenerator9 : IEncounterGenerator
         if (chain.Length == 0)
             return [];
 
-        return pk.Version switch
+        return (GameVersion)pk.Version switch
         {
-            SW when pk.MetLocation == LocationsHOME.SWSL => Instance.GetEncountersSWSH(pk, chain, SL),
-            SH when pk.MetLocation == LocationsHOME.SHVL => Instance.GetEncountersSWSH(pk, chain, VL),
+            SW when pk.Met_Location == LocationsHOME.SWSL => Instance.GetEncountersSWSH(pk, chain, SL),
+            SH when pk.Met_Location == LocationsHOME.SHVL => Instance.GetEncountersSWSH(pk, chain, VL),
             _ => GetEncounters(pk, chain, info),
         };
     }
@@ -38,12 +38,12 @@ public sealed class EncounterGenerator9 : IEncounterGenerator
 
     public IEnumerable<IEncounterable> GetEncounters(PKM pk, EvoCriteria[] chain, LegalInfo info)
     {
-        var iterator = new EncounterEnumerator9(pk, chain, pk.Version);
+        var iterator = new EncounterEnumerator9(pk, chain, (GameVersion)pk.Version);
         foreach (var enc in iterator)
             yield return enc.Encounter;
     }
 
-    private const byte Generation = 9;
+    private const int Generation = 9;
     private const EntityContext Context = EntityContext.Gen9;
     private const byte EggLevel = 1;
 

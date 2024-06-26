@@ -1,10 +1,12 @@
 using System;
+using System.Runtime.InteropServices;
 using static PKHeX.Core.Move;
 using static PKHeX.Core.Species;
 using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
 
+[StructLayout(LayoutKind.Sequential, Pack = 4, Size = SIZE)]
 public sealed class Swarm3(byte[] Data)
 {
     public const int SIZE = 0x14;
@@ -42,10 +44,6 @@ public sealed class Swarm3(byte[] Data)
 
 public static class Swarm3Details
 {
-    /// <summary>
-    /// Hardcoded templates available to set to the save file.
-    /// </summary>
-    /// <remarks>Ruby/Sapphire</remarks>
     public static readonly Swarm3[] Swarms_RS =
     [
         new(Surskit, 03, 0x11, Bubble, QuickAttack), // Route 102
@@ -55,10 +53,6 @@ public static class Swarm3Details
         new(Skitty,  15, 0x1F, Growl,  Tackle),      // Route 116
     ];
 
-    /// <summary>
-    /// Hardcoded templates available to set to the save file.
-    /// </summary>
-    /// <remarks><see cref="GameVersion.E"/></remarks>
     public static readonly Swarm3[] Swarms_E =
     [
         new(Seedot,  03, 0x11, Bide,      Harden,      LeechSeed),              // Route 102

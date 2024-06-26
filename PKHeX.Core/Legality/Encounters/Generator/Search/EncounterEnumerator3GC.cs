@@ -15,7 +15,7 @@ public record struct EncounterEnumerator3GC(PKM Entity, EvoCriteria[] Chain) : I
     private EncounterMatchRating Rating = EncounterMatchRating.MaxNotMatch;
     public MatchedEncounter<IEncounterable> Current { get; private set; }
     private YieldState State;
-    private ushort met;
+    private int met;
     private bool hasOriginalLocation;
 
     readonly object IEnumerator.Current => Current;
@@ -103,7 +103,7 @@ public record struct EncounterEnumerator3GC(PKM Entity, EvoCriteria[] Chain) : I
 
     private void InitializeWildLocationInfo()
     {
-        met = Entity.MetLocation;
+        met = Entity.Met_Location;
         hasOriginalLocation = Entity.Format == 3;
     }
 

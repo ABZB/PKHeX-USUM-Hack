@@ -7,7 +7,7 @@ namespace PKHeX.Core;
 /// Generation 7 Mystery Gift Template File (LGP/E)
 /// </summary>
 public sealed class WB7(byte[] Data)
-    : DataMysteryGift(Data), ILangNick, IAwakened, IRelearn, INature, ILangNicknamedTemplate, IRestrictVersion
+    : DataMysteryGift(Data), ILangNick, IAwakened, INature, ILangNicknamedTemplate, IRestrictVersion
 {
     public WB7() : this(new byte[SizeFull]) { }
 
@@ -16,19 +16,19 @@ public sealed class WB7(byte[] Data)
     private const int CardStart = SizeFull - Size;
     public override bool FatefulEncounter => true;
 
-    public override byte Generation => 7;
+    public override int Generation => 7;
     public override EntityContext Context => EntityContext.Gen7b;
-    public override GameVersion Version => GameVersion.GG;
+    public override GameVersion Version { get => GameVersion.GG; set { } }
 
     public byte RestrictVersion { get => Data[0]; set => Data[0] = value; }
 
-    public bool CanBeReceivedByVersion(GameVersion version)
+    public bool CanBeReceivedByVersion(int v)
     {
-        if (version is not (GameVersion.GP or GameVersion.GE))
+        if (v is not ((int)GameVersion.GP or (int)GameVersion.GE))
             return false;
         if (RestrictVersion == 0)
             return true; // no data
-        var bitIndex = version - GameVersion.GP;
+        var bitIndex = v - (int)GameVersion.GP;
         var bit = 1 << bitIndex;
         return (RestrictVersion & bit) != 0;
     }
@@ -88,12 +88,12 @@ public sealed class WB7(byte[] Data)
         }
         set
         {
-            if (value is { } dt)
+            if (value.HasValue)
             {
                 // Only update the properties if a value is provided.
-                Year = (ushort)dt.Year;
-                Month = (byte)dt.Month;
-                Day = (byte)dt.Day;
+                Year = (ushort)value.Value.Year;
+                Month = (byte)value.Value.Month;
+                Day = (byte)value.Value.Day;
             }
             else
             {
@@ -172,10 +172,10 @@ public sealed class WB7(byte[] Data)
         set => WriteUInt32LittleEndian(Data.AsSpan(CardStart + 0x70), value);
     }
 
-    public override byte Ball
+    public override int Ball
     {
         get => Data[CardStart + 0x76];
-        set => Data[CardStart + 0x76] = value; }
+        set => Data[CardStart + 0x76] = (byte)value; }
 
     public override int HeldItem // no references
     {
@@ -198,13 +198,13 @@ public sealed class WB7(byte[] Data)
     //     set => Encoding.Unicode.GetBytes(value.PadRight(12 + 1, '\0')).CopyTo(Data, CardStart + 0x86);
     // }
 
-    public Nature Nature { get => (Nature)Data[CardStart + 0xA0]; set => Data[CardStart + 0xA0] = (byte)value; }
-    public override byte Gender { get => Data[CardStart + 0xA1]; set => Data[CardStart + 0xA1] = value; }
+    public int Nature { get => (sbyte)Data[CardStart + 0xA0]; set => Data[CardStart + 0xA0] = (byte)value; }
+    public override int Gender { get => Data[CardStart + 0xA1]; set => Data[CardStart + 0xA1] = (byte)value; }
     public override int AbilityType { get => 3; set => Data[CardStart + 0xA2] = (byte)value; } // no references, always ability 0/1
     public ShinyType6 PIDType { get => (ShinyType6)Data[CardStart + 0xA3]; set => Data[CardStart + 0xA3] = (byte)value; }
-    public override ushort EggLocation { get => ReadUInt16LittleEndian(Data.AsSpan(CardStart + 0xA4)); set => WriteUInt16LittleEndian(Data.AsSpan(CardStart + 0xA4), value); }
-    public override ushort Location  { get => ReadUInt16LittleEndian(Data.AsSpan(CardStart + 0xA6)); set => WriteUInt16LittleEndian(Data.AsSpan(CardStart + 0xA6), value); }
-    public byte MetLevel { get => Data[CardStart + 0xA8]; set => Data[CardStart + 0xA8] = value; }
+    public override int EggLocation { get => ReadUInt16LittleEndian(Data.AsSpan(CardStart + 0xA4)); set => WriteUInt16LittleEndian(Data.AsSpan(CardStart + 0xA4), (ushort)value); }
+    public int MetLocation  { get => ReadUInt16LittleEndian(Data.AsSpan(CardStart + 0xA6)); set => WriteUInt16LittleEndian(Data.AsSpan(CardStart + 0xA6), (ushort)value); }
+    public int MetLevel { get => Data[CardStart + 0xA8]; set => Data[CardStart + 0xA8] = (byte)value; }
 
     public int IV_HP { get => Data[CardStart + 0xAF]; set => Data[CardStart + 0xAF] = (byte)value; }
     public int IV_ATK { get => Data[CardStart + 0xB0]; set => Data[CardStart + 0xB0] = (byte)value; }
@@ -213,9 +213,9 @@ public sealed class WB7(byte[] Data)
     public int IV_SPA { get => Data[CardStart + 0xB3]; set => Data[CardStart + 0xB3] = (byte)value; }
     public int IV_SPD { get => Data[CardStart + 0xB4]; set => Data[CardStart + 0xB4] = (byte)value; }
 
-    public byte OTGender { get => Data[CardStart + 0xB5]; set => Data[CardStart + 0xB5] = value; }
+    public int OTGender { get => Data[CardStart + 0xB5]; set => Data[CardStart + 0xB5] = (byte)value; }
 
-    // public override string OriginalTrainerName
+    // public override string OT_Name
     // {
     //     get => Util.TrimFromZero(Encoding.Unicode.GetString(Data, CardStart + 0xB6, 0x1A));
     //     set => Encoding.Unicode.GetBytes(value.PadRight(value.Length + 1, '\0')).CopyTo(Data, CardStart + 0xB6);
@@ -239,7 +239,7 @@ public sealed class WB7(byte[] Data)
     public byte AV_SPD { get => Data[CardStart + 0xEA]; set => Data[CardStart + 0xEA] = value; }
 
     // Meta Accessible Properties
-    public int[] IVs
+    public override int[] IVs
     {
         get => [IV_HP, IV_ATK, IV_DEF, IV_SPE, IV_SPA, IV_SPD];
         set
@@ -272,6 +272,8 @@ public sealed class WB7(byte[] Data)
         return lang < LanguageID.UNUSED_6 ? language - 1 : language - 2;
     }
 
+    public override int Location { get => MetLocation; set => MetLocation = (ushort)value; }
+
     public override Moveset Moves
     {
         get => new(Move1, Move2, Move3, Move4);
@@ -284,7 +286,7 @@ public sealed class WB7(byte[] Data)
         }
     }
 
-    public Moveset Relearn
+    public override Moveset Relearn
     {
         get => new(RelearnMove1, RelearnMove2, RelearnMove3, RelearnMove4);
         set
@@ -296,7 +298,7 @@ public sealed class WB7(byte[] Data)
         }
     }
 
-    public override string OriginalTrainerName
+    public override string OT_Name
     {
         get => GetOT(Language);
         set
@@ -352,8 +354,8 @@ public sealed class WB7(byte[] Data)
 
         var rnd = Util.Rand;
 
-        byte currentLevel = Level > 0 ? Level : (byte)(1 + rnd.Next(100));
-        var metLevel = MetLevel > 0 ? MetLevel : currentLevel;
+        int currentLevel = Level > 0 ? Level : (1 + rnd.Next(100));
+        int metLevel = MetLevel > 0 ? MetLevel : currentLevel;
         var pi = PersonalTable.GG.GetFormEntry(Species, Form);
 
         var redeemLanguage = tr.Language;
@@ -366,10 +368,10 @@ public sealed class WB7(byte[] Data)
             HeldItem = HeldItem,
             TID16 = TID16,
             SID16 = SID16,
-            MetLevel = metLevel,
+            Met_Level = metLevel,
             Form = Form,
-            EncryptionConstant = EncryptionConstant != 0 ? EncryptionConstant : rnd.Rand32(),
-            Version = OriginGame != 0 ? (GameVersion)OriginGame : tr.Version,
+            EncryptionConstant = EncryptionConstant != 0 ? EncryptionConstant : Util.Rand32(),
+            Version = OriginGame != 0 ? OriginGame : tr.Game,
             Language = language,
             Ball = Ball,
             Move1 = Move1,
@@ -380,8 +382,8 @@ public sealed class WB7(byte[] Data)
             RelearnMove2 = RelearnMove2,
             RelearnMove3 = RelearnMove3,
             RelearnMove4 = RelearnMove4,
-            MetLocation = Location,
-            EggLocation = EggLocation,
+            Met_Location = MetLocation,
+            Egg_Location = EggLocation,
             AV_HP = AV_HP,
             AV_ATK = AV_ATK,
             AV_DEF = AV_DEF,
@@ -389,19 +391,19 @@ public sealed class WB7(byte[] Data)
             AV_SPA = AV_SPA,
             AV_SPD = AV_SPD,
 
-            OriginalTrainerName = hasOT ? GetOT(redeemLanguage) : tr.OT,
-            OriginalTrainerGender = (byte)(OTGender != 3 ? OTGender % 2 : tr.Gender),
+            OT_Name = hasOT ? GetOT(redeemLanguage) : tr.OT,
+            OT_Gender = OTGender != 3 ? OTGender % 2 : tr.Gender,
 
             EXP = Experience.GetEXP(currentLevel, pi.EXPGrowth),
 
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
             FatefulEncounter = true,
         };
 
         if (hasOT)
         {
-            pk.HandlingTrainerName = tr.OT;
-            pk.HandlingTrainerGender = tr.Gender;
+            pk.HT_Name = tr.OT;
+            pk.HT_Gender = tr.Gender;
             pk.CurrentHandler = 1;
         }
 
@@ -410,7 +412,7 @@ public sealed class WB7(byte[] Data)
         if ((tr.Generation > Generation && OriginGame == 0) || !CanBeReceivedByVersion(pk.Version))
         {
             // give random valid game
-            do { pk.Version = GameVersion.GP + (byte)rnd.Next(2); }
+            do { pk.Version = (int)GameVersion.GP + rnd.Next(2); }
             while (!CanBeReceivedByVersion(pk.Version));
         }
 
@@ -449,7 +451,7 @@ public sealed class WB7(byte[] Data)
     private void SetPINGA(PB7 pk, EncounterCriteria criteria)
     {
         var pi = pk.PersonalInfo;
-        pk.Nature = criteria.GetNature(Nature);
+        pk.Nature = (int)criteria.GetNature((Nature)Nature);
         pk.Gender = criteria.GetGender(Gender, pi);
         var av = GetAbilityIndex(criteria);
         pk.RefreshAbility(av);
@@ -498,9 +500,9 @@ public sealed class WB7(byte[] Data)
     {
         Span<int> finalIVs = stackalloc int[6];
         GetIVs(finalIVs);
-        var ivflag = finalIVs.IndexOfAny(0xFC, 0xFD, 0xFE);
+        var ivflag = finalIVs.Find(static iv => (byte)(iv - 0xFC) < 3);
         var rng = Util.Rand;
-        if (ivflag == -1) // Random IVs
+        if (ivflag == default) // Random IVs
         {
             for (int i = 0; i < finalIVs.Length; i++)
             {
@@ -510,7 +512,7 @@ public sealed class WB7(byte[] Data)
         }
         else // 1/2/3 perfect IVs
         {
-            int IVCount = finalIVs[ivflag] - 0xFB;
+            int IVCount = ivflag - 0xFB;
             do { finalIVs[rng.Next(6)] = 31; }
             while (finalIVs.Count(31) < IVCount);
             for (int i = 0; i < finalIVs.Length; i++)
@@ -553,11 +555,11 @@ public sealed class WB7(byte[] Data)
             {
                 if (SID16 != pk.SID16) return false;
                 if (TID16 != pk.TID16) return false;
-                if (OTGender != pk.OriginalTrainerGender) return false;
+                if (OTGender != pk.OT_Gender) return false;
             }
             var OT = GetOT(pk.Language);
-            if (!string.IsNullOrEmpty(OT) && OT != pk.OriginalTrainerName) return false;
-            if (OriginGame != 0 && (GameVersion)OriginGame != pk.Version) return false;
+            if (!string.IsNullOrEmpty(OT) && OT != pk.OT_Name) return false;
+            if (OriginGame != 0 && OriginGame != pk.Version) return false;
             if (EncryptionConstant != 0 && EncryptionConstant != pk.EncryptionConstant) return false;
 
             if (!IsMatchEggLocation(pk)) return false;
@@ -570,9 +572,9 @@ public sealed class WB7(byte[] Data)
 
         if (IsEgg)
         {
-            if (EggLocation != pk.EggLocation) // traded
+            if (EggLocation != pk.Egg_Location) // traded
             {
-                if (pk.EggLocation != Locations.LinkTrade6)
+                if (pk.Egg_Location != Locations.LinkTrade6)
                     return false;
             }
             else if (PIDType == 0 && pk.IsShiny)
@@ -580,20 +582,20 @@ public sealed class WB7(byte[] Data)
                 return false; // can't be traded away for unshiny
             }
 
-            if (pk is { IsEgg: true, Context: not EntityContext.Gen7b })
+            if (pk is { IsEgg: true, IsNative: false })
                 return false;
         }
         else
         {
             if (!Shiny.IsValid(pk)) return false;
             if (!IsMatchEggLocation(pk)) return false;
-            if (Location != pk.MetLocation) return false;
+            if (MetLocation != pk.Met_Location) return false;
         }
 
-        if (MetLevel != pk.MetLevel) return false;
+        if (MetLevel != pk.Met_Level) return false;
         if (Ball != pk.Ball) return false;
-        if (OTGender < 3 && OTGender != pk.OriginalTrainerGender) return false;
-        if ((sbyte)Nature != -1 && pk.Nature != Nature) return false;
+        if (OTGender < 3 && OTGender != pk.OT_Gender) return false;
+        if (Nature != -1 && pk.Nature != Nature) return false;
         if (Gender != 3 && Gender != pk.Gender) return false;
 
         if (pk is IAwakened s && s.IsAwakeningBelow(this))

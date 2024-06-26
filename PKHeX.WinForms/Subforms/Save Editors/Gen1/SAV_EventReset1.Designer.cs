@@ -45,13 +45,13 @@ namespace PKHeX.WinForms
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             ClientSize = new System.Drawing.Size(284, 261);
             Controls.Add(FLP_List);
-            Icon = Properties.Resources.Icon;
+            Icon = global::PKHeX.WinForms.Properties.Resources.Icon;
             MaximizeBox = false;
             Name = "SAV_EventReset1";
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             Text = "Event Resetter";
-            FormClosing += SAV_EventReset1_FormClosing;
+            FormClosing += new System.Windows.Forms.FormClosingEventHandler(SAV_EventReset1_FormClosing);
             ResumeLayout(false);
+
         }
 
         #endregion

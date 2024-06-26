@@ -20,8 +20,8 @@ public interface ILocationSet
     string GetLocationName(int locationID);
 
     /// <summary>
-    /// Gets all groups -- not really useful besides unit testing.
+    /// Gets all groups -- ONLY USE FOR UNIT TESTING.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    IEnumerable<(int Bank, ReadOnlyMemory<string> Names)> GetAll();
+    IEnumerable<(int Bank, string[] Names)> GetAll();
 }

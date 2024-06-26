@@ -27,34 +27,33 @@ internal static class LearnVerifierEgg
     {
         if (enc is IMoveset { Moves: { HasMoves: true } x })
         {
-            var ls = GameData.GetLearnSource(enc.Version);
-            VerifyMovesInitial(result, current, x, ls.Environment);
+            VerifyMovesInitial(result, current, x);
         }
-        else if (enc.Version is not (GameVersion.Any or >= GameVersion.Invalid))
+        else if (enc.Version is not (GameVersion.Any or >= GameVersion.Unknown))
         {
             var ls = GameData.GetLearnSource(enc.Version);
             var learn = ls.GetLearnset(enc.Species, enc.Form);
             var initial = learn.GetBaseEggMoves(enc.LevelMin);
-            VerifyMovesInitial(result, current, initial, ls.Environment);
+            VerifyMovesInitial(result, current, initial);
         }
     }
 
-    private static void VerifyMovesInitial(Span<MoveResult> result, ReadOnlySpan<ushort> current, Moveset initial, LearnEnvironment game)
+    private static void VerifyMovesInitial(Span<MoveResult> result, ReadOnlySpan<ushort> current, Moveset initial)
     {
         // Check that the sequence of current move matches the initial move sequence.
         int i = 0;
         if (initial.Move1 != 0)
         {
-            result[i] = GetMethodInitial(current[i], initial.Move1, game); i++;
+            result[i] = GetMethodInitial(current[i], initial.Move1); i++;
             if (initial.Move2 != 0)
             {
-                result[i] = GetMethodInitial(current[i], initial.Move2, game); i++;
+                result[i] = GetMethodInitial(current[i], initial.Move2); i++;
                 if (initial.Move3 != 0)
                 {
-                    result[i] = GetMethodInitial(current[i], initial.Move3, game); i++;
+                    result[i] = GetMethodInitial(current[i], initial.Move3); i++;
                     if (initial.Move4 != 0)
                     {
-                        result[i] = GetMethodInitial(current[i], initial.Move4, game); i++;
+                        result[i] = GetMethodInitial(current[i], initial.Move4); i++;
                     }
                 }
             }
@@ -63,11 +62,11 @@ internal static class LearnVerifierEgg
             result[i] = current[i] == 0 ? MoveResult.Empty : MoveResult.Unobtainable(0);
     }
 
-    private static void VerifyMovesInitial(Span<MoveResult> result, ReadOnlySpan<ushort> current, ReadOnlySpan<ushort> initial, LearnEnvironment game)
+    private static void VerifyMovesInitial(Span<MoveResult> result, ReadOnlySpan<ushort> current, ReadOnlySpan<ushort> initial)
     {
         // Check that the sequence of current move matches the initial move sequence.
         for (int i = 0; i < initial.Length; i++)
-            result[i] = GetMethodInitial(current[i], initial[i], game);
+            result[i] = GetMethodInitial(current[i], initial[i]);
         for (int i = initial.Length; i < current.Length; i++)
             result[i] = current[i] == 0 ? MoveResult.Empty : MoveResult.Unobtainable(0);
     }
@@ -77,7 +76,7 @@ internal static class LearnVerifierEgg
         if (enc is EncounterEgg)
             VerifyMatchesRelearn(result, current, pk);
         else if (enc is IMoveset { Moves: { HasMoves: true } x })
-            VerifyMovesInitial(result, current, x, GameData.GetLearnSource(enc.Version).Environment);
+            VerifyMovesInitial(result, current, x);
         else
             VerifyFromEncounter(result, current, enc);
     }
@@ -89,13 +88,13 @@ internal static class LearnVerifierEgg
             result[i] = GetMethodRelearn(current[i], pk.GetRelearnMove(i));
     }
 
-    private static MoveResult GetMethodInitial(ushort current, ushort initial, LearnEnvironment game)
+    private static MoveResult GetMethodInitial(ushort current, ushort initial)
     {
         if (current != initial)
             return MoveResult.Unobtainable(initial);
         if (current == 0)
             return MoveResult.Empty;
-        return MoveResult.Initial(game);
+        return MoveResult.Initial;
     }
 
     private static MoveResult GetMethodRelearn(ushort current, ushort relearn)

@@ -4,17 +4,17 @@ namespace PKHeX.Core;
 /// Generation 2 Static Encounter
 /// </summary>
 public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Version)
-    : IEncounterable, IEncounterMatch, IEncounterConvertible<PK2>, IHatchCycle, IFixedGender, IMoveset, IFixedIVSet, IEncounterTime
+    : IEncounterable, IEncounterMatch, IEncounterConvertible<PK2>, IHatchCycle, IFixedGender, IMoveset, IFixedIVSet
 {
-    public byte Generation => 2;
+    public int Generation => 2;
     public EntityContext Context => EntityContext.Gen2;
     public byte Form => 0;
     public byte EggCycles => DizzyPunchEgg ? (byte)20 : (byte)0;
-    public bool DizzyPunchEgg => IsEgg && Moves.HasMoves;
+    public bool DizzyPunchEgg => EggEncounter && Moves.HasMoves;
 
     public Ball FixedBall => Ball.Poke;
-    ushort ILocation.Location => Location;
-    public ushort EggLocation => 0;
+    int ILocation.Location => Location;
+    public int EggLocation => 0;
     public bool IsShiny => Shiny == Shiny.Always;
     public AbilityPermission Ability => Species != (int)Core.Species.Koffing ? AbilityPermission.OnlyHidden : AbilityPermission.OnlyFirst;
     public bool Roaming => Species is (int)Core.Species.Entei or (int)Core.Species.Raikou or (int)Core.Species.Suicune && Location != 23;
@@ -24,7 +24,7 @@ public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Ve
     public byte Gender { get; init; } = FixedGenderUtil.GenderRandom;
     public IndividualValueSet IVs { get; init; }
     public Moveset Moves { get; init; }
-    public bool IsEgg { get; init; }
+    public bool EggEncounter { get; init; }
 
     public string Name => "Static Encounter";
     public string LongName => Name;
@@ -39,7 +39,7 @@ public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Ve
 
     public PK2 ConvertToPKM(ITrainerInfo tr, EncounterCriteria criteria)
     {
-        var version = this.GetCompatibleVersion(tr.Version);
+        var version = this.GetCompatibleVersion((GameVersion)tr.Game);
         int lang = (int)Language.GetSafeLanguage(Generation, (LanguageID)tr.Language, version);
         var pi = PersonalTable.C[Species];
         var pk = new PK2
@@ -48,24 +48,24 @@ public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Ve
             CurrentLevel = LevelMin,
 
             TID16 = tr.TID16,
-            OriginalTrainerName = tr.OT,
+            OT_Name = tr.OT,
 
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
 
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
         };
 
-        if (IsEgg)
+        if (EggEncounter)
         {
             if (DizzyPunchEgg) // Fixed EXP value instead of exactly Level 5
                 pk.EXP = 125;
         }
-        else if (Version == GameVersion.C || (Version == GameVersion.GSC && tr.Version == GameVersion.C))
+        else if (Version == GameVersion.C || (Version == GameVersion.GSC && tr.Game == (int)GameVersion.C))
         {
-            pk.OriginalTrainerGender = tr.Gender;
-            pk.MetLevel = LevelMin;
-            pk.MetLocation = Location;
-            pk.MetTimeOfDay = GetRandomTime();
+            pk.OT_Gender = tr.Gender;
+            pk.Met_Level = LevelMin;
+            pk.Met_Location = Location;
+            pk.Met_TimeOfDay = EncounterTime.Any.RandomValidTime();
         }
 
         if (Moves.HasMoves)
@@ -92,7 +92,7 @@ public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Ve
     {
         if (Shiny == Shiny.Always && !pk.IsShiny)
             return false;
-        if (IsEgg && Moves.HasMoves) // Odd Egg
+        if (EggEncounter && Moves.HasMoves) // Odd Egg
         {
             if (pk.Format > 2)
                 return false; // Can't be transferred to Gen7+
@@ -145,26 +145,26 @@ public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Ve
         if (pk is not ICaughtData2 c2)
         {
             var expect = pk is PB8 ? Locations.Default8bNone : EggLocation;
-            return pk.EggLocation == expect;
+            return pk.Egg_Location == expect;
         }
 
         if (pk.IsEgg)
         {
-            if (!IsEgg)
+            if (!EggEncounter)
                 return false;
-            if (c2.MetLocation != 0 && c2.MetLevel != 0)
+            if (c2.Met_Location != 0 && c2.Met_Level != 0)
                 return false;
         }
         else
         {
-            switch (c2.MetLevel)
+            switch (c2.Met_Level)
             {
-                case 0 when c2.MetLocation != 0:
+                case 0 when c2.Met_Location != 0:
                     return false;
                 case 1: // 0 = second floor of every Pokémon Center, valid
                     return true;
                 default:
-                    if (pk.MetLocation == 0 && c2.MetLevel != 0)
+                    if (pk.Met_Location == 0 && c2.Met_Level != 0)
                         return false;
                     break;
             }
@@ -178,7 +178,7 @@ public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Ve
         if (evo.LevelMax < Level)
             return false;
         if (pk is ICaughtData2 { CaughtData: not 0 })
-            return pk.MetLevel == (IsEgg ? 1 : Level);
+            return pk.Met_Level == (EggEncounter ? 1 : Level);
         return true;
     }
 
@@ -189,7 +189,7 @@ public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Ve
 
     private bool IsMatchLocation(PKM pk)
     {
-        if (IsEgg)
+        if (EggEncounter)
             return true;
         if (pk is not ICaughtData2 c2)
             return true;
@@ -199,13 +199,13 @@ public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Ve
         if (Roaming)
         {
             // Gen2 met location is always u8
-            var loc = c2.MetLocation;
+            var loc = c2.Met_Location;
             return loc <= 45 && ((RoamLocations & (1UL << loc)) != 0);
         }
         if (Version is GameVersion.C or GameVersion.GSC)
         {
             if (c2.CaughtData is not 0)
-                return Location == pk.MetLocation;
+                return Location == pk.Met_Location;
             if (pk.Species == (int)Core.Species.Celebi)
                 return false; // Cannot reset the Met data
         }
@@ -213,13 +213,4 @@ public sealed record EncounterStatic2(ushort Species, byte Level, GameVersion Ve
     }
 
     #endregion
-
-    public EncounterTime EncounterTime => EncounterTime.Any;
-
-    public int GetRandomTime()
-    {
-        if (IsEgg)
-            return 0;
-        return EncounterTime.RandomValidTime();
-    }
 }

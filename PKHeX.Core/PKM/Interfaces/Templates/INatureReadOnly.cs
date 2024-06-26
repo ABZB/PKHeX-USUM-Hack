@@ -8,5 +8,5 @@ public interface INatureReadOnly
     /// <summary>
     /// Nature the entity has.
     /// </summary>
-    Nature Nature { get; }
+    int Nature { get; }
 }

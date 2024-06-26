@@ -1,5 +1,4 @@
 using System;
-using static PKHeX.Core.SlotType2;
 
 namespace PKHeX.Core;
 
@@ -10,24 +9,27 @@ namespace PKHeX.Core;
 /// Referenced Area object contains Time data which is used for <see cref="GameVersion.C"/> origin data.
 /// </remarks>
 public sealed record EncounterSlot2(EncounterArea2 Parent, ushort Species, byte Form, byte LevelMin, byte LevelMax, byte SlotNumber)
-    : IEncounterable, IEncounterMatch, IEncounterConvertible<PK2>, INumberedSlot, IEncounterFormRandom, IEncounterTime
+    : IEncounterable, IEncounterMatch, IEncounterConvertible<PK2>, INumberedSlot, IEncounterFormRandom
 {
-    public byte Generation => 2;
+    public int Generation => 2;
     public EntityContext Context => EntityContext.Gen2;
-    public bool IsEgg => false;
+    public bool EggEncounter => false;
     public Ball FixedBall => Ball.Poke;
     public AbilityPermission Ability => TransporterLogic.IsHiddenDisallowedVC2(Species) ? AbilityPermission.OnlyFirst : AbilityPermission.OnlyHidden;
     public Shiny Shiny => Shiny.Random;
     public bool IsShiny => false;
-    public ushort EggLocation => 0;
+    public int EggLocation => 0;
     public bool IsRandomUnspecificForm => Form >= EncounterUtil.FormDynamic;
 
     public string Name => $"Wild Encounter ({Version})";
     public string LongName => $"{Name} {Type.ToString().Replace('_', ' ')}";
     public GameVersion Version => Parent.Version;
-    public ushort Location => Parent.Location;
-    public SlotType2 Type => Parent.Type;
-    public bool IsHeadbutt => Type is Headbutt or HeadbuttSpecial;
+    public int Location => Parent.Location;
+    public SlotType Type => Parent.Type;
+
+    // we have "Special" bitflag. Strip it out.
+    public SlotType SlotType => Type & (SlotType)0xF;
+    public bool IsHeadbutt => SlotType == SlotType.Headbutt;
 
     private static ReadOnlySpan<byte> TreeIndexes =>
     [
@@ -67,7 +69,7 @@ public sealed record EncounterSlot2(EncounterArea2 Parent, ushort Species, byte 
         var pivot = trainerID % 10;
         return Type switch
         {
-            Headbutt => (permissions & (1 << pivot)) != 0,
+            SlotType.Headbutt => (permissions & (1 << pivot)) != 0,
             /*special*/ _ => (permissions & (1 << (pivot + 12))) != 0,
         };
     }
@@ -88,21 +90,21 @@ public sealed record EncounterSlot2(EncounterArea2 Parent, ushort Species, byte 
             Species = Species,
             // Form is only Unown and is derived from IVs.
             CurrentLevel = LevelMin,
-            OriginalTrainerFriendship = pi.BaseFriendship,
+            OT_Friendship = pi.BaseFriendship,
             DV16 = EncounterUtil.GetRandomDVs(Util.Rand),
 
             Language = lang,
-            OriginalTrainerName = tr.OT,
+            OT_Name = tr.OT,
             TID16 = tr.TID16,
             Nickname = SpeciesName.GetSpeciesNameGeneration(Species, lang, Generation),
         };
 
         if (Version == GameVersion.C)
         {
-            pk.OriginalTrainerGender = tr.Gender;
-            pk.MetLevel = LevelMin;
-            pk.MetLocation = Location;
-            pk.MetTimeOfDay = GetRandomTime();
+            pk.OT_Gender = tr.Gender;
+            pk.Met_Level = LevelMin;
+            pk.Met_Location = Location;
+            pk.Met_TimeOfDay = GetRandomTime();
         }
 
         EncounterUtil.SetEncounterMoves(pk, Version, LevelMin);
@@ -123,7 +125,6 @@ public sealed record EncounterSlot2(EncounterArea2 Parent, ushort Species, byte 
     }
 
     public int GetRandomTime() => Parent.Time.RandomValidTime();
-    public EncounterTime EncounterTime => Parent.Time;
 
     #endregion
 
@@ -140,9 +141,9 @@ public sealed record EncounterSlot2(EncounterArea2 Parent, ushort Species, byte 
         if (pk is not ICaughtData2 {CaughtData: not 0} c2)
             return LevelMin <= evo.LevelMax;
 
-        if (!this.IsLevelWithinRange(c2.MetLevel))
+        if (!this.IsLevelWithinRange(c2.Met_Level))
             return false;
-        if (!Parent.Time.Contains(c2.MetTimeOfDay))
+        if (!Parent.Time.Contains(c2.Met_TimeOfDay))
             return false;
         return true;
     }

@@ -28,7 +28,7 @@ public sealed partial class SAV_GroupViewer : Form
         Regenerate(count);
         CenterToParent();
 
-        MouseWheel += (_, e) => CurrentGroup = e.Delta > 1 ? MoveLeft() : MoveRight();
+        MouseWheel += (s, e) => CurrentGroup = e.Delta > 1 ? MoveLeft() : MoveRight();
 
         var names = groups.Select(z => $"{z.GroupName}").ToArray();
         CB_BoxSelect.Items.AddRange(names);
@@ -36,18 +36,19 @@ public sealed partial class SAV_GroupViewer : Form
 
         foreach (PictureBox pb in Box.Entries)
         {
-            pb.Click += (_, args) => OmniClick(pb, args);
+            pb.Click += (o, args) => OmniClick(pb, args);
             pb.ContextMenuStrip = mnu;
-            pb.MouseMove += (_, args) => Preview.UpdatePreviewPosition(args.Location);
-            pb.MouseEnter += (_, _) => HoverSlot(pb);
-            pb.MouseLeave += (_, _) => Preview.Clear();
+            pb.MouseMove += (o, args) => Preview.UpdatePreviewPosition(args.Location);
+            pb.MouseEnter += (o, args) => HoverSlot(pb, args);
+            pb.MouseLeave += (o, args) => Preview.Clear();
         }
-        Closing += (_, _) => Preview.Clear();
+        Closing += (s, e) => Preview.Clear();
     }
 
-    private void HoverSlot(PictureBox pb)
+    private void HoverSlot(object sender, EventArgs e)
     {
         var group = Groups[CurrentGroup];
+        var pb = (PictureBox)sender;
         var index = Box.Entries.IndexOf(pb);
         var slot = group.Slots[index];
         Preview.Show(pb, slot);
@@ -117,7 +118,7 @@ public sealed partial class SAV_GroupViewer : Form
 
         var sav = SAV;
         for (int i = 0; i < slots.Length; i++)
-            Box.Entries[i].Image = slots[i].Sprite(sav, flagIllegal: true);
+            Box.Entries[i].Image = slots[i].Sprite(sav, -1, -1, true);
 
         if (slotSelected != -1 && (uint)slotSelected < Box.Entries.Count)
             Box.Entries[slotSelected].BackgroundImage = groupSelected != index ? null : SpriteUtil.Spriter.View;

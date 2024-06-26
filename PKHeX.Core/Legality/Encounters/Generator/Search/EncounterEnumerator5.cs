@@ -16,7 +16,7 @@ public record struct EncounterEnumerator5(PKM Entity, EvoCriteria[] Chain, GameV
     private bool Yielded;
     public MatchedEncounter<IEncounterable> Current { get; private set; }
     private YieldState State;
-    private ushort met;
+    private int met;
     readonly object IEnumerator.Current => Current;
 
     public readonly void Reset() => throw new NotSupportedException();
@@ -73,7 +73,7 @@ public record struct EncounterEnumerator5(PKM Entity, EvoCriteria[] Chain, GameV
                 if (Chain.Length == 0)
                     break;
 
-                if (Entity.MetLocation == Locations.LinkTrade5NPC)
+                if (Entity.Met_Location == Locations.LinkTrade5NPC)
                     goto case YieldState.TradeStart;
                 if (!Entity.FatefulEncounter)
                     goto case YieldState.Bred;
@@ -91,14 +91,14 @@ public record struct EncounterEnumerator5(PKM Entity, EvoCriteria[] Chain, GameV
                 Index = 0; goto case YieldState.Bred;
 
             case YieldState.Bred:
-                if (!Locations.IsEggLocationBred5(Entity.EggLocation))
+                if (!Locations.IsEggLocationBred5(Entity.Egg_Location))
                     goto case YieldState.StartCaptures;
                 if (!EncounterGenerator5.TryGetEgg(Chain, Version, out var egg))
                     goto case YieldState.StartCaptures;
                 State = YieldState.BredSplit;
                 return SetCurrent(egg);
             case YieldState.BredSplit:
-                bool daycare = Entity.EggLocation == Locations.Daycare5;
+                bool daycare = Entity.Egg_Location == Locations.Daycare5;
                 State = daycare ? YieldState.End : YieldState.StartCaptures;
                 if (EncounterGenerator5.TryGetSplit((EncounterEgg)Current.Encounter, Chain, out egg))
                     return SetCurrent(egg);
@@ -259,7 +259,7 @@ public record struct EncounterEnumerator5(PKM Entity, EvoCriteria[] Chain, GameV
 
     private void InitializeWildLocationInfo()
     {
-        met = Entity.MetLocation;
+        met = Entity.Met_Location;
     }
 
     private bool TryGetNext<TArea, TSlot>(TArea[] areas)

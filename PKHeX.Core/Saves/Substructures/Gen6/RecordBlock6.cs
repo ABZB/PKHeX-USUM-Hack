@@ -4,9 +4,11 @@ using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
 
-public abstract class RecordBlock6(SaveFile sav, Memory<byte> raw) : RecordBlock<SaveFile>(sav, raw) // 6 or 7
+public abstract class RecordBlock6 : RecordBlock<SaveFile> // 6 or 7
 {
     public const int RecordCount = 200;
+
+    protected RecordBlock6(SaveFile sav, int offset) : base(sav) => Offset = offset;
 
     // Structure:
     //   uint[100];
@@ -14,13 +16,13 @@ public abstract class RecordBlock6(SaveFile sav, Memory<byte> raw) : RecordBlock
 
     public override int GetRecord(int recordID)
     {
-        int ofs = Records.GetOffset(recordID);
+        int ofs = Records.GetOffset(Offset, recordID);
         switch (recordID)
         {
             case < 100:
-                return ReadInt32LittleEndian(Data[ofs..]);
+                return ReadInt32LittleEndian(Data.AsSpan(ofs));
             case < 200:
-                return ReadInt16LittleEndian(Data[ofs..]);
+                return ReadInt16LittleEndian(Data.AsSpan(ofs));
             default:
                 Trace.Fail(nameof(recordID));
                 return 0;
@@ -38,10 +40,10 @@ public abstract class RecordBlock6(SaveFile sav, Memory<byte> raw) : RecordBlock
         switch (recordID)
         {
             case < 100:
-                WriteInt32LittleEndian(Data[ofs..], value);
+                WriteInt32LittleEndian(Data.AsSpan(ofs), value);
                 break;
             case < 200:
-                WriteUInt16LittleEndian(Data[ofs..], (ushort)value);
+                WriteUInt16LittleEndian(Data.AsSpan(ofs), (ushort)value);
                 break;
             default:
                 Trace.Fail(nameof(recordID));
@@ -50,7 +52,7 @@ public abstract class RecordBlock6(SaveFile sav, Memory<byte> raw) : RecordBlock
     }
 }
 
-public sealed class RecordBlock6XY(SAV6XY sav, Memory<byte> raw) : RecordBlock6(sav, raw)
+public sealed class RecordBlock6XY(SAV6XY sav, int offset) : RecordBlock6(sav, offset)
 {
     protected override ReadOnlySpan<byte> RecordMax => MaxType_XY;
 
@@ -82,8 +84,8 @@ public sealed class RecordBlock6XY(SAV6XY sav, Memory<byte> raw) : RecordBlock6(
 
 public sealed class RecordBlock6AO : RecordBlock6
 {
-    public RecordBlock6AO(SAV6AO sav, Memory<byte> raw) : base(sav, raw) { }
-    public RecordBlock6AO(SAV6AODemo sav, Memory<byte> raw) : base(sav, raw) { }
+    public RecordBlock6AO(SAV6AO sav, int offset) : base(sav, offset) { }
+    public RecordBlock6AO(SAV6AODemo sav, int offset) : base(sav, offset) { }
     protected override ReadOnlySpan<byte> RecordMax => MaxType_AO;
 
     private static ReadOnlySpan<byte> MaxType_AO =>
@@ -112,7 +114,7 @@ public sealed class RecordBlock6AO : RecordBlock6
     ];
 }
 
-public sealed class RecordBlock7SM(SAV7SM sav, Memory<byte> raw) : RecordBlock6(sav, raw)
+public sealed class RecordBlock7SM(SAV7SM sav, int offset) : RecordBlock6(sav, offset)
 {
     protected override ReadOnlySpan<byte> RecordMax => MaxType_SM;
 
@@ -142,7 +144,7 @@ public sealed class RecordBlock7SM(SAV7SM sav, Memory<byte> raw) : RecordBlock6(
     ];
 }
 
-public sealed class RecordBlock7USUM(SAV7USUM sav, Memory<byte> raw) : RecordBlock6(sav, raw)
+public sealed class RecordBlock7USUM(SAV7USUM sav, int offset) : RecordBlock6(sav, offset)
 {
     protected override ReadOnlySpan<byte> RecordMax => MaxType_USUM;
 

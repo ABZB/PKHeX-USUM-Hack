@@ -3,28 +3,37 @@ using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
 
-public abstract class TrainerFashion6(ReadOnlySpan<byte> span)
+public abstract class TrainerFashion6
 {
-    public const int SIZE = 16;
+    protected uint data0;
+    protected uint data1;
+    protected uint data2;
+    protected uint data3;
 
-    protected uint data0 = ReadUInt32LittleEndian(span);
-    protected uint data1 = ReadUInt32LittleEndian(span[04..]);
-    protected uint data2 = ReadUInt32LittleEndian(span[08..]);
-    protected uint data3 = ReadUInt32LittleEndian(span[12..]);
+    protected TrainerFashion6(ReadOnlySpan<byte> data, int offset) : this(data[offset..]) { }
 
-    public static TrainerFashion6 GetFashion(ReadOnlySpan<byte> data, byte gender)
+    private TrainerFashion6(ReadOnlySpan<byte> span)
     {
-        if (gender == 0) // m
-            return new Fashion6Male(data);
-        return new Fashion6Female(data);
+        data0 = ReadUInt32LittleEndian(span);
+        data1 = ReadUInt32LittleEndian(span[04..]);
+        data2 = ReadUInt32LittleEndian(span[08..]);
+        data3 = ReadUInt32LittleEndian(span[12..]);
     }
 
-    public void Write(Span<byte> data)
+    public static TrainerFashion6 GetFashion(byte[] data, int offset, int gender)
     {
-        WriteUInt32LittleEndian(data, data0);
-        WriteUInt32LittleEndian(data[04..], data1);
-        WriteUInt32LittleEndian(data[08..], data2);
-        WriteUInt32LittleEndian(data[12..], data3);
+        if (gender == 0) // m
+            return new Fashion6Male(data, offset);
+        return new Fashion6Female(data, offset);
+    }
+
+    public void Write(byte[] data, int offset)
+    {
+        var span = data.AsSpan(offset);
+        WriteUInt32LittleEndian(span, data0);
+        WriteUInt32LittleEndian(span[04..], data1);
+        WriteUInt32LittleEndian(span[08..], data2);
+        WriteUInt32LittleEndian(span[12..], data3);
     }
 
     protected static uint GetBits(uint value, int startPos, int bits)
@@ -67,7 +76,7 @@ public abstract class TrainerFashion6(ReadOnlySpan<byte> span)
     }
 }
 
-public sealed class Fashion6Male(ReadOnlySpan<byte> data) : TrainerFashion6(data)
+public sealed class Fashion6Male(byte[] data, int offset) : TrainerFashion6(data, offset)
 {
     public uint Version  { get => GetBits(data0,  0, 3); set => data0 = SetBits(data0,  0, 3, value); }
     public uint Model    { get => GetBits(data0,  3, 3); set => data0 = SetBits(data0,  3, 3, value); }
@@ -264,7 +273,7 @@ public sealed class Fashion6Male(ReadOnlySpan<byte> data) : TrainerFashion6(data
     }
 }
 
-public sealed class Fashion6Female(ReadOnlySpan<byte> data) : TrainerFashion6(data)
+public sealed class Fashion6Female(byte[] data, int offset) : TrainerFashion6(data, offset)
 {
     public uint Version  { get => GetBits(data0,  0, 3); set => data0 = SetBits(data0,  0, 3, value); }
     public uint Model    { get => GetBits(data0,  3, 3); set => data0 = SetBits(data0,  3, 3, value); }

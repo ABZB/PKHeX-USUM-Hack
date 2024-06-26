@@ -7,6 +7,7 @@ public enum GameVersion : byte
 {
     #region Indicators for method empty arguments & result indication. Not stored values.
     Any = 0,
+    Unknown = byte.MaxValue - 1,
     Invalid = byte.MaxValue,
     #endregion
 
@@ -267,7 +268,7 @@ public enum GameVersion : byte
     GSC,
 
     /// <summary>
-    /// Pokémon Ruby &amp; Sapphire [<see cref="SAV3RS"/>] identifier.
+    /// Pokémon Ruby &amp; Sapphire [<see cref="SAV3"/>] identifier.
     /// </summary>
     /// <see cref="R"/>
     /// <see cref="S"/>
@@ -282,7 +283,7 @@ public enum GameVersion : byte
     RSE,
 
     /// <summary>
-    /// Pokémon FireRed/LeafGreen [<see cref="SAV3FRLG"/>] identifier.
+    /// Pokémon FireRed/LeafGreen [<see cref="SAV3"/>] identifier.
     /// </summary>
     /// <see cref="FR"/>
     /// <see cref="LG"/>
@@ -308,7 +309,7 @@ public enum GameVersion : byte
     XD,
 
     /// <summary>
-    /// Pokémon Diamond &amp; Pearl [<see cref="SAV4DP"/>] identifier.
+    /// Pokémon Diamond &amp; Pearl [<see cref="SAV4"/>] identifier.
     /// </summary>
     /// <see cref="D"/>
     /// <see cref="P"/>
@@ -324,7 +325,7 @@ public enum GameVersion : byte
     DPPt,
 
     /// <summary>
-    /// Pokémon HeartGold &amp; SoulSilver [<see cref="SAV4HGSS"/>] identifier.
+    /// Pokémon HeartGold &amp; SoulSilver [<see cref="SAV4"/>] identifier.
     /// </summary>
     /// <see cref="HG"/>
     /// <see cref="SS"/>
@@ -360,7 +361,7 @@ public enum GameVersion : byte
     XY,
 
     /// <summary>
-    /// Pokémon Omega Ruby &amp; Alpha Sapphire Demo [<see cref="SAV6AODemo"/>] identifier.
+    /// Pokémon Omega Ruby &amp; Alpha Sapphire Demo [<see cref="SAV6"/>] identifier.
     /// </summary>
     /// <see cref="ORAS"/>
     ORASDEMO,

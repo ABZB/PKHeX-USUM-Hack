@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace PKHeX.Core;
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly ref struct DecorationInventory3
 {
     public const int SIZE = 150;

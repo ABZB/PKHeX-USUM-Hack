@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -37,8 +36,7 @@ public static class BoxUtil
             var boxFolder = path;
             if (boxFolders)
             {
-                string boxName = sav is IBoxDetailName bn ? bn.GetBoxName(box) : BoxDetailNameExtensions.GetDefaultBoxName(box);
-                boxName = Util.CleanFileName(boxName);
+                var boxName = Util.CleanFileName(sav.GetBoxName(box));
                 boxFolder = Path.Combine(path, boxName);
                 Directory.CreateDirectory(boxFolder);
             }
@@ -225,27 +223,21 @@ public static class BoxUtil
     /// <returns>Returns default English box names in the event the save file does not have names (not exportable), or fails to return a box name.</returns>
     public static string[] GetBoxNames(SaveFile sav)
     {
-        var count = sav.BoxCount;
-        if (count == 0)
-            return [];
+        int count = sav.BoxCount;
         var result = new string[count];
-        GetBoxNames(sav, result);
+        if (!sav.State.Exportable)
+        {
+            for (int i = 0; i < count; i++)
+                result[i] = $"Box {i + 1}";
+            return result;
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            try { result[i] = sav.GetBoxName(i); }
+            catch { result[i] = $"Box {i + 1}"; }
+        }
+
         return result;
-    }
-
-    private static void GetBoxNames(SaveFile sav, Span<string> result)
-    {
-        if (!sav.State.Exportable || sav is not IBoxDetailNameRead r)
-        {
-            for (int i = 0; i < result.Length; i++)
-                result[i] = BoxDetailNameExtensions.GetDefaultBoxName(i);
-            return;
-        }
-
-        for (int i = 0; i < result.Length; i++)
-        {
-            try { result[i] = r.GetBoxName(i); }
-            catch { result[i] = BoxDetailNameExtensions.GetDefaultBoxName(i); }
-        }
     }
 }

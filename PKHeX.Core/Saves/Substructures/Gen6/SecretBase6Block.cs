@@ -3,8 +3,10 @@ using static System.Buffers.Binary.BinaryPrimitives;
 
 namespace PKHeX.Core;
 
-public sealed class SecretBase6Block(SAV6AO sav, Memory<byte> raw) : SaveBlock<SAV6AO>(sav, raw)
+public sealed class SecretBase6Block : SaveBlock<SAV6AO>
 {
+    public SecretBase6Block(SAV6AO sav, int offset) : base(sav) => Offset = offset;
+
     // structure: 0x7AD0 bytes total
     // [0000-031F] SecretBaseGoodStock[200] (800 bytes)
     // [0320-0321] u16 SecretBaseSelfLocation (-1 if not created)
@@ -19,7 +21,7 @@ public sealed class SecretBase6Block(SAV6AO sav, Memory<byte> raw) : SaveBlock<S
     public const int Count_Goods = 200;
     public const int Count_Goods_Used = 173;
 
-    public SecretBase6GoodStock GetGood(int index) => new(Raw.Slice(GetGoodOffset(index), SecretBase6GoodStock.SIZE));
+    public SecretBase6GoodStock GetGood(int index) => new(Data, Offset + GetGoodOffset(index));
 
     private static int GetGoodOffset(int index)
     {
@@ -32,19 +34,19 @@ public sealed class SecretBase6Block(SAV6AO sav, Memory<byte> raw) : SaveBlock<S
     {
         const uint value = 25u | (1 << 16); // count: 25, new flag.
         for (int i = 0; i < Count_Goods_Used; i++)
-            WriteUInt32LittleEndian(Data[GetGoodOffset(i)..], value);
+            WriteUInt32LittleEndian(Data.AsSpan(Offset + GetGoodOffset(i)), value);
     }
 
     public ushort SecretBaseSelfLocation
     {
-        get => ReadUInt16LittleEndian(Data[800..]);
-        set => WriteUInt16LittleEndian(Data[800..], value);
+        get => ReadUInt16LittleEndian(Data.AsSpan(Offset + 800));
+        set => WriteUInt16LittleEndian(Data.AsSpan(Offset + 800), value);
     }
 
     public const int OtherSecretBaseCount = 30;
     private const int OtherSecretStart = 0x638;
-    public SecretBase6 GetSecretBaseSelf() => new(Raw.Slice(0x324, SecretBase6.SIZE));
-    public SecretBase6Other GetSecretBaseOther(int index) => new(Raw.Slice(OtherSecretStart + GetSecretBaseOtherOffset(index), SecretBase6Other.SIZE));
+    public SecretBase6 GetSecretBaseSelf() => new(Data, Offset + 0x324);
+    public SecretBase6Other GetSecretBaseOther(int index) => new(Data, Offset + OtherSecretStart + GetSecretBaseOtherOffset(index));
 
     private static int GetSecretBaseOtherOffset(int index)
     {
@@ -55,28 +57,26 @@ public sealed class SecretBase6Block(SAV6AO sav, Memory<byte> raw) : SaveBlock<S
 
     public bool SecretBaseHasFlag
     {
-        get => Data[0x7AC8] == 1;
-        set => Data[0x7AC8] = (byte) (value ? 1 : 0);
+        get => Data[Offset + 0x7AC8] == 1;
+        set => Data[Offset + 0x7AC8] = (byte) (value ? 1 : 0);
     }
 
     public void DeleteOther(int index)
     {
+        int baseOffset = Offset + OtherSecretStart;
         const int maxBaseIndex = OtherSecretBaseCount - 1;
         const int size = SecretBase6Other.SIZE;
-        int offset = OtherSecretStart + GetSecretBaseOtherOffset(index);
-        var arr = Data;
+        int offset = baseOffset + GetSecretBaseOtherOffset(index);
+        var arr = SAV.Data;
         if ((uint)index < OtherSecretBaseCount)
         {
             int shiftDownCount = maxBaseIndex - index;
             int shiftDownLength = size * shiftDownCount;
-
-            var src = arr.Slice(offset + size, shiftDownLength);
-            var dst = arr.Slice(offset, shiftDownLength);
-            src.CopyTo(dst);
+            Array.Copy(arr, offset + size, arr, offset, shiftDownLength);
         }
 
         // Ensure Last Entry is Cleared
-        const int lastBaseOffset = OtherSecretStart + (size * maxBaseIndex);
-        arr.Slice(lastBaseOffset, size).Clear();
+        int lastBaseOffset = baseOffset + (size * maxBaseIndex);
+        arr.AsSpan(lastBaseOffset, size).Clear();
     }
 }
