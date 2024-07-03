@@ -231,6 +231,7 @@ public static class FormConverter
                 types[0], // Normal
                 forms[953], // White
                 forms[954], // Black
+                forms[Ultra]
             ],
             Keldeo => [
                 forms[(int)Keldeo], // Ordinary
