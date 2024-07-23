@@ -69,22 +69,28 @@ public static class FormConverter
             Tauros when generation >= 9 => GetFormsPaldea(species, types, forms),
             Diglett or Dugtrio or Tentacool or Tentacruel when generation >= 7 => GetFormsConvergent(types, forms),
 
-            Dragonair or Dragonite when generation >= 7 => GetFormsJudea(types, forms),
+            Dragonite when generation >= 7 => GetFormsJudea(types, forms),
             Onix when generation >= 7 => GetFormsCrystal(types, forms),
             Wigglytuff when generation >= 7 => GetFormsParadox(species, types, forms),
             Feraligatr or Scyther when generation >= 7 => GetFormsOrre(types, forms),
 
             Exeggutor when generation >= 7 => [
                 forms[Kantonian],
-                forms[810], // Alolan
+                forms[Alolan],
                 forms[Judean], // Judean
                 forms[Ultra], // Ultra
             ],
             Persian when generation >=7 => [
                 forms[Kantonian],
-                forms[810], // Alolan
-                forms[Galarian], // Judean
-                forms[Ultra], // Ultra
+                forms[Alolan],
+                forms[Galarian],
+                forms[Ultra],
+            ],
+            Dragonair when generation >= 7 => [
+                forms[Kantonian],
+                forms[Sinnohan],
+                forms[Judean_Shield],
+                forms[Judean_Blade],
             ],
 
             _ => GetFormsAlolan(context, types, forms, species),
@@ -321,8 +327,10 @@ public static class FormConverter
                 genders[001], // Female
             ],
             Aegislash => [
-                forms[(int)Aegislash], // Shield
-                forms[1005], // Blade
+                forms[Shield], // Shield
+                forms[Blade], // Blade
+                forms[Mega_Shield], // Shield
+                forms[Mega_Blade], // Blade
             ],
             Goodra when generation >= 7 => GetFormsHisui(species, generation, types, forms),
             Sliggoo or Avalugg when generation >= 8 => GetFormsHisui(species, generation, types, forms),
@@ -342,6 +350,7 @@ public static class FormConverter
                 forms[DeltaHolon],
                 forms[DeltaHolon1],
                 forms[Ultra],
+                forms[Power_Construct],
             ],
             Hoopa => [
                 forms[(int)Hoopa], // Confined
@@ -1054,6 +1063,21 @@ public static class FormConverter
     private const int DeltaHolon1 = 1145;
     private const int Johtonian = 1146;
     private const int Kantonian = 1147;
+    private const int Hoennian = 1148;
+    private const int Sinnohan = 1149;
+    private const int Unovan = 1150;
+    private const int Kalosian = 1151;
+    private const int Alolan = 810;
+
+
+    private const int Shield = 681;
+    private const int Blade = 1005;
+    private const int Mega_Shield = 1154;
+    private const int Mega_Blade = 1155;
+    private const int Judean_Shield = 1152;
+    private const int Judean_Blade = 1153;
+
+    private const int Power_Construct = 1016;
 
     public static string GetGigantamaxName(IReadOnlyList<string> forms) => forms[Gigantamax];
 

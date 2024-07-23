@@ -808,7 +808,7 @@ Mega Y
 Mega
 Mega
 Mega
-Alola
+Alolan
 Alola
 
 Original
@@ -1135,8 +1135,8 @@ Artisan
 Masterpiece
 Terastal
 Stellar
-Orre
-Judea
+Orren
+Judean
 Convergent
 Crystal
 Paradox
@@ -1144,5 +1144,13 @@ Paradox Ancient
 Paradox Future
 δ
 δ-1
-Johto
-Kanto
+Johtonian
+Kantonion
+Hoennian
+Sinnohan
+Unovan
+Kalosian
+Judean Shield
+Judean Blade
+Mega Shield
+Mega Blade
