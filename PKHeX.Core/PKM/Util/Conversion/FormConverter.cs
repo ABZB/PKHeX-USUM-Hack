@@ -191,7 +191,11 @@ public static class FormConverter
             Arceus => GetFormsArceus(species, generation, types, forms),
             Weavile when generation >= 7 => GetFormsHisui(species, generation, types, forms),
             PorygonZ when generation >= 7 => GetFormsJudea(types, forms),
-            Magnezone when generation >= 7 => GetFormsParadox(species, types, forms),
+            Magnezone => [
+            types[0], // Normal
+            forms[ParadoxAncient],
+            forms[ParadoxFuture],
+            ],
             _ => EMPTY,
         };
     }
