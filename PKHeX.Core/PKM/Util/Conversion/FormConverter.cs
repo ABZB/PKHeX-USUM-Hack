@@ -55,6 +55,13 @@ public static class FormConverter
         int generation = context.Generation();
         return (Species)species switch
         {
+            Bulbasaur => [
+                types[0],
+                forms[Apex_starter],
+                forms[Apex_Ultra],
+                ],
+
+
             Charizard or Mewtwo when context.IsMegaGeneration() => GetMegaXY(types, forms),
             Eevee when context is Gen7b =>
             [
@@ -62,7 +69,7 @@ public static class FormConverter
                 Starter,
             ],
             Pikachu => GetFormsPikachu(context, types, forms),
-            Slowbro when generation >= 8 => GetFormsGalarSlowbro(types, forms),
+            Slowbro when generation >= 7 => GetFormsGalarSlowbro(types, forms),
             Weezing or Ponyta or Rapidash or MrMime or Articuno or Zapdos or Moltres when generation >= 7 => GetFormsGalar(types, forms),
             Slowpoke or Farfetchd when generation >= 8 => GetFormsGalar(types, forms),
             Growlithe or Arcanine or Voltorb or Electrode when generation >= 7 => GetFormsHisui(species, generation, types, forms),
@@ -72,7 +79,12 @@ public static class FormConverter
             Dragonite when generation >= 7 => GetFormsJudea(types, forms),
             Onix when generation >= 7 => GetFormsCrystal(types, forms),
             Wigglytuff when generation >= 7 => GetFormsParadox(species, types, forms),
-            Feraligatr or Scyther when generation >= 7 => GetFormsOrre(types, forms),
+            Feraligatr when generation >= 7 => GetFormsOrre(types, forms),
+
+            Scyther => [
+                types[0],
+                forms[Hisuian]
+                ],
 
             Exeggutor when generation >= 7 => [
                 forms[Kantonian],
@@ -90,7 +102,9 @@ public static class FormConverter
                 forms[Kantonian],
                 forms[Sinnohan],
                 forms[Judean_Shield],
-                forms[Judean_Blade],
+                forms[Judean_Spear],
+                forms[Judean_Arrow],
+                forms[Judean_Tank],
             ],
 
             _ => GetFormsAlolan(context, types, forms, species),
@@ -102,6 +116,14 @@ public static class FormConverter
         int generation = context.Generation();
         return (Species)species switch
         {
+
+            Tyranitar => [
+                types[0],
+                forms[ParadoxAncient],
+                forms[804],
+                ],
+
+
             Pichu when context is Gen4 => GetFormsPichu(types, forms),
             Slowking or Corsola when generation >= 7 => GetFormsGalar(types, forms),
             Meganium or Typhlosion when generation >= 7 => GetFormsHisui(species, generation, types, forms),
@@ -127,12 +149,30 @@ public static class FormConverter
     {
         return (Species)species switch
         {
+
+            Salamence => [
+                types[0],
+                forms[ParadoxAncient],
+                forms[804],
+                ],
+
+
+            Latias or Latios => [
+                types[0],
+                forms[DeltaHolon],
+                forms[Ultra_α],
+                forms[Ultra_β],
+                ],
+
+
+
             Zigzagoon or Linoone when generation >= 8 => GetFormsGalar(types, forms),
             Castform => [
                 types[0], // Normal
                 forms[889], // Sunny
                 forms[890], // Rainy
                 forms[891], // Snowy
+                forms[Sandy],
             ],
             Kyogre or Groudon when generation < 8 => [
                 types[0], // Normal
@@ -366,6 +406,14 @@ public static class FormConverter
                 forms[1014] + "-C", // 10% Cell (Power Construct)
                 forms[1015] + "-C", // 50% Cell (Power Construct)
                 forms[1016], // 100% Cell (Power Construct)
+            ],
+            Inkay => [
+                forms[Kalosian],
+                forms[Judean],
+            ],
+            Malamar => [
+                forms[Kalosian],
+                forms[Judean],
             ],
             _ => EMPTY,
         };
@@ -816,12 +864,12 @@ public static class FormConverter
     private static bool IsFormListSingleMega(ushort species) => species is
         // XY
         003 or 009 or 065 or 094 or 115 or 127 or 130 or 142 or 181 or
-        214 or 229 or 248 or 257 or 282 or 303 or 306 or 308 or 310 or 354 or
-        359 or 380 or 381 or 445 or 448 or 460 or
+        214 or 229 or 257 or 282 or 303 or 306 or 308 or 310 or 354 or
+        359 or 445 or 448 or 460 or
 
         // AO
         015 or 018 or 080 or 208 or 254 or 260 or 302 or 319 or 323 or 334 or
-        362 or 373 or 376 or 384 or 428 or 475 or 531 or 719
+        362 or 376 or 384 or 428 or 475 or 531 or 719
 
         //USUMABZB
         or 12 or 68 or 83 or 99 or 131 or 133 or 143 or 225 or 277 or 330 or 468 or
@@ -974,8 +1022,8 @@ public static class FormConverter
         return
         [
             types[0], // Normal
-            forms[804], // Mega
             forms[Galarian], // Galarian
+            forms[804], // Mega
         ];
     }
 
@@ -1078,8 +1126,22 @@ public static class FormConverter
     private const int Blade = 1005;
     private const int Mega_Shield = 1154;
     private const int Mega_Blade = 1155;
+
     private const int Judean_Shield = 1152;
-    private const int Judean_Blade = 1153;
+    private const int Judean_Spear = 1153;
+    private const int Judean_Arrow = 1156;
+    private const int Judean_Tank = 1157;
+
+    private const int Apex_starter = 1158;
+    private const int Apex_Ultra= 1159;
+
+    private const int Ultra_α = 1160;
+    private const int Ultra_β = 1161;
+
+
+
+    private const int Sandy = 906;
+
 
     private const int Power_Construct = 1016;
 

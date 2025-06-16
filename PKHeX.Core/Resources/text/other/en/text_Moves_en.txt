@@ -326,7 +326,7 @@ Signal Beam
 Shadow Punch
 Extrasensory
 Sky Uppercut
-Scorching Sands
+Sand Tomb
 Sheer Cold
 Muddy Water
 Bullet Seed
@@ -389,7 +389,7 @@ Last Resort
 Worry Seed
 Sucker Punch
 Toxic Spikes
-Heart Swap
+Heart Strike
 Aqua Ring
 Magnet Rise
 Flare Blitz
@@ -470,7 +470,7 @@ Hone Claws
 Wide Guard
 Guard Split
 Power Split
-Wonder Room
+Fell Rain
 Psyshock
 Venoshock
 Autotomize
@@ -621,41 +621,41 @@ Precipice Blades
 Dragon Ascent
 Hyperspace Fury
 Breakneck Blitz
-Breakneck Blitz
+Breakneck Cannon
 All-Out Pummeling
-All-Out Pummeling
+All-Out Soulpunch
 Supersonic Skystrike
-Supersonic Skystrike
+Supersonic Skyblast
+Acid Deluge
 Acid Downpour
-Acid Downpour
+Tectonic Fury
 Tectonic Rage
-Tectonic Rage
-Continental Crush
+Continental Crash
 Continental Crush
 Savage Spin-Out
-Savage Spin-Out
+Savage Web-Bomb
 Never-Ending Nightmare
-Never-Ending Nightmare
+Never-Ending Torment
 Corkscrew Crash
-Corkscrew Crash
+Corkscrew Cannon
 Inferno Overdrive
-Inferno Overdrive
-Hydro Vortex
-Hydro Vortex
+Inferno Megabomb
+Hydro Vortexation
+Hydro Annihilation
+Bloom Boom
 Bloom Doom
-Bloom Doom
-Gigavolt Havoc
+Gigavolt Carnage
 Gigavolt Havoc
 Shattered Psyche
-Shattered Psyche
+Shattered Anima
 Subzero Slammer
-Subzero Slammer
+Subzero Banger
 Devastating Drake
-Devastating Drake
+Withering Wyvern
 Black Hole Eclipse
-Black Hole Eclipse
+Black Hole Occultation
 Twinkle Tackle
-Twinkle Tackle
+Twinkle Cannon
 Catastropika
 Shore Up
 First Impression
@@ -719,7 +719,7 @@ Nature’s Madness
 Multi-Attack
 10,000,000 Volt Thunderbolt
 Mind Blown
-Plasma Lash
+Plasma Fists
 Photon Geyser
 Light That Burns the Sky
 Searing Sunraze Smash
@@ -727,194 +727,16 @@ Menacing Moonraze Maelstrom
 Let’s Snuggle Forever
 Splintered Stormshards
 Clangorous Soulblaze
-Zippy Zap
-Splishy Splash
-Floaty Fall
-Pika Papow
-Bouncy Bubble
-Buzzy Buzz
-Sizzly Slide
-Glitzy Glow
-Baddy Bad
-Sappy Seed
-Freezy Frost
-Sparkly Swirl
-Veevee Volley
-Double Iron Bash
-Max Guard
-Dynamax Cannon
-Snipe Shot
-Jaw Lock
-Stuff Cheeks
-No Retreat
-Tar Shot
-Magic Powder
-Dragon Darts
-Teatime
-Octolock
-Bolt Beak
-Fishious Rend
-Court Change
-Max Flare
-Max Flutterby
-Max Lightning
-Max Strike
-Max Knuckle
-Max Phantasm
-Max Hailstorm
-Max Ooze
-Max Geyser
-Max Airstream
-Max Starfall
-Max Wyrmwind
-Max Mindstorm
-Max Rockfall
-Max Quake
-Max Darkness
-Max Overgrowth
-Max Steelspike
-Clangorous Soul
 Body Press
-Decorate
-Drum Beating
-Snap Trap
-Pyro Ball
-Behemoth Blade
-Behemoth Bash
-Aura Wheel
-Breaking Swipe
-Branch Poke
-Overdrive
-Apple Acid
-Grav Apple
-Spirit Break
 Strange Steam
-Life Dew
-Obstruct
-False Surrender
-Meteor Assault
-Eternabeam
-Steel Beam
-Expanding Force
-Steel Roller
-Scale Shot
-Meteor Beam
-Shell Side Arm
-Misty Explosion
-Grassy Glide
-Rising Voltage
-Terrain Pulse
-Skitter Smack
-Burning Jealousy
-Lash Out
-Poltergeist
-Corrosive Gas
-Coaching
-Flip Turn
-Triple Axel
-Dual Wingbeat
-Scorching Sands
-Jungle Healing
-Wicked Blow
-Surging Strikes
-Thunder Cage
-Dragon Energy
-Freezing Glare
-Fiery Wrath
-Thunderous Kick
-Glacial Lance
-Astral Barrage
-Eerie Spell
-Dire Claw
-Psyshield Bash
-Power Shift
-Stone Axe
-Springtide Storm
-Mystical Power
-Raging Fury
-Wave Crash
-Chloroblast
-Mountain Gale
-Victory Dance
-Headlong Rush
-Barb Barrage
-Esper Wing
-Bitter Malice
-Shelter
-Triple Arrows
-Infernal Parade
-Ceaseless Edge
-Bleakwind Storm
-Wildbolt Storm
-Sandsear Storm
-Lunar Blessing
-Take Heart
-Tera Blast
-Silk Trap
-Axe Kick
-Last Respects
-Lumina Crash
-Order Up
-Jet Punch
-Spicy Extract
-Spin Out
-Population Bomb
-Ice Spinner
-Glaive Rush
-Revival Blessing
-Salt Cure
-Triple Dive
-Mortal Spin
-Doodle
-Fillet Away
-Kowtow Cleave
-Flower Trick
-Torch Song
-Aqua Step
-Raging Bull
-Make It Rain
-Psyblade
-Hydro Steam
-Ruination
-Collision Course
-Electro Drift
-Shed Tail
 Chilly Reception
-Tidy Up
-Snowscape
-Pounce
-Trailblaze
-Chilling Water
-Hyper Drill
-Twin Beam
-Rage Fist
-Armor Cannon
-Bitter Blade
-Double Shock
-Gigaton Hammer
-Comeuppance
-Aqua Cutter
-Blazing Torque
-Wicked Torque
-Noxious Torque
-Combat Torque
-Magical Torque
-Blood Moon
-Matcha Gotcha
-Syrup Bomb
-Ivy Cudgel
-Electro Shot
-Tera Starstorm
-Fickle Beam
-Burning Bulwark
-Thunderclap
-Mighty Cleave
-Tachyon Cutter
-Hard Press
-Dragon Cheer
+Flap Away
+Soul Punch
+Triple Flutter
+Terrain Pulse
+Corrosive Gas
+Mystical Power
+Sandsear Storm
+Scorching Sands
+Dire Claw
 Alluring Voice
-Temper Flare
-Supercell Slam
-Psychic Noise
-Upper Hand
-Malignant Chain

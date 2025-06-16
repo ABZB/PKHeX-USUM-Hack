@@ -54,6 +54,32 @@ public sealed class ItemStorage7SM : IItemStorage
              851,      853, 854, 855, 856,           879,
         880, 881, 882,
         883, 884, 904, 905, 906, 907, 908, 909, 910, 911, 912, 913, 914, 915, 916, 917, 918, 919, 920,
+
+
+
+
+        
+
+        //Covert Cloak
+        113,
+        //Loaded Dice
+        114,
+        //Umbrella Tree
+        115,
+
+        //Throat Spray
+        426,
+        //Frost Orb
+        120,
+        //Spark Orb
+        121,
+
+
+
+
+
+
+
     ];
 
     private static ReadOnlySpan<ushort> Pouch_Key_SM =>

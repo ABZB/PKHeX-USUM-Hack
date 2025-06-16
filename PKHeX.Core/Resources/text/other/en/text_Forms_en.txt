@@ -1135,7 +1135,7 @@ Artisan
 Masterpiece
 Terastal
 Stellar
-Orren
+Orrean
 Judean
 Convergent
 Crystal
@@ -1151,6 +1151,12 @@ Sinnohan
 Unovan
 Kalosian
 Judean Shield
-Judean Blade
+Judean Spear
 Mega Shield
 Mega Blade
+Judean Arrow
+Judean Tank
+Apex
+Apex Ultra
+Ultra α
+Ultra β

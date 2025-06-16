@@ -1,4 +1,7 @@
 using System;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Threading;
 
 namespace PKHeX.Core;
 
@@ -39,6 +42,21 @@ public sealed class ItemStorage8SWSH : IItemStorage
         1532, 1533, 1534, 1535, 1536, 1537, 1538, 1539, 1540, 1541, 1542, 1543, 1544, 1545, 1546, 1547, 1548, 1549,
         1550, 1551, 1552, 1553, 1554, 1555, 1556, 1557, 1558, 1559, 1560, 1561, 1562, 1563, 1564, 1565, 1566, 1567,
         1568, 1569, 1570, 1571, 1572, 1573, 1574, 1575, 1576, 1577, 1578, 1581, 1582, 1588,
+
+        //Covert Cloak
+        113,
+        //Loaded Dice
+        114,
+        //Umbrella Tree
+        115,
+
+        //Throat Spray
+        426,
+        //Frost Orb
+        120,
+        //Spark Orb
+        121,
+
 
         // DLC 2
         1592, 1604, 1606,

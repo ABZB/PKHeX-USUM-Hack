@@ -83,11 +83,11 @@ Snow Cloak
 Gluttony
 Anger Point
 Unburden
-Heatproof
+Orichalcum Body
 Simple
 Dry Skin
 Download
-Iron Fist
+Cosmic Fist
 Poison Heal
 Adaptability
 Skill Link
@@ -100,7 +100,7 @@ Magic Guard
 No Guard
 Stall
 Technician
-Leaf Guard
+Solar Shield
 Klutz
 Mold Breaker
 Super Luck
@@ -127,13 +127,13 @@ Sheer Force
 Contrary
 Unnerve
 Defiant
-Defeatist
+Invictist
 Cursed Body
 Healer
 Friend Guard
 Weak Armor
 Heavy Metal
-Light Metal
+Light Heart
 Multiscale
 Toxic Boost
 Flare Boost
@@ -177,7 +177,7 @@ Sweet Veil
 Stance Change
 Gale Wings
 Mega Launcher
-Grass Pelt
+Terra Pelt
 Symbiosis
 Tough Claws
 Pixilate
@@ -232,10 +232,10 @@ Full Metal Body
 Shadow Shield
 Prism Armor
 Neuroforce
-Intrepid Sword
-Dauntless Shield
-Libero
-Ball Fetch
+Mycellium Might
+Skywalker
+Electropyresis
+Euaspida
 Cotton Down
 Propeller Tail
 Mirror Armor
