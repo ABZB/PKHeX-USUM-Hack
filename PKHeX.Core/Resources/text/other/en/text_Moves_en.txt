@@ -182,7 +182,7 @@ Spite
 Powder Snow
 Protect
 Mach Punch
-Freezing Glare
+Scary Face
 Feint Attack
 Sweet Kiss
 Belly Drum
@@ -740,3 +740,8 @@ Sandsear Storm
 Scorching Sands
 Dire Claw
 Alluring Voice
+Hydro Drill Breaker
+Volt Cannon
+Bitter Malice
+Freezing Glare
+Triple Dive
