@@ -120,13 +120,13 @@ Burn Drive
 Chill Drive
 Frost Orb
 Spark Orb
-Medicine Pocket
-TM Case
-Candy Jar
-Power-Up Pocket
-Clothing Trunk
-Catching Pocket
-Battle Pocket
+Clear Amulet
+Squirtilium Z
+???
+???
+???
+???
+???
 ???
 ???
 ???
@@ -250,7 +250,7 @@ Twisted Spoon
 Charcoal
 Dragon Fang
 Silk Scarf
-Upgrade
+Up-Grade
 Shell Bell
 Sea Incense
 Lax Incense
@@ -424,17 +424,17 @@ HM03
 HM04
 HM05
 HM06
-???
+Throat Spray
 ???
 Explorer Kit
 Loot Sack
 Rule Book
 Poké Radar
 Point Card
-Guidebook
-Sticker Case
+Journal
+Seal Case
 Fashion Case
-Sticker Bag
+Seal Bag
 Pal Pad
 Works Key
 Old Charm
@@ -451,7 +451,7 @@ Poffin Case
 Bike
 Suite Key
 Oak’s Letter
-Lunar Feather
+Lunar Wing
 Member Card
 Azure Flute
 S.S. Ticket
@@ -462,7 +462,7 @@ Coupon 1
 Coupon 2
 Coupon 3
 Storage Key
-Secret Medicine
+Secret Potion
 Vs. Recorder
 Gracidea
 Secret Key
@@ -480,8 +480,8 @@ Red Scale
 Lost Item
 Pass
 Machine Part
-Silver Feather
-Rainbow Feather
+Silver Wing
+Rainbow Wing
 Mystery Egg
 Red Apricorn
 Blue Apricorn
@@ -563,13 +563,13 @@ Dragon Gem
 Dark Gem
 Steel Gem
 Normal Gem
-Restoration Wing
-Muscle Feather
-Resist Feather
-Genius Feather
-Clever Feather
-Swift Feather
-Pretty Feather
+Health Wing
+Muscle Wing
+Resist Wing
+Genius Wing
+Clever Wing
+Swift Wing
+Healing Wing
 Cover Fossil
 Plume Fossil
 Liberty Pass
@@ -620,7 +620,7 @@ TM93
 TM94
 TM95
 Xtransceiver
-???
+God Stone
 Gram 1
 Gram 2
 Gram 3
@@ -701,7 +701,7 @@ Discount Coupon
 Elevator Key
 TMV Pass
 Honor of Kalos
-Adventure Guide
+Adventure Rules
 Strange Souvenir
 Lens Case
 Makeup Bag
@@ -805,35 +805,35 @@ Aloraichium Z
 Snorlium Z
 Eevium Z
 Mewnium Z
-Normalium Z
-Firium Z
-Waterium Z
-Electrium Z
-Grassium Z
-Icium Z
-Fightinium Z
-Poisonium Z
-Groundium Z
-Flyinium Z
-Psychium Z
-Buginium Z
-Rockium Z
-Ghostium Z
-Dragonium Z
-Darkinium Z
-Steelium Z
-Fairium Z
-Pikanium Z
-Decidium Z
-Incinium Z
-Primarium Z
-Tapunium Z
-Marshadium Z
-Aloraichium Z
-Snorlium Z
-Eevium Z
-Mewnium Z
-Pikashunium Z
+Normalium U
+Firium U
+Waterium U
+Electrium U
+Grassium U
+Icium U
+Fightinium U
+Poisonium U
+Groundium U
+Flyinium U
+Psychium U
+Buginium U
+Rockium U
+Ghostium U
+Dragonium U
+Darkinium U
+Steelium U
+Fairium U
+Pikanium U
+Decidium U
+Incinium U
+Primarium U
+Tapunium U
+Marshadium U
+Aloraichium U
+Snorlium U
+Eevium U
+Mewnium U
+Pikashunium U
 Pikashunium Z
 ???
 ???
@@ -859,49 +859,49 @@ Sun Flute
 Moon Flute
 ???
 Enigmatic Card
-Silver Razz Berry
-Golden Razz Berry
-Silver Nanab Berry
-Golden Nanab Berry
-Silver Pinap Berry
-Golden Pinap Berry
 ???
 ???
 ???
 ???
 ???
-Secret Key
-S.S. Ticket
-Silph Scope
-Parcel
-Card Key
-Gold Teeth
-Lift Key
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
 Terrain Extender
 Protective Pads
 Electric Seed
 Psychic Seed
 Misty Seed
 Grassy Seed
-Stretchy Spring
-Chalky Stone
-Marble
-Lone Earring
-Beach Glass
-Gold Leaf
-Silver Leaf
-Polished Mud Ball
-Tropical Shell
-Leaf Letter
-Leaf Letter
-Small Bouquet
 ???
 ???
 ???
-Lure
-Super Lure
-Max Lure
-Pewter Crunchies
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
+???
 Fighting Memory
 Flying Memory
 Poison Memory
@@ -921,16 +921,16 @@ Dark Memory
 Fairy Memory
 Solganium Z
 Lunalium Z
-Ultranecrozium Z
+Ultraburstium Z
 Mimikium Z
 Lycanium Z
 Kommonium Z
 Solganium Z
 Lunalium Z
-Ultranecrozium Z
-Mimikium Z
-Lycanium Z
-Kommonium Z
+Ultranecrozium U
+Mimikium U
+Lycanium U
+Kommonium U
 Z-Power Ring
 Pink Petal
 Orange Petal
