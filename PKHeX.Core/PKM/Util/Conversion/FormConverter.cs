@@ -873,7 +873,7 @@ public static class FormConverter
 
         //USUMABZB
         or 12 or 68 or 83 or 99 or 131 or 133 or 143 or 225 or 277 or 330 or 468 or
-        478 or 479 or 483 or 484 or 569 or 697 or 699 or 790 or 791
+        478 or 479 or 483 or 484 or 569 or 652 or 655 or 697 or 699 or 790 or 791
     ;
 
     private static string[] GetMegaSingle(IReadOnlyList<string> types, IReadOnlyList<string> forms)

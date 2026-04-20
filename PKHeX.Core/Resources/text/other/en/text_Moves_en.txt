@@ -745,3 +745,11 @@ Volt Cannon
 Bitter Malice
 Freezing Glare
 Triple Dive
+Dragon Darts
+Tachyon Cutter
+Ultima Cannon
+Electro Shot
+Meteor Beam
+Stone Axe
+Ceaseless Edge
+Punch Buggy
