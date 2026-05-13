@@ -122,16 +122,16 @@ Frost Orb
 Spark Orb
 Clear Amulet
 Squirtilium Z
-???
-???
-???
-???
-???
-???
-???
-???
-???
-???
+Radiant Cloak
+Hallucinatory Map
+Solar Sail
+Kinglerite
+Vikavoltinite
+Togekissite
+Flygonite
+Laprasite
+Chesnaughtite
+Delphoxite
 Sweet Heart
 Adamant Orb
 Lustrous Orb
@@ -425,7 +425,7 @@ TM104
 TM105
 TM106
 Throat Spray
-???
+Butterfrinite
 Explorer Kit
 Loot Sack
 Rule Book
@@ -835,10 +835,10 @@ Eevium U
 Mewnium U
 Pikashunium U
 Pikashunium Z
-???
-???
-???
-???
+Victreebelite
+Aurorite
+Aegislashite
+Golurkite
 Forage Bag
 Fishing Rod
 Professor’s Mask
@@ -846,7 +846,7 @@ Festival Ticket
 Sparkling Stone
 Adrenaline Orb
 Zygarde Cube
-???
+Marvelous Cloak
 Ice Stone
 Ride Pager
 Beast Ball
@@ -857,19 +857,19 @@ Pink Nectar
 Purple Nectar
 Sun Flute
 Moon Flute
-???
+Dragoninite
 Enigmatic Card
-???
-???
-???
-???
-???
-???
-???
-???
-???
-???
-???
+Snorlaxite
+Salazzlite
+Tyrantrumite
+Magearnite
+Chandelurite
+Chimechite
+Clefablite
+Feraligite
+Skarmorite
+Froslassite
+Garbodorite
 ???
 ???
 ???
@@ -965,7 +965,7 @@ TM111
 TM112
 TM113
 TM114
-XXX
+TM115
 XXX
 XXX
 XXX

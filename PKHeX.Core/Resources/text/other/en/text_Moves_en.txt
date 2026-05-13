@@ -753,3 +753,5 @@ Meteor Beam
 Stone Axe
 Ceaseless Edge
 Punch Buggy
+Ice Spinner
+Poltergeist

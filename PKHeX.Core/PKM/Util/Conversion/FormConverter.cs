@@ -76,10 +76,14 @@ public static class FormConverter
             Tauros when generation >= 9 => GetFormsPaldea(species, types, forms),
             Diglett or Dugtrio or Tentacool or Tentacruel when generation >= 7 => GetFormsConvergent(types, forms),
 
-            Dragonite when generation >= 7 => GetFormsJudea(types, forms),
             Onix when generation >= 7 => GetFormsCrystal(types, forms),
             Wigglytuff when generation >= 7 => GetFormsParadox(species, types, forms),
-            Feraligatr when generation >= 7 => GetFormsOrre(types, forms),
+
+            Feraligatr => [
+                types[Johtonian],
+                forms[Orrean],
+                forms[Ultra]
+                ],
 
             Scyther => [
                 types[0],
@@ -246,7 +250,17 @@ public static class FormConverter
         {
             Serperior or Emboar or Samurott or Zorua or Zoroark or Braviary when generation >= 7 => GetFormsHisui(species, generation, types, forms),
             Lilligant when generation >= 8 => GetFormsHisui(species, generation, types, forms),
-            Golurk or Chandelure when generation >= 7 => GetFormsJudea(types, forms),
+            Chandelure when generation >= 7 => [
+                forms[Unovan], 
+                forms[Judean], 
+                forms[Ultra],
+            ],
+            Golurk when generation >= 7 => [
+                forms[Unovan], 
+                forms[Judean], 
+                forms[Ultra_Unovan], 
+                forms[Ultra_Judean],
+            ],
             Basculin when generation >= 8 => [
                 forms[(int)Basculin], // Red
                 forms[942], // Blue
@@ -863,9 +877,9 @@ public static class FormConverter
 
     private static bool IsFormListSingleMega(ushort species) => species is
         // XY
-        003 or 009 or 065 or 094 or 115 or 127 or 130 or 142 or 181 or
+        003 or 009 or 36 or 065 or 094 or 115 or 127 or 130 or 142 or 148 or 181 or
         214 or 229 or 257 or 282 or 303 or 306 or 308 or 310 or 354 or
-        359 or 445 or 448 or 460 or
+        359 or 445 or 448 or 460 or 358 or 227 or
 
         // AO
         015 or 018 or 080 or 208 or 254 or 260 or 302 or 319 or 323 or 334 or
@@ -1137,6 +1151,8 @@ public static class FormConverter
 
     private const int Ultra_α = 1160;
     private const int Ultra_β = 1161;
+    private const int Ultra_Unovan = 1162;
+    private const int Ultra_Judean = 1163;
 
 
 
