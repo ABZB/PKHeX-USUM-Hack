@@ -77,7 +77,8 @@ public sealed class ItemStorage7SM : IItemStorage
         125, //Hallucinatory Map
 
 
-        128, 129, 130, 131, 132, 133, 134, 428, 838, 839, 840, 841, 860, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871, 872 //Kinglerite, Vikavoltinite, Togekissite, Flygonite, Laprasite, Chesnaughtite, Delphoxite, Butterfrinite, Victreebelite, Aurorite, Aegislashite, Golurkite, Dragoninite, Snorlaxite, Salazzlite, Tyrantrumite, Magearnite, Chandelurite, Chimechite, Clefablite, Feraligite, Skarmorite, Froslassite, Garbodorite
+        128, 129, 130, 131, 132, 133, 134, 428, 838, 839, 840, 841, 860, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871, 872, 873, 874, 875, 876, 877, 885, 886, 887, 888, 889, 890, 891 //Kinglerite, Vikavoltinite, Togekissite, Flygonite, Laprasite, Chesnaughtite, Delphoxite, Butterfrinite, Victreebelite, Aurorite, Aegislashite, Golurkite, Dragoninite, Snorlaxite, Salazzlite, Tyrantrumite, Magearnite, Chandelurite, Chimechite, Clefablite, Feraligite, Skarmorite, Froslassite, Garbodorite, Meganiumite, Machampinite, Lurantinite, Araquanite, Cherriminite, Ribombinite, Crabominite, Drampanite, Excadrite, Emboarite, Hawluchanite, Meowsticite, Starminite
+
 
 
 

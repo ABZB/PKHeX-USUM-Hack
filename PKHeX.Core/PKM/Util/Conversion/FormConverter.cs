@@ -127,10 +127,16 @@ public static class FormConverter
                 forms[804],
                 ],
 
+            Meganium => [
+                types[Johtonian],
+                forms[Hisuian],
+                forms[Ultra],
+                ],
+
 
             Pichu when context is Gen4 => GetFormsPichu(types, forms),
             Slowking or Corsola when generation >= 7 => GetFormsGalar(types, forms),
-            Meganium or Typhlosion when generation >= 7 => GetFormsHisui(species, generation, types, forms),
+            Typhlosion when generation >= 7 => GetFormsHisui(species, generation, types, forms),
             Feraligatr when generation >= 7 => GetFormsOrre(types, forms),
             Qwilfish or Sneasel when generation >= 8 => GetFormsHisui(species, generation, types, forms),
             Quagsire when generation >= 7 => GetFormsPaldea(species, types, forms),
@@ -248,8 +254,13 @@ public static class FormConverter
     {
         return (Species)species switch
         {
-            Serperior or Emboar or Samurott or Zorua or Zoroark or Braviary when generation >= 7 => GetFormsHisui(species, generation, types, forms),
+            Serperior or Samurott or Zorua or Zoroark or Braviary when generation >= 7 => GetFormsHisui(species, generation, types, forms),
             Lilligant when generation >= 8 => GetFormsHisui(species, generation, types, forms),
+            Emboar when generation >= 7 => [
+                forms[Unovan],
+                forms[Hisuian],
+                forms[Ultra],
+            ],
             Chandelure when generation >= 7 => [
                 forms[Unovan], 
                 forms[Judean], 
@@ -383,6 +394,7 @@ public static class FormConverter
             Meowstic => [
                 genders[000], // Male
                 genders[001], // Female
+                forms[Ultra], // Mega
             ],
             Aegislash => [
                 forms[Shield], // Shield
@@ -887,7 +899,8 @@ public static class FormConverter
 
         //USUMABZB
         or 12 or 68 or 83 or 99 or 131 or 133 or 143 or 225 or 277 or 330 or 468 or
-        478 or 479 or 483 or 484 or 569 or 652 or 655 or 697 or 699 or 790 or 791
+        478 or 479 or 483 or 484 or 569 or 652 or 655 or 697 or 699 or 790 or 791 or
+        68 or 740 or 780 or 530 or 701 or 121
     ;
 
     private static string[] GetMegaSingle(IReadOnlyList<string> types, IReadOnlyList<string> forms)
@@ -1040,6 +1053,8 @@ public static class FormConverter
             forms[804], // Mega
         ];
     }
+
+    private const int Mega = 805;
 
     private const int Ultra = 1067;
 

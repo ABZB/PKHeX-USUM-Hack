@@ -204,42 +204,8 @@ public sealed class GameStrings : IBasicStrings
     private void SanitizeItemNames()
     {
         // Fix Item Names (Duplicate entries)
-        var HM06 = itemlist[425];
-        var HM0 = HM06[..^1]; // language ambiguous!
-        itemlist[426] = $"{HM0}7 (G4)";
-        itemlist[427] = $"{HM0}8 (G4)";
-        itemlist[456] += " (HG/SS)"; // S.S. Ticket
-        itemlist[736] += " (OR/AS)"; // S.S. Ticket
-        itemlist[463] += " (DPPt)"; // Storage Key
-        itemlist[734] += " (OR/AS)"; // Storage Key
-        itemlist[476] += " (HG/SS)"; // Basement Key
-        itemlist[723] += " (OR/AS)"; // Basement Key
-        itemlist[621] += " (M)"; // Xtransceiver
-        itemlist[626] += " (F)"; // Xtransceiver
-        itemlist[629] += " (2)"; // DNA Splicers
-        itemlist[637] += " (2)"; // Dropped Item
-        itemlist[707] += " (2)"; // Travel Trunk
-        itemlist[713] += " (2)"; // Alt Bike
-        itemlist[714] += " (2)"; // Holo Caster
-        itemlist[729] += " (1)"; // Meteorite
-        itemlist[740] += " (2)"; // Contest Costume
-        itemlist[751] += " (2)"; // Meteorite
-        itemlist[771] += " (3)"; // Meteorite
-        itemlist[772] += " (4)"; // Meteorite
-        itemlist[842] += " (SM)"; // Fishing Rod
-        itemlist[945] += " (2)"; // Used Solarizer
-        itemlist[946] += " (2)"; // Used Lunarizer
-
-        itemlist[873] += " (GP/GE)"; // S.S. Ticket
-        itemlist[459] += " (HG/SS)"; // Parcel
-        itemlist[467] += " (Pt)"; // Secret Key
-        itemlist[475] += " (HG/SS)"; // Card Key
-        itemlist[894] += " (GP)"; // Leaf Letter
-        itemlist[895] += " (GE)"; // Leaf Letter
-
-        // some languages have same names for other items!
-        itemlist[878] += " (GP/GE)"; // Lift Key (Elevator Key=700)
-        itemlist[479] += " (HG/SS)"; // Lost Item (Dropped Item=636)
+        itemlist[945] += " (used)"; // Used Solarizer
+        itemlist[946] += " (used)"; // Used Lunarizer
 
         // Append Z-Crystal Key Item differentiator
         foreach (var i in ItemStorage7USUM.Pouch_ZCrystal_USUM)
