@@ -16,6 +16,10 @@ public sealed class ItemStorage7USUM : IItemStorage
         841, 842, 843, 845, 847, 850, 857, 858, 860,
         // US/UM
         933, 934, 935, 936, 937, 938, 939, 940, 941, 942, 943, 944, 945, 946, 947, 948,
+
+        //Vs Seeker!
+        443,
+
     ];
 
     private static ReadOnlySpan<ushort> Pouch_Roto_USUM =>
