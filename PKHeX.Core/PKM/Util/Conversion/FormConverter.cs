@@ -62,13 +62,37 @@ public static class FormConverter
                 ],
 
 
-            Charizard or Mewtwo when context.IsMegaGeneration() => GetMegaXY(types, forms),
+            Charizard when context.IsMegaGeneration() => GetMegaXY(types, forms),
+
+            Mewtwo when context is Gen7 => [
+                types[0],
+                forms[Mega_X],
+                forms[Mega_Y],
+                forms[Ultimate],
+            ],
+
+
             Eevee when context is Gen7b =>
             [
                 types[0], // Normal
                 Starter,
             ],
+            Eevee when context is Gen7 =>
+            [
+                types[0], // Normal
+                forms[Mega],
+            ],
             Pikachu => GetFormsPikachu(context, types, forms),
+
+            Raichu => [
+                forms[Kantonian],
+                forms[Alolan],
+                forms[Mega_X],
+                forms[Mega_Y],
+            ],
+
+
+
             Slowbro when generation >= 7 => GetFormsGalarSlowbro(types, forms),
             Weezing or Ponyta or Rapidash or MrMime or Articuno or Zapdos or Moltres when generation >= 7 => GetFormsGalar(types, forms),
             Slowpoke or Farfetchd when generation >= 8 => GetFormsGalar(types, forms),
@@ -121,16 +145,16 @@ public static class FormConverter
         return (Species)species switch
         {
 
-            Tyranitar => [
+            Tyranitar when generation == 7 => [
                 types[0],
                 forms[ParadoxAncient],
                 forms[804],
                 ],
 
-            Meganium => [
-                types[Johtonian],
+            Meganium when generation == 7 => [
+                forms[Johtonian],
                 forms[Hisuian],
-                forms[Ultra],
+                forms[Mega],
                 ],
 
 
@@ -678,7 +702,6 @@ public static class FormConverter
 
             // Only reached when Gen8+, as Totem logic picks up Gen7 earlier.
             Rattata or Raticate
-                or Raichu
                 or Sandshrew or Sandslash
                 or Vulpix or Ninetales
                 or Diglett or Dugtrio
@@ -1054,7 +1077,10 @@ public static class FormConverter
         ];
     }
 
-    private const int Mega = 805;
+    private const int Mega = 804;
+    private const int Mega_X = 805;
+    private const int Mega_Y = 806;
+
 
     private const int Ultra = 1067;
 
