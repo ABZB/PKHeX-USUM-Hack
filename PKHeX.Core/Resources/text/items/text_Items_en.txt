@@ -876,7 +876,7 @@ Lurantinite
 Araquanite
 Cherriminite
 Ribombinite
-???
+Raichunite X
 Terrain Extender
 Protective Pads
 Electric Seed
@@ -890,7 +890,7 @@ Emboarite
 Hawluchanite	
 Meowsticite	
 Starminite	
-???
+Raichunite Y
 ???
 ???
 ???
