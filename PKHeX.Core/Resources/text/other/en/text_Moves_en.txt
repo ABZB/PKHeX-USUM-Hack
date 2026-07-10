@@ -756,3 +756,5 @@ Punch Buggy
 Ice Spinner
 Poltergeist
 Thistledown Barrage
+Aqua Fang
+Hard Press

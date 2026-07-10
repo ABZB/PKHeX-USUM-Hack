@@ -60,6 +60,11 @@ public static class FormConverter
                 forms[Apex_starter],
                 forms[Apex_Ultra],
                 ],
+            Squirtle => [
+                types[0],
+                forms[Apex_starter],
+                forms[Apex_Ultra],
+                ],
 
 
             Charizard when context.IsMegaGeneration() => GetMegaXY(types, forms),
@@ -241,6 +246,10 @@ public static class FormConverter
                 forms[(int)Shellos], // West
                 forms[911], // East
             ],
+            Staraptor => [
+                types[0],
+                forms[Mega],
+            ],
             Rotom => [
                 types[0], // Normal
                 forms[917], // Heat
@@ -305,16 +314,12 @@ public static class FormConverter
                 forms[(int)Basculin], // Red
                 forms[942], // Blue
             ],
-            Darumaka or Stunfisk or Yamask when generation >= 8 => GetFormsGalar(types, forms),
-            Darmanitan when generation >= 8 => [
+            Darumaka => GetFormsGalar(types, forms),
+            Darmanitan when generation >= 7 => [
                 forms[(int)Darmanitan], // Standard
                 forms[943], // Zen
                 forms[Galarian], // Standard
                 forms[Galarian] + " " + forms[943], // Zen
-            ],
-            Darmanitan => [
-                forms[(int)Darmanitan], // Standard
-                forms[943], // Zen
             ],
             Deerling or Sawsbuck => [
                 forms[(int)Deerling], // Spring
@@ -322,6 +327,17 @@ public static class FormConverter
                 forms[948], // Autumn
                 forms[949], // Winter
             ],
+            
+            Eelektross => [
+                types[0],
+                forms[Mega],
+            ],
+            
+            Scrafty => [
+                types[0],
+                forms[Mega],
+            ],
+
             Tornadus or Thundurus or Landorus => [
                 forms[(int)Tornadus], // Incarnate
                 forms[952], // Therian
@@ -347,7 +363,14 @@ public static class FormConverter
                 types[009], // Burn (Fire)
                 types[014], // Chill (Ice)
             ],
-            Whirlipede or Scolipede or Galvantula when generation >= 7 => GetFormsOrre(types, forms),
+
+            Scolipede => [
+                forms[Unovan],
+                forms[Orrean],
+                forms[Mega],
+            ],
+
+            Whirlipede or Galvantula when generation >= 7 => GetFormsOrre(types, forms),
             Amoonguss or Hydreigon or Volcarona or Cobalion or Terrakion or Virizion when generation >= 7 => GetFormsParadox(species, types, forms),
             _ => EMPTY,
         };
@@ -362,9 +385,14 @@ public static class FormConverter
                 forms[962], // Ash
                 forms[1012], // "Bonded" - Active
             ],
-            Greninja => [
+            Dragalge  => [
                 types[0], // Normal
-                forms[962], // Ash
+                forms[Mega],
+            ],
+            Pyroar => [
+                genders[000], // Male
+                genders[001], // Female
+                forms[Mega],
             ],
             Scatterbug or Spewpa or Vivillon => [
                 forms[(int)Vivillon], // Icy Snow
@@ -463,7 +491,8 @@ public static class FormConverter
             ],
             Malamar => [
                 forms[Kalosian],
-                forms[Judean],
+                forms[Rosharan],
+                forms[Mega]
             ],
             _ => EMPTY,
         };
@@ -923,7 +952,7 @@ public static class FormConverter
         //USUMABZB
         or 12 or 68 or 83 or 99 or 131 or 133 or 143 or 225 or 277 or 330 or 468 or
         478 or 479 or 483 or 484 or 569 or 652 or 655 or 697 or 699 or 790 or 791 or
-        68 or 740 or 780 or 530 or 701 or 121
+        68 or 740 or 780 or 530 or 701 or 121 or 699
     ;
 
     private static string[] GetMegaSingle(IReadOnlyList<string> types, IReadOnlyList<string> forms)
@@ -1194,6 +1223,7 @@ public static class FormConverter
     private const int Ultra_β = 1161;
     private const int Ultra_Unovan = 1162;
     private const int Ultra_Judean = 1163;
+    private const int Rosharan = 1164;
 
 
 

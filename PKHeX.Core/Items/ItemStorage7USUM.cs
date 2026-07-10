@@ -40,7 +40,7 @@ public sealed class ItemStorage7USUM : IItemStorage
         // SM
         776, 777, 778, 779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 789, 790, 791, 792, 793, 794, 798, 799, 800, 801, 802, 803, 804, 805, 806, 836,
         // US/UM Additions
-        921, 922, 923, 924, 925, 926,
+        921, 922, 923, 924, 925, 926, 123
     ];
 
     public static ushort[] GetAllHeld() => [..Pouch_Regular_SM, ..Pouch_Berries_SM, ..Pouch_Medicine_SM, ..Pouch_ZCrystalHeld_USUM, ..Pouch_Roto_USUM];

@@ -81,7 +81,8 @@ public sealed class ItemStorage7SM : IItemStorage
 
         878, 892, //Raichunite X, Raichunite Y
 
-
+        897, 900, 894, 898, 899, 896, 901, 895, //Dragalgite, Eelektrossite, Gumshoosinite, Malamarite, Pyroarite, Scolipite, Scraftinite, Staraptite
+        902, //Barbaricite
 
 
     ];
