@@ -191,7 +191,7 @@ Primordial Sea
 Desolate Land
 Delta Stream
 Stamina
-Wimp Out
+Mega Sol
 Emergency Exit
 Water Compaction
 Merciless
@@ -205,7 +205,7 @@ Long Reach
 Liquid Voice
 Triage
 Galvanize
-Surge Surfer
+Terra Surfer
 Schooling
 Disguise
 Battle Bond
@@ -236,21 +236,21 @@ Mycellium Might
 Skywalker
 Electropyresis
 Euaspida
-Cotton Down
+Monoclonal
+Water Dancer
+Rocky Payload
+Libero
+Stalwart
 Propeller Tail
 Mirror Armor
-Gulp Missile
-Stalwart
+Cotton Down
 Steam Engine
-Punk Rock
-Sand Spit
-Ice Scales
 Ripen
-Ice Face
-Power Spot
+Sand Spit
+Gulp Missile
 Mimicry
 Screen Cleaner
-Steely Spirit
+Ice Scales
 Perish Body
 Wandering Spirit
 Gorilla Tactics
@@ -261,7 +261,7 @@ Quick Draw
 Unseen Fist
 Curious Medicine
 Transistor
-Dragon’s Maw
+Dragon's Maw
 Chilling Neigh
 Grim Neigh
 As One
@@ -274,7 +274,7 @@ Purifying Salt
 Well-Baked Body
 Wind Rider
 Guard Dog
-Rocky Payload
+Power Spot
 Wind Power
 Zero to Hero
 Commander
@@ -290,22 +290,6 @@ Orichalcum Pulse
 Hadron Engine
 Opportunist
 Cud Chew
-Sharpness
-Supreme Overlord
-Costar
-Toxic Debris
-Armor Tail
-Earth Eater
-Mycelium Might
-Hospitality
-Mind’s Eye
-Embody Aspect
-Embody Aspect
-Embody Aspect
-Embody Aspect
-Toxic Chain
-Supersweet Syrup
-Tera Shift
-Tera Shell
-Teraform Zero
-Poison Puppeteer
+Ice Face
+Intrepid Sword
+Dauntless Shield

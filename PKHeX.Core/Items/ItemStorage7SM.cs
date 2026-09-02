@@ -83,7 +83,30 @@ public sealed class ItemStorage7SM : IItemStorage
 
         897, 900, 894, 898, 899, 896, 901, 895, //Dragalgite, Eelektrossite, Gumshoosinite, Malamarite, Pyroarite, Scolipite, Scraftinite, Staraptite
         902, //Barbaricite
+        903,//Ability Shield
 
+
+        505, 506, 507, //Tart, Sweet, Syrupy Apple
+
+
+        //Galarica Cuff
+        //Galarica Wreath
+        //Greninjite
+        //Floettite
+
+        508, 
+        509,
+        510,
+        511,
+
+        //Cracked Pot
+        //Chipped Pot
+
+        512,
+        513,
+
+        //Strawberry Sweet, Berry Sweet, Love Sweet, Star Sweet, Clover Sweet, Flower Sweet, Ribbon Sweet, Scroll of Darkness, Scroll of Waters, Rusted Sword, Rusted Shield, Reins of Unity, Cream Reswirler
+        514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526,
 
     ];
 
@@ -112,7 +135,7 @@ public sealed class ItemStorage7SM : IItemStorage
         690, 691, 692, 693, 694, // 96-100
         420, 421, 422, 423, 424, 425, //101-106
         737, //107
-        960, 961, 962, 963, 964, 965, 966, 967// 108-115
+        960, 961, 962, 963, 964, 965, 966, 967,// 108-115
 
     ];
 

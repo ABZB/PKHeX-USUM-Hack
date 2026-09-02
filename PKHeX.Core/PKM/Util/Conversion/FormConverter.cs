@@ -100,9 +100,9 @@ public static class FormConverter
 
             Slowbro when generation >= 7 => GetFormsGalarSlowbro(types, forms),
             Weezing or Ponyta or Rapidash or MrMime or Articuno or Zapdos or Moltres when generation >= 7 => GetFormsGalar(types, forms),
-            Slowpoke or Farfetchd when generation >= 8 => GetFormsGalar(types, forms),
+            Slowpoke or Farfetchd when generation >= 7 => GetFormsGalar(types, forms),
             Growlithe or Arcanine or Voltorb or Electrode when generation >= 7 => GetFormsHisui(species, generation, types, forms),
-            Tauros when generation >= 9 => GetFormsPaldea(species, types, forms),
+            Tauros => GetFormsPaldea(species, types, forms),
             Diglett or Dugtrio or Tentacool or Tentacruel when generation >= 7 => GetFormsConvergent(types, forms),
 
             Onix when generation >= 7 => GetFormsCrystal(types, forms),
@@ -167,9 +167,9 @@ public static class FormConverter
             Slowking or Corsola when generation >= 7 => GetFormsGalar(types, forms),
             Typhlosion when generation >= 7 => GetFormsHisui(species, generation, types, forms),
             Feraligatr when generation >= 7 => GetFormsOrre(types, forms),
-            Qwilfish or Sneasel when generation >= 8 => GetFormsHisui(species, generation, types, forms),
+            Qwilfish or Sneasel  => GetFormsHisui(species, generation, types, forms),
             Quagsire when generation >= 7 => GetFormsPaldea(species, types, forms),
-            Wooper when generation >= 9 => GetFormsPaldea(species, types, forms),
+            Wooper => GetFormsPaldea(species, types, forms),
             Unown => GetFormsUnown(generation),
             Donphan or Raikou or Entei or Suicune when generation >= 7 => GetFormsParadox(species, types, forms),
             Crobat when generation >= 7 => GetFormsDeltaHolon(types, forms),
@@ -205,7 +205,7 @@ public static class FormConverter
 
 
 
-            Zigzagoon or Linoone when generation >= 8 => GetFormsGalar(types, forms),
+            Zigzagoon or Linoone  => GetFormsGalar(types, forms),
             Castform => [
                 types[0], // Normal
                 forms[889], // Sunny
@@ -288,7 +288,7 @@ public static class FormConverter
         return (Species)species switch
         {
             Serperior or Samurott or Zorua or Zoroark or Braviary when generation >= 7 => GetFormsHisui(species, generation, types, forms),
-            Lilligant when generation >= 8 => GetFormsHisui(species, generation, types, forms),
+            Lilligant  => GetFormsHisui(species, generation, types, forms),
             Emboar when generation >= 7 => [
                 forms[Unovan],
                 forms[Hisuian],
@@ -305,16 +305,12 @@ public static class FormConverter
                 forms[Ultra_Unovan], 
                 forms[Ultra_Judean],
             ],
-            Basculin when generation >= 8 => [
+            Basculin => [
                 forms[(int)Basculin], // Red
                 forms[942], // Blue
                 forms[989], // White
             ],
-            Basculin => [
-                forms[(int)Basculin], // Red
-                forms[942], // Blue
-            ],
-            Darumaka => GetFormsGalar(types, forms),
+            Darumaka or Yamask or Stunfisk => GetFormsGalar(types, forms),
             Darmanitan when generation >= 7 => [
                 forms[(int)Darmanitan], // Standard
                 forms[943], // Zen
@@ -370,8 +366,15 @@ public static class FormConverter
                 forms[Mega],
             ],
 
+            Virizion => [
+                forms[Unovan],
+                forms[ParadoxFuture],
+                forms[Ultra],
+                forms[Paradox_Ultra],
+            ],
+
             Whirlipede or Galvantula when generation >= 7 => GetFormsOrre(types, forms),
-            Amoonguss or Hydreigon or Volcarona or Cobalion or Terrakion or Virizion when generation >= 7 => GetFormsParadox(species, types, forms),
+            Amoonguss or Hydreigon or Volcarona or Cobalion or Terrakion when generation >= 7 => GetFormsParadox(species, types, forms),
             _ => EMPTY,
         };
     }
@@ -384,6 +387,7 @@ public static class FormConverter
                 types[0], // Normal
                 forms[962], // Ash
                 forms[1012], // "Bonded" - Active
+                forms[Mega], // "Bonded" - Active
             ],
             Dragalge  => [
                 types[0], // Normal
@@ -423,6 +427,7 @@ public static class FormConverter
                 forms[988], // Blue
                 forms[989], // White
                 forms[990], // Eternal
+                forms[Mega], // Eternal
             ],
             Flabébé or Floette or Florges => [
                 forms[(int)Flabébé], // Red
@@ -454,8 +459,7 @@ public static class FormConverter
                 forms[Mega_Shield], // Shield
                 forms[Mega_Blade], // Blade
             ],
-            Goodra when generation >= 7 => GetFormsHisui(species, generation, types, forms),
-            Sliggoo or Avalugg when generation >= 8 => GetFormsHisui(species, generation, types, forms),
+            Sliggoo or Goodra or Avalugg => GetFormsHisui(species, generation, types, forms),
 
             Pumpkaboo or Gourgeist => [
                 forms[(int)Pumpkaboo], // Average
@@ -557,6 +561,8 @@ public static class FormConverter
             Magearna => [
                 types[0],
                 forms[1062], // Original
+                forms[Mega],
+                forms[Mega_Original], // Original
             ],
             _ => EMPTY,
         };
@@ -606,7 +612,7 @@ public static class FormConverter
                 forms[HeroOfManyBattles],
                 forms[Crowned],
             ],
-            Eternatus when generation == 8 => [
+            Eternatus => [
                 types[0], // Normal
                 forms[Eternamax],
             ],
@@ -768,6 +774,7 @@ public static class FormConverter
                 forms[817], // Kalos
                 forms[818], // Alola
                 forms[1063], // Partner
+                forms[1085], // World
                 Starter,
             ],
             7 => [
@@ -790,7 +797,6 @@ public static class FormConverter
                 forms[818], // Alola
                 forms[1063], // Partner
                 Starter,
-                forms[1085], // World
             ],
             _ => EMPTY,
         };
@@ -941,7 +947,7 @@ public static class FormConverter
 
     private static bool IsFormListSingleMega(ushort species) => species is
         // XY
-        003 or 009 or 36 or 065 or 094 or 115 or 127 or 130 or 142 or 148 or 181 or
+        003 or 009 or 36 or 065 or 094 or 115 or 127 or 130 or 142 or 181 or
         214 or 229 or 257 or 282 or 303 or 306 or 308 or 310 or 354 or
         359 or 445 or 448 or 460 or 358 or 227 or
 
@@ -1224,6 +1230,8 @@ public static class FormConverter
     private const int Ultra_Unovan = 1162;
     private const int Ultra_Judean = 1163;
     private const int Rosharan = 1164;
+    private const int Mega_Original = 1165;
+    private const int Paradox_Ultra = 1166;
 
 
 

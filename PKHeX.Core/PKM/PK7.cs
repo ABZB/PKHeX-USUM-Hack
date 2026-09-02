@@ -86,7 +86,17 @@ public sealed class PK7 : G6PKM, IRibbonSetEvent3, IRibbonSetEvent4, IRibbonSetC
         set => WriteUInt32LittleEndian(Data.AsSpan(0x10), value);
     }
 
-    public override int Ability { get => Data[0x14]; set => Data[0x14] = (byte)value; }
+    public override int Ability
+    {
+
+        get => (Data[0x14] | (Data[0x3B] << 8));
+        set
+        {
+            Data[0x14] = (byte)value;
+            Data[0x3B] = (byte)(value >> 8);
+        }
+
+    }
     public override int AbilityNumber { get => Data[0x15] & 7; set => Data[0x15] = (byte)((Data[0x15] & ~7) | (value & 7)); }
     public ushort MarkingValue { get => ReadUInt16LittleEndian(Data.AsSpan(0x16)); set => WriteUInt16LittleEndian(Data.AsSpan(0x16), value); }
 

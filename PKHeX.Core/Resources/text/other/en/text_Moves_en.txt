@@ -740,7 +740,7 @@ Sandsear Storm
 Scorching Sands
 Dire Claw
 Alluring Voice
-Hydro Drill Breaker
+Hydrill Breaker
 Volt Cannon
 Bitter Malice
 Freezing Glare
@@ -755,6 +755,68 @@ Ceaseless Edge
 Punch Buggy
 Ice Spinner
 Poltergeist
-Thistledown Barrage
+Thistledown Bomb
 Aqua Fang
 Hard Press
+Hax
+Mighty Cleave
+Hydro Steam
+Thunderclap
+Double Iron Bash
+Snipe Shot
+Drum Beating
+Pyro Ball
+Apple Acid
+Grav Apple
+Stuff Cheeks
+Jaw Lock
+Tar Shot
+Barb Barrage
+Raging Bull
+Clangorous Soul
+Wave Crash
+Axe Kick
+Mountain Gale
+Snap Trap
+Magic Powder
+Octolock
+Decorate
+Teatime
+Breaking Swipe
+Branch Poke
+Overdrive
+Bolt Beak
+Fishious Rend
+Spirit Break
+Behemoth Blade
+Behemoth Bash
+Obstruct
+False Surrender
+Meteor Assault
+Burning Bulwark
+Steel Beam
+Expanding Force
+Steel Roller
+No Retreat
+Aura Wheel
+Shell Side Arm
+Misty Explosion
+Grassy Glide
+Rising Voltage
+Life Dew
+Skitter Smack
+Burning Jealousy
+Lash Out
+Eternabeam
+Eerie Spell
+Coaching
+Flip Turn
+Triple Axel
+Dual Wingbeat
+Dragon Energy
+Jungle Healing
+Wicked Blow
+Surging Strikes
+Thunder Cage
+Glacial Lance
+Astral Barrage

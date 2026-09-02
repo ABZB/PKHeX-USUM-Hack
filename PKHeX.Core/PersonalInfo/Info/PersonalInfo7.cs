@@ -40,9 +40,39 @@ public sealed class PersonalInfo7(byte[] Data)
     public override byte EXPGrowth { get => Data[0x15]; set => Data[0x15] = value; }
     public override int EggGroup1 { get => Data[0x16]; set => Data[0x16] = (byte)value; }
     public override int EggGroup2 { get => Data[0x17]; set => Data[0x17] = (byte)value; }
-    public int Ability1 { get => Data[0x18]; set => Data[0x18] = (byte)value; }
-    public int Ability2 { get => Data[0x19]; set => Data[0x19] = (byte)value; }
-    public int AbilityH { get => Data[0x1A]; set => Data[0x1A] = (byte)value; }
+    public int Ability1
+    {
+        get => Data[0x18] | (Data[0x53] << 8);
+
+        set
+        {
+            Data[0x18] = (byte)value;
+            Data[0x53] = (byte)(value >> 8);
+        }
+
+    }
+    public int Ability2
+    {
+        get => Data[0x19] | (Data[0x1E] << 8);
+
+        set
+        {
+            Data[0x18] = (byte)value;
+            Data[0x1E] = (byte)(value >> 8);
+        }
+
+    }
+    public int AbilityH
+    {
+        get => Data[0x1A] | (Data[0x1F] << 8);
+
+        set
+        {
+            Data[0x18] = (byte)value;
+            Data[0x1F] = (byte)(value >> 8);
+        }
+
+    }
 
     public override int EscapeRate { get => Data[0x1B]; set => Data[0x1B] = (byte)value; }
     public override int FormStatsIndex { get => ReadUInt16LittleEndian(Data.AsSpan(0x1C)); set => WriteUInt16LittleEndian(Data.AsSpan(0x1C), (ushort)value); }
