@@ -53,6 +53,7 @@ public sealed class GameStrings : IBasicStrings
 
     internal GameStrings(string l)
     {
+        
         lang = l;
         LanguageIndex = GameLanguage.GetLanguageIndex(l);
         ribbons = Get("ribbons");

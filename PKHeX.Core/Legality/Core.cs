@@ -61,10 +61,10 @@ public static class Legal
     internal const int MaxBallID_7 = 0x1A; // 26
     internal const int MaxGameID_7 = 41; // Crystal (VC?)
 
-    internal const int MaxSpeciesID_7_USUM = 807;
-    internal const int MaxMoveID_7_USUM = 757;
-    internal const int MaxItemID_7_USUM = 968;
-    internal const int MaxAbilityID_7_USUM = 238;
+    internal const int MaxSpeciesID_7_USUM = 898;
+    internal const int MaxMoveID_7_USUM = 821;
+    internal const int MaxItemID_7_USUM = 978;
+    internal const int MaxAbilityID_7_USUM = 294;
 
     internal const int MaxSpeciesID_7b = 809; // Melmetal
     internal const int MaxMoveID_7b = 742; // Double Iron Bash
