@@ -525,8 +525,8 @@ Rusted Sword
 Rusted Shield
 Reins of Unity
 Cream Reswirler
-Data Card 23
-Data Card 24
+Falinksite
+Eternasite
 Data Card 25
 Data Card 26
 Data Card 27
@@ -5872,3 +5872,4 @@ x
 x
 x
 x
+

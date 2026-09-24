@@ -108,6 +108,9 @@ public sealed class ItemStorage7SM : IItemStorage
         //Strawberry Sweet, Berry Sweet, Love Sweet, Star Sweet, Clover Sweet, Flower Sweet, Ribbon Sweet, Scroll of Darkness, Scroll of Waters, Rusted Sword, Rusted Shield, Reins of Unity, Cream Reswirler
         514, 515, 516, 517, 518, 519, 520, 521, 522, 523, 524, 525, 526,
 
+
+        527, 528, //Falinksite, Eternasite
+
     ];
 
     private static ReadOnlySpan<ushort> Pouch_Key_SM =>
