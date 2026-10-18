@@ -820,3 +820,104 @@ Surging Strikes
 Thunder Cage
 Glacial Lance
 Astral Barrage
+Dynamax Cannon
+Court Change
+T-824
+T-825
+T-826
+T-827
+Psyshield Bash
+Power Shift
+T-830
+Springtide Storm
+T-832
+Raging Fury
+T-834
+Chloroblast
+T-836
+Victory Dance
+Headlong Rush
+T-839
+Esper Wing
+T-841
+Shelter
+Triple Arrows
+Infernal Parade
+Ceaseless Edge
+Bleakwind Storm
+Wildbolt Storm
+T-848
+Lunar Blessing
+Take Heart
+Tera Blast
+Silk Trap
+T-853
+Last Respects
+Lumina Crash
+Order Up
+Jet Punch
+Spicy Extract
+Spin Out
+Population Bomb
+T-861
+Glaive Rush
+Revival Blessing
+Salt Cure
+Triple Dive
+Mortal Spin
+Doodle
+Fillet Away
+Kowtow Cleave
+Flower Trick
+Torch Song
+Aqua Step
+Raging Bull
+Make It Rain
+Psyblade
+Hydro Steam
+Ruination
+Collision Course
+Electro Drift
+Shed Tail
+Chilly Reception
+Tidy Up
+T-883
+Pounce
+Trailblaze
+Chilling Water
+Hyper Drill
+Twin Beam
+Rage Fist
+Armor Cannon
+Bitter Blade
+Double Shock
+Gigaton Hammer
+Comeuppance
+Aqua Cutter
+Blazing Torque
+Wicked Torque
+Noxious Torque
+Combat Torque
+Magical Torque
+Blood Moon
+Matcha Gotcha
+Syrup Bomb
+Ivy Cudgel
+T-905
+Tera Starstorm
+Fickle Beam
+T-908
+T-909
+T-910
+T-911
+T-912
+Dragon Cheer
+T-914
+Temper Flare
+Supercell Slam
+Psychic Noise
+Upper Hand
+Malignant Chain
+x
+x
+x

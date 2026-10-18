@@ -1,4 +1,4 @@
-—
+---
 Stench
 Drizzle
 Speed Boost
@@ -255,7 +255,7 @@ Perish Body
 Wandering Spirit
 Gorilla Tactics
 Neutralizing Gas
-Pastel Veil
+Steam Engine
 Hunger Switch
 Quick Draw
 Unseen Fist
@@ -264,18 +264,18 @@ Transistor
 Dragon's Maw
 Chilling Neigh
 Grim Neigh
-As One
-As One
+As One (Chilling Neigh)
+As One (Grim Neigh)
 Lingering Aroma
 Seed Sower
 Thermal Exchange
 Anger Shell
 Purifying Salt
 Well-Baked Body
-Wind Rider
+Wind Powerider
 Guard Dog
 Power Spot
-Wind Power
+Supreme Overlord
 Zero to Hero
 Commander
 Electromorphosis
@@ -293,20 +293,29 @@ Cud Chew
 Ice Face
 Intrepid Sword
 Dauntless Shield
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
+Toxic Debris
+Armor Tail
+Earth Eater
+Costar
+Hospitality
+Mind's Eye
+Embody Aspect
+Embody Aspect
+Embody Aspect
+Embody Aspect
+Toxic Chain
+Supersweet Syrup
+Tera Shift
+Tera Shell
+Teraform Zero
+Poison Puppeteer
+Piercing Drill
+Dragonize
+Eelevate
+314
+315
+Fire Mane
+317
+Spicy Spray
+Aura Guard
 x

@@ -111,6 +111,12 @@ public sealed class ItemStorage7SM : IItemStorage
 
         527, 528, //Falinksite, Eternasite
 
+
+        981, 982, 983, 984, 985, 986, 987, 988, 989, 990, 991, 992, 993, 994, 995, //Black Augurite, Peat Block, Bog Iron, Leader's Crest, Cursed Scroll, Coin Purse, Auspicious Armor, Malicious Armor, Unremarkable Teacup, Masterpiece Teacup, Teal Mask, Wellspring Mask, Hearthflame Mask, Cornerstone Mask, Metal Alloy
+
+
+
+
     ];
 
     private static ReadOnlySpan<ushort> Pouch_Key_SM =>

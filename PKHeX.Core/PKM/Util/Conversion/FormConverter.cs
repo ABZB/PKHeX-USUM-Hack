@@ -39,7 +39,7 @@ public static class FormConverter
             <= Legal.MaxSpeciesID_4 => GetFormsGen4(species, types, forms, generation),
             <= Legal.MaxSpeciesID_5 => GetFormsGen5(species, types, forms, generation),
             <= Legal.MaxSpeciesID_6 => GetFormsGen6(species, types, forms, genders, generation),
-            <= Legal.MaxSpeciesID_7_USUM => GetFormsGen7(species, types, forms, generation),
+            <= 807 => GetFormsGen7(species, types, forms, generation),
             <= Legal.MaxSpeciesID_8a => GetFormsGen8(species, generation, types, forms, genders),
             _ => GetFormsGen9(species, generation, types, forms, genders),
         };
@@ -61,6 +61,11 @@ public static class FormConverter
                 forms[Apex_Ultra],
                 ],
             Squirtle => [
+                types[0],
+                forms[Apex_starter],
+                forms[Apex_Ultra],
+                ],
+            Charmander => [
                 types[0],
                 forms[Apex_starter],
                 forms[Apex_Ultra],
@@ -139,6 +144,14 @@ public static class FormConverter
                 forms[Judean_Arrow],
                 forms[Judean_Tank],
             ],
+            Dragonair when generation >= 7 => [
+                forms[Kantonian],
+                forms[Sinnohan],
+                forms[Judean_Shield],
+                forms[Judean_Spear],
+                forms[Judean_Arrow],
+                forms[Judean_Tank],
+            ],
 
             _ => GetFormsAlolan(context, types, forms, species),
         };
@@ -203,7 +216,12 @@ public static class FormConverter
                 forms[Ultra_β],
                 ],
 
+            Absol => [
 
+                types[0],
+                forms[Mega],
+                forms[Mega_Z],
+            ],
 
             Zigzagoon or Linoone  => GetFormsGalar(types, forms),
             Castform => [
@@ -233,6 +251,15 @@ public static class FormConverter
     {
         return (Species)species switch
         {
+
+
+
+            Garchomp or Lucario => [
+
+                types[0],
+                forms[Mega],
+                forms[Mega_Z],
+            ],
             Burmy or Wormadam or Mothim => [
                 forms[(int)Burmy], // Plant
                 forms[905], // Sandy
@@ -488,6 +515,7 @@ public static class FormConverter
                 forms[1014] + "-C", // 10% Cell (Power Construct)
                 forms[1015] + "-C", // 50% Cell (Power Construct)
                 forms[1016], // 100% Cell (Power Construct)
+                forms[Mega],
             ],
             Inkay => [
                 forms[Kalosian],
@@ -669,6 +697,9 @@ public static class FormConverter
                 forms[Curly],
                 forms[Droopy],
                 forms[Stretchy],
+                forms[Curly_Mega],
+                forms[Droopy_Mega],
+                forms[Stretchy_Mega],
             ],
             Squawkabilly => [
                 forms[Green],
@@ -949,7 +980,7 @@ public static class FormConverter
         // XY
         003 or 009 or 36 or 065 or 094 or 115 or 127 or 130 or 142 or 181 or
         214 or 229 or 257 or 282 or 303 or 306 or 308 or 310 or 354 or
-        359 or 445 or 448 or 460 or 358 or 227 or
+        460 or 358 or 227 or
 
         // AO
         015 or 018 or 080 or 208 or 254 or 260 or 302 or 319 or 323 or 334 or
@@ -959,6 +990,11 @@ public static class FormConverter
         or 12 or 68 or 83 or 99 or 131 or 133 or 143 or 225 or 277 or 330 or 468 or
         478 or 479 or 483 or 484 or 569 or 652 or 655 or 697 or 699 or 790 or 791 or
         68 or 740 or 780 or 530 or 701 or 121 or 699
+
+
+        or 36 or 71 or 121 or 227 or 358 or 398 or 478 or 485 or 491 or 500 or 530 or 560 or 604 or 609 or 652 or 655 or 689 or 691 or 701 or 740 or 768 or 780 or 807 or 870 or 952 or 970 or 998 or 150
+    //Clefable, Victreebel, Starmie, Skarmory, Chimecho, Staraptor, Froslass, Heatran, Darkrai, Emboar, Excadrill, Scrafty, Eelektross, Chandelure, Chesnaught, Delphox, Barbaracle, Dragalge, Hawlucha, Crabominable, Golisopod, Drampa, Zeraora, Falinks, Scovillain, Glimmora, Baxcalibur, Dragonite
+
     ;
 
     private static string[] GetMegaSingle(IReadOnlyList<string> types, IReadOnlyList<string> forms)
@@ -1232,6 +1268,10 @@ public static class FormConverter
     private const int Rosharan = 1164;
     private const int Mega_Original = 1165;
     private const int Paradox_Ultra = 1166;
+    private const int Mega_Z = 1167;
+    private const int Curly_Mega = 1168;
+    private const int Droopy_Mega = 1169;
+    private const int Stretchy_Mega = 1170;
 
 
 

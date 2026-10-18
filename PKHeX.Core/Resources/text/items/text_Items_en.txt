@@ -112,7 +112,7 @@ Oval Stone
 Odd Keystone
 Griseous Orb
 Covert Cloak
-Loaded Die
+Loaded Dice
 Umbrella Tree
 Douse Drive
 Shock Drive
@@ -426,8 +426,8 @@ TM105
 TM106
 Throat Spray
 Butterfrinite
-Virizium Z (Bag)
-Virizium Z (Hold)
+Virizium U
+Virizium Z
 Rule Book
 Poké Radar
 Point Card
@@ -883,15 +883,15 @@ Electric Seed
 Psychic Seed
 Misty Seed
 Grassy Seed
-Crabominite	
-Drampanite	
-Excadrite	
-Emboarite	
-Hawluchanite	
-Meowsticite	
-Starminite	
+Crabominite
+Drampanite
+Excadrite
+Emboarite
+Hawluchanite
+Meowsticite
+Starminite
 Raichunite Y
-Squirtilium Z (Bag)
+Squirtilium U
 Dragalgite
 Eelektrossite
 Gumshoosinite
@@ -901,7 +901,7 @@ Scolipite
 Scraftinite
 Staraptite
 Barbaricite
-Ability Shield
+???
 Fighting Memory
 Flying Memory
 Poison Memory
@@ -977,22 +977,23 @@ TM123
 TM124
 TM125
 TM126
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
-x
+TM127
+TM128
+Black Augurite
+Peat Block
+Bog Iron
+Leader's Crest
+Cursed Scroll
+Coin Purse
+Auspicious Armor
+Malicious Armor
+Unremarkable Teacup
+Masterpiece Teacup
+Teal Mask
+Wellspring Mask
+Hearthflame Mask
+Cornerstone Mask
+Metal Alloy
 x
 x
 x
