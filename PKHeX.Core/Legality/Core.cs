@@ -64,7 +64,7 @@ public static class Legal
     internal const int MaxSpeciesID_7_USUM = 1025;
     internal const int MaxMoveID_7_USUM = 919;
     internal const int MaxItemID_7_USUM = 995;
-    internal const int MaxAbilityID_7_USUM = 319;
+    internal const int MaxAbilityID_7_USUM = 320;
 
     internal const int MaxSpeciesID_7b = 809; // Melmetal
     internal const int MaxMoveID_7b = 742; // Double Iron Bash
